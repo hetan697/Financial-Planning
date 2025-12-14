@@ -3,12 +3,9 @@
     <h3>投资建议</h3>
     
     <div v-if="hasValidData" class="advice-content">
-      <!-- 投资计算器 -->
-      <InvestmentCalculator
-        :investable-fund="availableFunds"
-        :total-assets="totalAssets"
-        @update:investment-options="updateInvestmentOptions"
-      />
+      <div class="advice-placeholder">
+        <p>基于您的财务状况，系统将为您提供个性化的投资建议。</p>
+      </div>
     </div>
     
     <div v-else class="advice-placeholder">
@@ -18,13 +15,8 @@
 </template>
 
 <script>
-import InvestmentCalculator from './InvestmentCalculator.vue';
-
 export default {
   name: 'InvestmentAdvice',
-  components: {
-    InvestmentCalculator
-  },
   props: {
     balance: {
       type: Number,
@@ -41,7 +33,6 @@ export default {
   },
   data() {
     return {
-      investmentOptions: [],
       emergencyFundMonths: 3
     };
   },
@@ -95,10 +86,6 @@ export default {
     }
   },
   methods: {
-    updateInvestmentOptions(options) {
-      this.investmentOptions = options;
-    },
-    
     // 计算覆盖的月份数量
     getMonthsCovered(transactions) {
       if (transactions.length === 0) return 0;

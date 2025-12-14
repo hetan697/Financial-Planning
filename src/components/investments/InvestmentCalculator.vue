@@ -166,32 +166,7 @@ export default {
   data() {
     return {
       investmentTypes: TypeManager.getInvestmentTypes(),
-      investmentOptions: [
-        { 
-          type: '紧急备用金',
-          name: '紧急备用金', 
-          percentage: 10, 
-          returnRate: 2.0 
-        },
-        { 
-          type: '股票',
-          name: '股票投资', 
-          percentage: 30, 
-          returnRate: 8.0 
-        },
-        { 
-          type: '基金',
-          name: '基金投资', 
-          percentage: 40, 
-          returnRate: 6.0 
-        },
-        { 
-          type: '债券',
-          name: '债券投资', 
-          percentage: 20, 
-          returnRate: 4.0 
-        }
-      ],
+      investmentOptions: TypeManager.getInvestmentOptions(),
       showOptionForm: false,
       isEditingOption: false,
       currentOptionIndex: -1,
@@ -251,6 +226,8 @@ export default {
     // 更新选项
     updateOption(index, field, value) {
       this.investmentOptions[index][field] = value;
+      // 保存到localStorage
+      this.saveInvestmentOptions();
     },
     
     // 编辑投资方式
@@ -284,6 +261,9 @@ export default {
         this.investmentOptions.push({ ...option });
       }
       
+      // 保存到localStorage
+      this.saveInvestmentOptions();
+      
       // 返回列表视图
       this.cancelOption();
     },
@@ -299,9 +279,16 @@ export default {
     removeInvestmentOption(index) {
       if (this.investmentOptions.length > 1) {
         this.investmentOptions.splice(index, 1);
+        // 保存到localStorage
+        this.saveInvestmentOptions();
       } else {
         alert('至少需要保留一种投资方式');
       }
+    },
+    
+    // 保存投资选项到localStorage
+    saveInvestmentOptions() {
+      TypeManager.setInvestmentOptions(this.investmentOptions);
     }
   },
   mounted() {

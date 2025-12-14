@@ -7,6 +7,14 @@
       :total-profit="totalInvestmentProfit"
     />
     
+    <!-- 投资计算器 -->
+    <div class="card-section">
+      <InvestmentCalculator
+        :investable-fund="availableFunds"
+        :total-assets="totalAssets"
+      />
+    </div>
+    
     <!-- 投资列表 -->
     <div class="card-section">
       <div class="card-header">
@@ -39,13 +47,15 @@
 import InvestmentSummary from './InvestmentSummary.vue';
 import InvestmentList from './InvestmentList.vue';
 import InvestmentAdvice from './InvestmentAdvice.vue';
+import InvestmentCalculator from './InvestmentCalculator.vue';
 
 export default {
   name: 'InvestmentManagement',
   components: {
     InvestmentSummary,
     InvestmentList,
-    InvestmentAdvice
+    InvestmentAdvice,
+    InvestmentCalculator
   },
   props: {
     investments: {
@@ -76,6 +86,38 @@ export default {
     },
     totalInvestmentProfit() {
       return this.totalInvestmentValue - this.totalInvestmentCost;
+    },
+    // 紧急备用金（基于过去6个月平均月支出 × 3个月）
+    emergencyFund() {
+      // 计算过去6个月的支出
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      const expenseTransactions = this.transactions.filter(t => t.type === 'expense');
+      const recentExpenses = expenseTransactions.filter(t => new Date(t.date) >= sixMonthsAgo);
+      
+      if (recentExpenses.length === 0) return 0;
+      
+      const totalExpense = recentExpenses.reduce((sum, transaction) => sum + transaction.amount, 0);
+      const monthsCount = Math.min(6, this.getMonthsCovered(recentExpenses));
+      const averageMonthlyExpense = monthsCount > 0 ? totalExpense / monthsCount : 0;
+      
+      return averageMonthlyExpense * 3; // 3个月的紧急备用金
+    },
+    // 可投资金额（账户余额 - 紧急备用金）
+    availableFunds() {
+      if (this.balance <= 0) return 0;
+      return Math.max(0, this.balance - this.emergencyFund);
+    },
+    // 总资产（余额 + 投资总价值）
+    totalAssets() {
+      const investmentValue = this.investments.reduce((sum, investment) => {
+        const price = investment.currentPrice !== null ? 
+          investment.currentPrice : investment.purchasePrice;
+        return sum + (price * investment.quantity);
+      }, 0);
+      
+      return this.balance + investmentValue;
     }
   },
   methods: {
@@ -90,6 +132,17 @@ export default {
         this.$emit('delete-investment', id);
         alert('删除成功');
       }
+    },
+    // 计算覆盖的月份数量
+    getMonthsCovered(transactions) {
+      if (transactions.length === 0) return 0;
+      
+      const dates = transactions.map(t => new Date(t.date));
+      const minDate = new Date(Math.min.apply(null, dates));
+      const maxDate = new Date(Math.max.apply(null, dates));
+      
+      return (maxDate.getFullYear() - minDate.getFullYear()) * 12 + 
+             (maxDate.getMonth() - minDate.getMonth()) + 1;
     }
   }
 };

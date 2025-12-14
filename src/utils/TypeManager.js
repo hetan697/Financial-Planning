@@ -8,6 +8,34 @@ class TypeManager {
     income: ['工资', '奖金', '投资收益', '兼职收入', '礼金', '其他收入'],
     expense: ['房租', '水电费', '餐饮', '交通', '购物', '娱乐', '医疗', '教育', '保险', '投资支出', '其他支出']
   };
+  
+  // 默认投资计算器选项
+  static defaultInvestmentOptions = [
+    { 
+      type: '紧急备用金',
+      name: '紧急备用金', 
+      percentage: 10, 
+      returnRate: 2.0 
+    },
+    { 
+      type: '股票',
+      name: '股票投资', 
+      percentage: 30, 
+      returnRate: 8.0 
+    },
+    { 
+      type: '基金',
+      name: '基金投资', 
+      percentage: 40, 
+      returnRate: 6.0 
+    },
+    { 
+      type: '债券',
+      name: '债券投资', 
+      percentage: 20, 
+      returnRate: 4.0 
+    }
+  ];
 
   // 获取投资类型
   static getInvestmentTypes() {
@@ -52,6 +80,26 @@ class TypeManager {
       console.error('Failed to save transaction types to localStorage:', error);
     }
   }
+  
+  // 获取投资计算器选项
+  static getInvestmentOptions() {
+    try {
+      const options = localStorage.getItem('investmentOptions');
+      return options ? JSON.parse(options) : this.defaultInvestmentOptions;
+    } catch (error) {
+      console.error('Failed to parse investment options from localStorage:', error);
+      return this.defaultInvestmentOptions;
+    }
+  }
+  
+  // 设置投资计算器选项
+  static setInvestmentOptions(options) {
+    try {
+      localStorage.setItem('investmentOptions', JSON.stringify(options));
+    } catch (error) {
+      console.error('Failed to save investment options to localStorage:', error);
+    }
+  }
 
   // 初始化类型数据
   static initialize() {
@@ -62,6 +110,10 @@ class TypeManager {
     
     if (!localStorage.getItem('transactionTypes')) {
       this.setTransactionTypes(this.defaultTransactionTypes);
+    }
+    
+    if (!localStorage.getItem('investmentOptions')) {
+      this.setInvestmentOptions(this.defaultInvestmentOptions);
     }
   }
 }

@@ -317,42 +317,6 @@ export default {
         alert('加载数据失败');
       }
     },
-    importData(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const data = JSON.parse(e.target.result);
-          
-          // Validate data format
-          if (!this.validateImportData(data)) {
-            alert('导入的数据格式不正确');
-            return;
-          }
-          
-          this.transactions = data.transactions || [];
-          this.investments = data.investments || [];
-          
-          // Import type data if exists
-          if (data.investmentTypes) {
-            TypeManager.setInvestmentTypes(data.investmentTypes);
-          }
-          
-          if (data.transactionTypes) {
-            TypeManager.setTransactionTypes(data.transactionTypes);
-          }
-          
-          this.saveToLocalStorage();
-          alert('数据导入成功');
-        } catch (error) {
-          console.error('数据导入失败:', error);
-          alert('数据导入失败，请检查文件格式');
-        }
-      };
-      reader.readAsText(file);
-    },
     validateImportData(data) {
       if (!data || typeof data !== 'object') return false;
       
@@ -381,7 +345,60 @@ export default {
         }
       }
       
+      // Validate investment options if present
+      if (data.investmentOptions) {
+        if (!Array.isArray(data.investmentOptions)) return false;
+        for (const option of data.investmentOptions) {
+          if (!option.type || !option.name || 
+              typeof option.percentage !== 'number' || 
+              typeof option.returnRate !== 'number') {
+            return false;
+          }
+        }
+      }
+      
       return true;
+    },
+    importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          
+          // Validate data format
+          if (!this.validateImportData(data)) {
+            alert('导入的数据格式不正确');
+            return;
+          }
+          
+          this.transactions = data.transactions || [];
+          this.investments = data.investments || [];
+          
+          // Import type data if exists
+          if (data.investmentTypes) {
+            TypeManager.setInvestmentTypes(data.investmentTypes);
+          }
+          
+          if (data.transactionTypes) {
+            TypeManager.setTransactionTypes(data.transactionTypes);
+          }
+          
+          // Import investment calculator options if exists
+          if (data.investmentOptions) {
+            TypeManager.setInvestmentOptions(data.investmentOptions);
+          }
+          
+          this.saveToLocalStorage();
+          alert('数据导入成功');
+        } catch (error) {
+          console.error('数据导入失败:', error);
+          alert('数据导入失败，请检查文件格式');
+        }
+      };
+      reader.readAsText(file);
     },
     exportData() {
       try {
@@ -389,7 +406,8 @@ export default {
           transactions: this.transactions,
           investments: this.investments,
           investmentTypes: TypeManager.getInvestmentTypes(),
-          transactionTypes: TypeManager.getTransactionTypes()
+          transactionTypes: TypeManager.getTransactionTypes(),
+          investmentOptions: TypeManager.getInvestmentOptions()
         };
         const jsonData = JSON.stringify(data, null, 2);
         const blob = new Blob([jsonData], { type: 'application/json' });
