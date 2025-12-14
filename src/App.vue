@@ -1,87 +1,75 @@
 <template>
   <div class="finance-app">
-    <header>
-      <h1>{{ appName }}</h1>
-    </header>
-    
-    <main>
-      <!-- 导航标签 -->
-      <nav class="tab-navigation">
-        <button 
-          :class="{ active: activeTab === 'dashboard' }" 
-          @click="switchTab('dashboard')"
-        >
-          数据看板
-        </button>
-        <button 
-          :class="{ active: activeTab === 'transactions' }" 
-          @click="switchTab('transactions')"
-        >
-          财务记录
-        </button>
-        <button 
-          :class="{ active: activeTab === 'investments' }" 
-          @click="switchTab('investments')"
-        >
-          投资管理
-        </button>
-      </nav>
+    <el-container>
+      <el-header>
+        <h1>{{ appName }}</h1>
+      </el-header>
+      
+      <el-main>
+        <!-- 导航标签 -->
+        <el-tabs v-model="activeTab" type="border-card" @tab-change="onTabChange">
+          <el-tab-pane name="dashboard" label="数据看板"></el-tab-pane>
+          <el-tab-pane name="transactions" label="财务记录"></el-tab-pane>
+          <el-tab-pane name="investments" label="投资管理"></el-tab-pane>
+        </el-tabs>
 
-      <!-- 数据看板标签页 -->
-      <div v-show="activeTab === 'dashboard'">
-        <Dashboard 
-          :transactions="transactions"
-          :investments="investments"
-          @export-data="exportData"
-          @import-data="importData"
-          @clear-data="clearAllData"
-        />
-      </div>
+        <!-- 数据看板标签页 -->
+        <div v-show="activeTab === 'dashboard'">
+          <Dashboard 
+            :transactions="transactions"
+            :investments="investments"
+            @export-data="exportData"
+            @import-data="importData"
+            @clear-data="clearAllData"
+          />
+        </div>
 
-      <!-- 财务记录标签页 -->
-      <div v-show="activeTab === 'transactions'">
-        <!-- 财务概览 -->
-        <SummarySection 
-          :total-income="totalIncome" 
-          :total-expense="totalExpense" 
-          :balance="balance"
-        />
-        
-        <!-- 添加/编辑交易 -->
-        <TransactionForm 
-          :new-transaction="newTransaction" 
-          :is-editing="isEditing"
-          @add-transaction="addTransaction"
-          @update-transaction="updateTransaction"
-          @cancel-edit="cancelEdit"
-        />
-        
-        <!-- 交易列表 -->
-        <TransactionList 
-          :transactions="sortedTransactions" 
-          @delete-transaction="deleteTransaction"
-          @edit-transaction="editTransaction"
-        />
-      </div>
+        <!-- 财务记录标签页 -->
+        <div v-show="activeTab === 'transactions'">
+          <!-- 财务概览 -->
+          <SummarySection 
+            :total-income="totalIncome" 
+            :total-expense="totalExpense" 
+            :balance="balance"
+          />
+          
+          <!-- 添加/编辑交易 -->
+          <TransactionForm 
+            :new-transaction="newTransaction" 
+            :is-editing="isEditing"
+            @add-transaction="addTransaction"
+            @update-transaction="updateTransaction"
+            @cancel-edit="cancelEdit"
+          />
+          
+          <!-- 交易列表 -->
+          <TransactionList 
+            :transactions="sortedTransactions" 
+            @delete-transaction="deleteTransaction"
+            @edit-transaction="editTransaction"
+          />
+        </div>
 
-      <!-- 投资管理标签页 -->
-      <div v-show="activeTab === 'investments'">
-        <InvestmentManagement
-          :investments="investments"
-          :balance="balance"
-          :transactions="transactions"
-          @add-investment="addInvestment"
-          @update-investment="updateInvestment"
-          @delete-investment="deleteInvestment"
-          @edit-investment="editInvestment"
-          @cancel-edit="cancelInvestmentEdit"
-        />
-      </div>
-    </main>
+        <!-- 投资管理标签页 -->
+        <div v-show="activeTab === 'investments'">
+          <InvestmentManagement
+            :investments="investments"
+            :balance="balance"
+            :transactions="transactions"
+            @add-investment="addInvestment"
+            @update-investment="updateInvestment"
+            @delete-investment="deleteInvestment"
+            @edit-investment="editInvestment"
+            @cancel-edit="cancelInvestmentEdit"
+          />
+        </div>
+      </el-main>
+    </el-container>
   </div>
 </template>
 
 <script>
+import { ElContainer, ElHeader, ElMain, ElTabs, ElTabPane, ElMessage, ElMessageBox } from 'element-plus';
 import SummarySection from './components/SummarySection.vue';
 import TransactionForm from './components/TransactionForm.vue';
 import TransactionList from './components/TransactionList.vue';
@@ -91,6 +79,11 @@ import Dashboard from './components/Dashboard.vue';
 export default {
   name: 'FinanceApp',
   components: {
+    ElContainer,
+    ElHeader,
+    ElMain,
+    ElTabs,
+    ElTabPane,
     SummarySection,
     TransactionForm,
     TransactionList,
@@ -165,8 +158,7 @@ export default {
     }
   },
   methods: {
-    switchTab(tab) {
-      this.activeTab = tab;
+    onTabChange(tab) {
       // 切换标签页时取消编辑状态
       this.isEditing = false;
       this.isEditingInvestment = false;
@@ -176,7 +168,10 @@ export default {
     },
     addTransaction() {
       if (!this.newTransaction.description || this.newTransaction.amount <= 0) {
-        alert('请选择有效的明细和金额');
+        ElMessage({
+          message: '请选择有效的明细和金额',
+          type: 'warning'
+        });
         return;
       }
 
@@ -208,11 +203,28 @@ export default {
         this.newTransaction.notes = '';
         this.newTransaction.amount = 0;
         this.newTransaction.date = new Date().toISOString().substr(0, 10);
+        
+        ElMessage({
+          message: '交易添加成功',
+          type: 'success'
+        });
       }
     },
     
     deleteTransaction(id) {
-      this.transactions = this.transactions.filter(transaction => transaction.id !== id);
+      ElMessageBox.confirm('确定要删除这条交易记录吗？', '确认删除', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.transactions = this.transactions.filter(transaction => transaction.id !== id);
+        ElMessage({
+          type: 'success',
+          message: '删除成功'
+        });
+      }).catch(() => {
+        // 用户取消删除
+      });
     },
     
     editTransaction(transaction) {
@@ -241,7 +253,10 @@ export default {
     },
     addInvestment() {
       if (!this.newInvestment.name.trim() || this.newInvestment.quantity <= 0 || this.newInvestment.purchasePrice <= 0) {
-        alert('请填写有效的投资信息');
+        ElMessage({
+          message: '请填写有效的投资信息',
+          type: 'warning'
+        });
         return;
       }
 
@@ -275,11 +290,28 @@ export default {
         this.newInvestment.purchasePrice = 0;
         this.newInvestment.currentPrice = 0;
         this.newInvestment.purchaseDate = new Date().toISOString().substr(0, 10);
+        
+        ElMessage({
+          message: '投资添加成功',
+          type: 'success'
+        });
       }
     },
     
     deleteInvestment(id) {
-      this.investments = this.investments.filter(investment => investment.id !== id);
+      ElMessageBox.confirm('确定要删除这项投资记录吗？', '确认删除', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.investments = this.investments.filter(investment => investment.id !== id);
+        ElMessage({
+          type: 'success',
+          message: '删除成功'
+        });
+      }).catch(() => {
+        // 用户取消删除
+      });
     },
     
     editInvestment(investment) {
@@ -335,6 +367,11 @@ export default {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      
+      ElMessage({
+        message: '数据导出成功',
+        type: 'success'
+      });
     },
     
     importData(event) {
@@ -349,12 +386,21 @@ export default {
           if (data.transactions && data.investments) {
             this.transactions = data.transactions;
             this.investments = data.investments;
-            alert('数据导入成功！');
+            ElMessage({
+              message: '数据导入成功！',
+              type: 'success'
+            });
           } else {
-            alert('数据格式不正确！');
+            ElMessage({
+              message: '数据格式不正确！',
+              type: 'error'
+            });
           }
         } catch (error) {
-          alert('导入失败：' + error.message);
+          ElMessage({
+            message: '导入失败：' + error.message,
+            type: 'error'
+          });
         }
       };
       reader.readAsText(file);
@@ -364,12 +410,27 @@ export default {
     },
     
     clearAllData() {
-      if (confirm('确定要清除所有数据吗？此操作不可撤销！')) {
+      ElMessageBox.confirm(
+        '确定要清除所有数据吗？此操作不可撤销！', 
+        '确认清除', 
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      ).then(() => {
         this.transactions = [];
         this.investments = [];
         localStorage.removeItem('financeTransactions');
         localStorage.removeItem('financeInvestments');
-      }
+        
+        ElMessage({
+          type: 'success',
+          message: '数据已清除'
+        });
+      }).catch(() => {
+        // 用户取消操作
+      });
     }
   }
 };
@@ -382,123 +443,20 @@ export default {
   padding: 20px;
 }
 
-/* 头部 */
-header {
+.el-header {
   text-align: center;
   margin-bottom: 30px;
-  padding: 20px 0;
+  padding: 20px 0 !important;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-header h1 {
+.el-header h1 {
   font-size: 2rem;
   font-weight: bold;
-}
-
-/* 标签导航 */
-.tab-navigation {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 30px;
-  flex-wrap: wrap;
-}
-
-.tab-navigation button {
-  padding: 12px 24px;
-  background-color: #e0e0e0;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.tab-navigation button:hover {
-  background-color: #d5d5d5;
-}
-
-.tab-navigation button.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-/* 数据管理 */
-.data-actions {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin-top: 30px;
-}
-
-.data-actions h3 {
-  margin-top: 0;
-  margin-bottom: 15px;
-  color: #333;
-}
-
-.button-group {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.export-btn,
-.import-label,
-.clear-btn {
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-}
-
-.export-btn {
-  background-color: #28a745;
-  color: white;
-  border: none;
-}
-
-.export-btn:hover {
-  background-color: #218838;
-}
-
-.import-label {
-  background-color: #17a2b8;
-  color: white;
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.import-label:hover {
-  background-color: #138496;
-}
-
-.import-input {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.clear-btn {
-  background-color: #f44336;
-  color: white;
-  border: none;
-}
-
-.clear-btn:hover {
-  background-color: #d32f2f;
+  margin: 0;
 }
 
 /* 响应式设计 */

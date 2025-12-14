@@ -10,24 +10,192 @@
     />
     
     <!-- 添加/编辑投资 -->
-    <InvestmentForm 
-      :new-investment="newInvestment" 
-      :is-editing="isEditingInvestment"
-      @add-investment="addInvestment"
-      @update-investment="updateInvestment"
-      @cancel-edit="cancelInvestmentEdit"
-    />
+    <el-card class="add-investment">
+      <template #header>
+        <div class="card-header">
+          <span>{{ isEditingInvestment ? '编辑投资' : '添加投资' }}</span>
+        </div>
+      </template>
+      
+      <el-form 
+        :model="newInvestment" 
+        label-position="top"
+        @submit.prevent="addInvestment"
+      >
+        <el-row :gutter="20">
+          <el-col :span="12" :xs="24">
+            <el-form-item label="投资类型:">
+              <el-select 
+                v-model="newInvestment.type" 
+                placeholder="请选择投资类型"
+                style="width: 100%"
+              >
+                <el-option label="股票" value="股票"></el-option>
+                <el-option label="基金" value="基金"></el-option>
+                <el-option label="债券" value="债券"></el-option>
+                <el-option label="银行理财" value="银行理财"></el-option>
+                <el-option label="其他" value="其他"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          
+          <el-col :span="12" :xs="24">
+            <el-form-item label="名称:">
+              <el-input 
+                v-model="newInvestment.name" 
+                placeholder="请输入投资名称"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        
+        <el-row :gutter="20">
+          <el-col :span="8" :xs="24">
+            <el-form-item label="数量:">
+              <el-input-number 
+                v-model="newInvestment.quantity" 
+                :min="0"
+                :step="1"
+                controls-position="right"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          
+          <el-col :span="8" :xs="24">
+            <el-form-item label="买入价:">
+              <el-input-number 
+                v-model="newInvestment.purchasePrice" 
+                :min="0"
+                :step="0.01"
+                controls-position="right"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          
+          <el-col :span="8" :xs="24">
+            <el-form-item label="当前价 (可选):">
+              <el-input-number 
+                v-model="newInvestment.currentPrice" 
+                :min="0"
+                :step="0.01"
+                controls-position="right"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        
+        <el-form-item label="买入日期:">
+          <el-date-picker
+            v-model="newInvestment.purchaseDate"
+            type="date"
+            placeholder="请选择买入日期"
+            value-format="YYYY-MM-DD"
+            format="YYYY-MM-DD"
+            style="width: 100%"
+          />
+        </el-form-item>
+        
+        <div class="form-buttons">
+          <el-button 
+            type="primary" 
+            native-type="submit" 
+            style="flex: 1"
+          >
+            {{ isEditingInvestment ? '更新' : '添加' }}
+          </el-button>
+          <el-button 
+            v-if="isEditingInvestment" 
+            @click="cancelInvestmentEdit"
+            style="flex: 1"
+          >
+            取消
+          </el-button>
+        </div>
+      </el-form>
+    </el-card>
     
     <!-- 投资列表 -->
-    <InvestmentList 
-      :investments="investments" 
-      @delete-investment="deleteInvestment"
-      @edit-investment="editInvestment"
-    />
+    <el-card class="investments">
+      <template #header>
+        <div class="card-header">
+          <span>投资组合</span>
+        </div>
+      </template>
+      
+      <div v-if="investments.length === 0">
+        <el-empty description="暂无投资记录">
+          <p class="help-text">点击上方"添加投资"区域录入您的第一条投资信息</p>
+        </el-empty>
+      </div>
+      
+      <div v-else>
+        <el-table :data="investments" style="width: 100%">
+          <el-table-column prop="name" label="名称" />
+          
+          <el-table-column prop="type" label="类型" width="100" />
+          
+          <el-table-column label="买入信息" width="200">
+            <template #default="scope">
+              <div>价格: ¥{{ scope.row.purchasePrice.toFixed(2) }}</div>
+              <div>数量: {{ scope.row.quantity }}</div>
+              <div>日期: {{ formatDate(scope.row.purchaseDate) }}</div>
+            </template>
+          </el-table-column>
+          
+          <el-table-column label="当前信息" width="150">
+            <template #default="scope">
+              <div v-if="scope.row.currentPrice">
+                价格: ¥{{ scope.row.currentPrice.toFixed(2) }}
+              </div>
+              <div v-else>价格: 未设置</div>
+              <div>总价值: ¥{{ currentValue(scope.row).toFixed(2) }}</div>
+            </template>
+          </el-table-column>
+          
+          <el-table-column label="盈亏" width="150">
+            <template #default="scope">
+              <div :class="profitClass(scope.row)">
+                {{ profit(scope.row) >= 0 ? '+' : '' }}¥{{ profit(scope.row).toFixed(2) }}
+              </div>
+              <div :class="profitClass(scope.row)">
+                ({{ profitPercent(scope.row).toFixed(2) }}%)
+              </div>
+            </template>
+          </el-table-column>
+          
+          <el-table-column label="操作" width="150">
+            <template #default="scope">
+              <el-button 
+                size="small" 
+                type="primary" 
+                @click="editInvestment(scope.row)"
+              >
+                编辑
+              </el-button>
+              <el-button 
+                size="small" 
+                type="danger" 
+                @click="deleteInvestment(scope.row.id)"
+              >
+                删除
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </el-card>
     
     <!-- 投资建议 -->
-    <div class="investment-advice-section">
-      <h3>投资建议</h3>
+    <el-card class="investment-advice-section">
+      <template #header>
+        <div class="card-header">
+          <span>投资建议</span>
+        </div>
+      </template>
+      
       <InvestmentAdvice 
         :balance="balance" 
         :transactions="transactions"
@@ -36,64 +204,101 @@
       
       <!-- 自定义投资分配 -->
       <div class="custom-allocation" v-if="Object.keys(customAllocation).length > 0">
-        <h4>自定义投资计划</h4>
-        <div class="allocation-controls">
-          <div 
+        <h3>自定义投资计划</h3>
+        <el-row :gutter="20">
+          <el-col 
             v-for="(allocation, key) in customAllocation" 
             :key="key"
-            class="allocation-control"
+            :span="8"
+            :xs="24"
           >
-            <label>{{ allocation.name }} ({{ allocation.percentage }}%)</label>
-            <input 
-              type="range" 
-              min="0" 
-              max="100" 
-              :value="allocation.percentage"
-              @input="updateCustomAllocation(key, $event.target.value)"
-            >
-          </div>
-        </div>
+            <el-card class="allocation-card">
+              <div class="allocation-header">
+                <span class="allocation-name">{{ allocation.name }}</span>
+              </div>
+              <div class="allocation-control">
+                <el-slider 
+                  v-model="allocation.percentage" 
+                  :min="0" 
+                  :max="100"
+                  show-input
+                  @change="updateCustomAllocation(key, $event)"
+                />
+              </div>
+              <div class="allocation-amount">
+                金额: ¥{{ allocation.amount.toFixed(2) }}
+              </div>
+            </el-card>
+          </el-col>
+        </el-row>
         
         <div class="allocation-summary">
-          <h4>投资分配对比</h4>
-          <div class="comparison-table">
-            <div class="table-header">
-              <div>投资类型</div>
-              <div>建议分配</div>
-              <div>当前分配</div>
-              <div>建议金额</div>
-              <div>当前金额</div>
-            </div>
-            <div 
-              v-for="(item, key) in allocationComparison" 
-              :key="key"
-              class="table-row"
-            >
-              <div>{{ item.name }}</div>
-              <div>{{ item.suggestedPercentage }}%</div>
-              <div>{{ item.currentPercentage }}%</div>
-              <div>¥{{ item.suggestedAmount.toFixed(2) }}</div>
-              <div>¥{{ item.currentAmount.toFixed(2) }}</div>
-            </div>
-          </div>
+          <h3>投资分配对比</h3>
+          <el-table :data="allocationComparisonArray" style="width: 100%">
+            <el-table-column prop="name" label="投资类型" />
+            
+            <el-table-column prop="suggestedPercentage" label="建议分配(%)" width="120" />
+            
+            <el-table-column prop="currentPercentage" label="当前分配(%)" width="120" />
+            
+            <el-table-column prop="suggestedAmount" label="建议金额" width="120">
+              <template #default="scope">
+                ¥{{ scope.row.suggestedAmount.toFixed(2) }}
+              </template>
+            </el-table-column>
+            
+            <el-table-column prop="currentAmount" label="当前金额" width="120">
+              <template #default="scope">
+                ¥{{ scope.row.currentAmount.toFixed(2) }}
+              </template>
+            </el-table-column>
+          </el-table>
         </div>
       </div>
-    </div>
+    </el-card>
   </div>
 </template>
 
 <script>
+import { 
+  ElCard, 
+  ElForm, 
+  ElFormItem, 
+  ElSelect, 
+  ElOption, 
+  ElInput, 
+  ElInputNumber, 
+  ElDatePicker, 
+  ElButton,
+  ElRow,
+  ElCol,
+  ElTable,
+  ElTableColumn,
+  ElEmpty,
+  ElSlider
+} from 'element-plus';
 import InvestmentSummary from './InvestmentSummary.vue';
-import InvestmentForm from './InvestmentForm.vue';
-import InvestmentList from './InvestmentList.vue';
 import InvestmentAdvice from './InvestmentAdvice.vue';
 
 export default {
   name: 'InvestmentManagement',
   components: {
+    ElCard,
+    ElForm,
+    ElFormItem,
+    ElSelect,
+    ElOption,
+    ElInput,
+    ElInputNumber,
+    ElDatePicker,
+    ElButton,
+    ElRow,
+    ElCol,
+    ElTable,
+    ElTableColumn,
+    ElEmpty,
+    ElSlider,
     InvestmentSummary,
-    InvestmentForm,
-    InvestmentList,
     InvestmentAdvice
   },
   props: {
@@ -142,8 +347,8 @@ export default {
     totalInvestmentProfit() {
       return this.totalInvestmentValue - this.totalInvestmentCost;
     },
-    allocationComparison() {
-      const comparison = {};
+    allocationComparisonArray() {
+      const comparison = [];
       
       // 获取建议分配比例
       const suggestedAllocations = this.customAllocation;
@@ -165,32 +370,36 @@ export default {
             key = 'conservative';
           }
           
-          if (!comparison[key]) {
-            comparison[key] = {
+          const existingItem = comparison.find(item => item.key === key);
+          if (!existingItem) {
+            comparison.push({
+              key: key,
               name: investment.type,
               suggestedPercentage: suggestedAllocations[key] ? suggestedAllocations[key].percentage : 0,
               currentPercentage: currentPercentage,
               suggestedAmount: suggestedAllocations[key] ? suggestedAllocations[key].amount : 0,
               currentAmount: currentValue
-            };
+            });
           } else {
             // 如果已经有同类型的，累加
-            comparison[key].currentPercentage += currentPercentage;
-            comparison[key].currentAmount += currentValue;
+            existingItem.currentPercentage += currentPercentage;
+            existingItem.currentAmount += currentValue;
           }
         });
       }
       
       // 补全缺失的建议项
       Object.keys(suggestedAllocations).forEach(key => {
-        if (!comparison[key]) {
-          comparison[key] = {
+        const existingItem = comparison.find(item => item.key === key);
+        if (!existingItem) {
+          comparison.push({
+            key: key,
             name: suggestedAllocations[key].name,
             suggestedPercentage: suggestedAllocations[key].percentage,
             currentPercentage: 0,
             suggestedAmount: suggestedAllocations[key].amount,
             currentAmount: 0
-          };
+          });
         }
       });
       
@@ -198,7 +407,36 @@ export default {
     }
   },
   methods: {
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('zh-CN');
+    },
+    currentValue(investment) {
+      const price = investment.currentPrice || investment.purchasePrice;
+      return price * investment.quantity;
+    },
+    profit(investment) {
+      return (investment.currentPrice - investment.purchasePrice) * investment.quantity || 0;
+    },
+    profitClass(investment) {
+      return {
+        'profit': this.profit(investment) >= 0,
+        'loss': this.profit(investment) < 0
+      };
+    },
+    profitPercent(investment) {
+      if (!investment.currentPrice) return 0;
+      return ((investment.currentPrice - investment.purchasePrice) / investment.purchasePrice) * 100;
+    },
     addInvestment() {
+      if (!this.newInvestment.name.trim() || this.newInvestment.quantity <= 0 || this.newInvestment.purchasePrice <= 0) {
+        this.$message({
+          message: '请填写有效的投资信息',
+          type: 'warning'
+        });
+        return;
+      }
+      
       this.$emit('add-investment');
     },
     updateInvestment(field, value) {
@@ -227,13 +465,21 @@ export default {
       this.$emit('cancel-edit');
     },
     handleAllocationChange(allocation) {
-      this.customAllocation = allocation;
+      // 初始化自定义分配比例
+      const initializedAllocation = {};
+      Object.keys(allocation).forEach(key => {
+        initializedAllocation[key] = {
+          ...allocation[key],
+          percentage: allocation[key].percentage
+        };
+      });
+      this.customAllocation = initializedAllocation;
     },
     updateCustomAllocation(key, percentage) {
-      this.customAllocation[key].percentage = parseInt(percentage);
+      this.customAllocation[key].percentage = percentage;
       // 重新计算金额
       const totalInvestable = this.calculateInvestableFund();
-      this.customAllocation[key].amount = totalInvestable * (parseInt(percentage) / 100);
+      this.customAllocation[key].amount = totalInvestable * (percentage / 100);
     },
     calculateInvestableFund() {
       // 简化计算 - 实际应该根据紧急备用金计算
@@ -245,10 +491,6 @@ export default {
 
 <style scoped>
 .investment-management {
-  background: white;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 30px;
 }
 
@@ -259,90 +501,77 @@ export default {
   padding-bottom: 10px;
 }
 
+.add-investment,
+.investments,
 .investment-advice-section {
-  margin-top: 30px;
-}
-
-.investment-advice-section h3 {
-  margin-bottom: 20px;
-  color: #333;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 10px;
-}
-
-.custom-allocation {
-  margin-top: 30px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
-}
-
-.custom-allocation h4 {
-  margin-top: 0;
-  color: #333;
-}
-
-.allocation-controls {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
   margin-bottom: 30px;
 }
 
-.allocation-control {
-  display: flex;
-  flex-direction: column;
+.card-header {
+  font-weight: bold;
+  font-size: 1.1rem;
 }
 
-.allocation-control label {
-  margin-bottom: 10px;
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.profit {
+  color: #4caf50;
   font-weight: bold;
 }
 
-.allocation-control input[type="range"] {
-  width: 100%;
+.loss {
+  color: #f44336;
+  font-weight: bold;
 }
 
-.allocation-summary h4 {
-  margin-top: 0;
+.custom-allocation h3 {
+  margin-top: 30px;
+  margin-bottom: 20px;
   color: #333;
 }
 
-.comparison-table {
-  width: 100%;
-  border-collapse: collapse;
+.allocation-card {
+  margin-bottom: 20px;
 }
 
-.table-header {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+.allocation-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
   font-weight: bold;
-  background: #e9ecef;
-  padding: 10px;
 }
 
-.table-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-  padding: 10px;
-  border-bottom: 1px solid #dee2e6;
+.allocation-name {
+  font-size: 1.1rem;
 }
 
-.table-row:last-child {
-  border-bottom: none;
+.allocation-control {
+  margin-bottom: 15px;
+}
+
+.allocation-amount {
+  font-weight: bold;
+  color: #333;
+}
+
+.allocation-summary {
+  margin-top: 30px;
+}
+
+.allocation-summary h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .table-header,
-  .table-row {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  
-  .table-header > div:nth-child(n+3),
-  .table-row > div:nth-child(n+3) {
-    display: none;
+  .form-buttons {
+    flex-direction: column;
   }
 }
 </style>

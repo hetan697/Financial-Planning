@@ -1,25 +1,52 @@
 <template>
-  <section class="summary">
-    <div class="summary-card income">
-      <h3>总收入</h3>
-      <p>¥{{ totalIncome.toFixed(2) }}</p>
-    </div>
-    
-    <div class="summary-card expense">
-      <h3>总支出</h3>
-      <p>¥{{ totalExpense.toFixed(2) }}</p>
-    </div>
-    
-    <div class="summary-card balance" :class="{ negative: balance < 0 }">
-      <h3>{{ adviceMode ? '可用资金' : '余额' }}</h3>
-      <p>¥{{ balance.toFixed(2) }}</p>
-    </div>
-  </section>
+  <el-card class="summary-section" :class="{ 'advice-mode': adviceMode }">
+    <el-row :gutter="20">
+      <el-col :span="adviceMode ? 8 : 6" :xs="12">
+        <div class="summary-item">
+          <h3>总收入</h3>
+          <p class="amount income">¥{{ totalIncome.toFixed(2) }}</p>
+        </div>
+      </el-col>
+      
+      <el-col :span="adviceMode ? 8 : 6" :xs="12">
+        <div class="summary-item">
+          <h3>总支出</h3>
+          <p class="amount expense">¥{{ totalExpense.toFixed(2) }}</p>
+        </div>
+      </el-col>
+      
+      <el-col :span="adviceMode ? 8 : 6" :xs="12">
+        <div class="summary-item">
+          <h3>账户余额</h3>
+          <p 
+            class="amount" 
+            :class="{ expense: balance < 0, income: balance >= 0 }"
+          >
+            ¥{{ balance.toFixed(2) }}
+          </p>
+        </div>
+      </el-col>
+      
+      <el-col v-if="!adviceMode" :span="6" :xs="12">
+        <div class="summary-item">
+          <h3>投资总额</h3>
+          <p class="amount">¥0.00</p>
+        </div>
+      </el-col>
+    </el-row>
+  </el-card>
 </template>
 
 <script>
+import { ElCard, ElRow, ElCol } from 'element-plus';
+
 export default {
   name: 'SummarySection',
+  components: {
+    ElCard,
+    ElRow,
+    ElCol
+  },
   props: {
     totalIncome: {
       type: Number,
@@ -42,48 +69,37 @@ export default {
 </script>
 
 <style scoped>
-/* 概览卡片 */
-.summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
+.summary-section {
   margin-bottom: 30px;
 }
 
-.summary-card {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+.summary-section.advice-mode {
+  background-color: #e3f2fd;
+  border-color: #2196f3;
+}
+
+.summary-item {
   text-align: center;
+  padding: 20px 0;
 }
 
-.summary-card h3 {
-  font-size: 1rem;
-  margin-bottom: 10px;
+.summary-item h3 {
+  margin: 0 0 10px 0;
   color: #666;
+  font-size: 1rem;
 }
 
-.summary-card p {
+.amount {
   font-size: 1.5rem;
   font-weight: bold;
+  margin: 0;
 }
 
-.summary-card.income p {
+.income {
   color: #4caf50;
 }
 
-.summary-card.expense p {
-  color: #f44336;
-}
-
-.summary-card.balance p,
-.summary-card.profit p {
-  color: #2196f3;
-}
-
-.summary-card.balance.negative p,
-.summary-card.loss p {
+.expense {
   color: #f44336;
 }
 </style>

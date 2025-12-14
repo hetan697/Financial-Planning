@@ -1,41 +1,82 @@
 <template>
-  <section class="transactions">
-    <h2>交易记录</h2>
+  <el-card class="transactions">
+    <template #header>
+      <div class="card-header">
+        <span>交易记录</span>
+      </div>
+    </template>
+    
     <div v-if="transactions.length === 0" class="no-transactions">
-      <div class="empty-state">
-        <div class="empty-icon">📋</div>
-        <h3>暂无交易记录</h3>
-        <p>您还没有添加任何收入或支出记录</p>
+      <el-empty description="暂无交易记录">
         <p class="help-text">点击上方"添加交易"区域录入您的第一条交易记录</p>
-      </div>
+      </el-empty>
     </div>
-    <div v-else class="transaction-list">
-      <div 
-        class="transaction-item" 
-        :class="transaction.type"
-        v-for="transaction in transactions" 
-        :key="transaction.id"
+    
+    <div v-else>
+      <el-table 
+        :data="transactions" 
+        style="width: 100%" 
+        :row-class-name="tableRowClassName"
       >
-        <div class="transaction-info">
-          <h4>{{ transaction.description }}</h4>
-          <p>{{ formatDate(transaction.date) }}</p>
-          <p v-if="transaction.notes" class="notes">{{ transaction.notes }}</p>
-        </div>
-        <div class="transaction-amount">
-          ¥{{ transaction.amount.toFixed(2) }}
-        </div>
-        <div class="transaction-actions">
-          <button @click="editTransaction(transaction)" class="edit-btn">编辑</button>
-          <button @click="deleteTransaction(transaction.id)" class="delete-btn">删除</button>
-        </div>
-      </div>
+        <el-table-column prop="date" label="日期" width="120">
+          <template #default="scope">
+            {{ formatDate(scope.row.date) }}
+          </template>
+        </el-table-column>
+        
+        <el-table-column prop="description" label="明细" />
+        
+        <el-table-column prop="notes" label="备注" />
+        
+        <el-table-column prop="amount" label="金额" width="120">
+          <template #default="scope">
+            <span :class="scope.row.type">
+              ¥{{ scope.row.amount.toFixed(2) }}
+            </span>
+          </template>
+        </el-table-column>
+        
+        <el-table-column label="操作" width="150">
+          <template #default="scope">
+            <el-button 
+              size="small" 
+              type="primary" 
+              @click="editTransaction(scope.row)"
+            >
+              编辑
+            </el-button>
+            <el-button 
+              size="small" 
+              type="danger" 
+              @click="deleteTransaction(scope.row.id)"
+            >
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
     </div>
-  </section>
+  </el-card>
 </template>
 
 <script>
+import { 
+  ElCard, 
+  ElTable, 
+  ElTableColumn, 
+  ElButton, 
+  ElEmpty 
+} from 'element-plus';
+
 export default {
   name: 'TransactionList',
+  components: {
+    ElCard,
+    ElTable,
+    ElTableColumn,
+    ElButton,
+    ElEmpty
+  },
   props: {
     transactions: {
       type: Array,
@@ -53,25 +94,27 @@ export default {
     },
     editTransaction(transaction) {
       this.$emit('edit-transaction', transaction);
+    },
+    tableRowClassName({ row }) {
+      if (row.type === 'income') {
+        return 'income-row';
+      } else if (row.type === 'expense') {
+        return 'expense-row';
+      }
+      return '';
     }
   }
 };
 </script>
 
 <style scoped>
-/* 交易记录 */
 .transactions {
-  background: white;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
 }
 
-.transactions h2 {
-  margin-bottom: 20px;
-  color: #333;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 10px;
+.card-header {
+  font-weight: bold;
+  font-size: 1.1rem;
 }
 
 .no-transactions {
@@ -79,139 +122,27 @@ export default {
   padding: 40px 20px;
 }
 
-.empty-state {
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.empty-icon {
-  font-size: 3rem;
-  margin-bottom: 20px;
-}
-
-.empty-state h3 {
-  margin-bottom: 10px;
-  color: #666;
-}
-
-.empty-state p {
-  color: #999;
-  margin-bottom: 5px;
-}
-
 .help-text {
   font-style: italic;
-  margin-top: 15px;
   color: #667eea;
+  margin-top: 15px;
 }
 
-.transaction-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.transaction-item {
-  display: flex;
-  align-items: center;
-  padding: 15px;
-  border-radius: 8px;
-  background-color: #fafafa;
-  transition: box-shadow 0.2s;
-}
-
-.transaction-item:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.transaction-item.income {
-  border-left: 4px solid #4caf50;
-}
-
-.transaction-item.expense {
-  border-left: 4px solid #f44336;
-}
-
-.transaction-info {
-  flex: 1;
-}
-
-.transaction-info h4 {
-  margin-bottom: 5px;
-  font-size: 1.1rem;
-}
-
-.transaction-info p {
-  color: #777;
-  font-size: 0.9rem;
-}
-
-.transaction-info .notes {
-  color: #555;
-  font-style: italic;
-  margin-top: 3px;
-}
-
-.transaction-amount {
-  font-weight: bold;
-  margin-right: 15px;
-  font-size: 1.1rem;
-}
-
-.transaction-item.income .transaction-amount {
+.income {
   color: #4caf50;
+  font-weight: bold;
 }
 
-.transaction-item.expense .transaction-amount {
+.expense {
   color: #f44336;
+  font-weight: bold;
 }
 
-.transaction-actions {
-  display: flex;
-  gap: 10px;
+:deep(.income-row) {
+  background-color: #f0f9ff;
 }
 
-.edit-btn {
-  background-color: #17a2b8;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.edit-btn:hover {
-  background-color: #138496;
-}
-
-.delete-btn {
-  background-color: #f44336;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.delete-btn:hover {
-  background-color: #d32f2f;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .transaction-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .transaction-amount {
-    margin: 10px 0;
-  }
-  
-  .transaction-actions {
-    align-self: flex-end;
-  }
+:deep(.expense-row) {
+  background-color: #fff0f0;
 }
 </style>

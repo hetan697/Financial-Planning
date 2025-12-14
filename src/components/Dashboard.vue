@@ -3,84 +3,127 @@
     <h2>数据看板</h2>
     
     <!-- 财务概览 -->
-    <div class="summary-cards">
-      <div class="card">
-        <h3>总收入</h3>
-        <p class="amount income">¥{{ totalIncome.toFixed(2) }}</p>
-      </div>
-      <div class="card">
-        <h3>总支出</h3>
-        <p class="amount expense">¥{{ totalExpense.toFixed(2) }}</p>
-      </div>
-      <div class="card">
-        <h3>账户余额</h3>
-        <p class="amount" :class="{ expense: balance < 0, income: balance >= 0 }">
-          ¥{{ balance.toFixed(2) }}
-        </p>
-      </div>
-      <div class="card">
-        <h3>投资总额</h3>
-        <p class="amount">¥{{ totalInvestmentValue.toFixed(2) }}</p>
-      </div>
-    </div>
+    <el-row :gutter="20" class="summary-cards">
+      <el-col :span="6" :xs="12">
+        <el-card class="card income-card">
+          <div class="card-content">
+            <h3>总收入</h3>
+            <p class="amount income">¥{{ totalIncome.toFixed(2) }}</p>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6" :xs="12">
+        <el-card class="card expense-card">
+          <div class="card-content">
+            <h3>总支出</h3>
+            <p class="amount expense">¥{{ totalExpense.toFixed(2) }}</p>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6" :xs="12">
+        <el-card class="card" :class="balance >= 0 ? 'income-card' : 'expense-card'">
+          <div class="card-content">
+            <h3>账户余额</h3>
+            <p class="amount" :class="{ expense: balance < 0, income: balance >= 0 }">
+              ¥{{ balance.toFixed(2) }}
+            </p>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6" :xs="12">
+        <el-card class="card investment-card">
+          <div class="card-content">
+            <h3>投资总额</h3>
+            <p class="amount">¥{{ totalInvestmentValue.toFixed(2) }}</p>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
     
     <!-- 图表区域 -->
-    <div class="charts">
+    <el-row :gutter="20" class="charts">
       <!-- 收支趋势图 -->
-      <div class="chart-container">
-        <h3>收支趋势</h3>
-        <div class="chart-wrapper">
-          <canvas ref="incomeExpenseChart" v-show="hasTransactions"></canvas>
-          <div v-if="!hasTransactions" class="chart-placeholder">
-            <p>暂无交易数据</p>
+      <el-col :span="8" :xs="24">
+        <el-card class="chart-container">
+          <template #header>
+            <div class="card-header">
+              <span>收支趋势</span>
+            </div>
+          </template>
+          <div class="chart-wrapper">
+            <canvas ref="incomeExpenseChart" v-show="hasTransactions"></canvas>
+            <div v-if="!hasTransactions" class="chart-placeholder">
+              <p>暂无交易数据</p>
+            </div>
           </div>
-        </div>
-      </div>
+        </el-card>
+      </el-col>
       
       <!-- 支出分类饼图 -->
-      <div class="chart-container">
-        <h3>支出分类</h3>
-        <div class="chart-wrapper">
-          <canvas ref="expenseCategoryChart" v-show="hasExpenseTransactions"></canvas>
-          <div v-if="!hasExpenseTransactions" class="chart-placeholder">
-            <p>暂无支出数据</p>
+      <el-col :span="8" :xs="24">
+        <el-card class="chart-container">
+          <template #header>
+            <div class="card-header">
+              <span>支出分类</span>
+            </div>
+          </template>
+          <div class="chart-wrapper">
+            <canvas ref="expenseCategoryChart" v-show="hasExpenseTransactions"></canvas>
+            <div v-if="!hasExpenseTransactions" class="chart-placeholder">
+              <p>暂无支出数据</p>
+            </div>
           </div>
-        </div>
-      </div>
+        </el-card>
+      </el-col>
       
       <!-- 投资收益趋势图 -->
-      <div class="chart-container">
-        <h3>投资收益趋势</h3>
-        <div class="chart-wrapper">
-          <canvas ref="investmentReturnChart" v-show="hasInvestments"></canvas>
-          <div v-if="!hasInvestments" class="chart-placeholder">
-            <p>暂无投资数据</p>
+      <el-col :span="8" :xs="24">
+        <el-card class="chart-container">
+          <template #header>
+            <div class="card-header">
+              <span>投资收益趋势</span>
+            </div>
+          </template>
+          <div class="chart-wrapper">
+            <canvas ref="investmentReturnChart" v-show="hasInvestments"></canvas>
+            <div v-if="!hasInvestments" class="chart-placeholder">
+              <p>暂无投资数据</p>
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </el-card>
+      </el-col>
+    </el-row>
     
     <!-- 数据管理 -->
-    <div class="data-management">
-      <h3>数据管理</h3>
+    <el-card class="data-management">
+      <template #header>
+        <div class="card-header">
+          <span>数据管理</span>
+        </div>
+      </template>
       <div class="button-group">
-        <button @click="exportData" class="export-btn">导出数据</button>
-        <label class="import-label">
-          导入数据
-          <input type="file" @change="importData" accept=".json" class="import-input">
-        </label>
-        <button @click="clearAllData" class="clear-btn">清除所有数据</button>
+        <el-button type="success" @click="exportData">导出数据</el-button>
+        <el-button type="primary" @click="triggerImport">导入数据</el-button>
+        <input ref="fileInput" type="file" @change="importData" accept=".json" style="display: none;">
+        <el-button type="danger" @click="clearAllData">清除所有数据</el-button>
       </div>
-    </div>
+    </el-card>
   </div>
 </template>
 
 <script>
 import { Chart, registerables } from 'chart.js';
+import { ElRow, ElCol, ElCard, ElButton } from 'element-plus';
 Chart.register(...registerables);
 
 export default {
   name: 'Dashboard',
+  components: {
+    ElRow,
+    ElCol,
+    ElCard,
+    ElButton
+  },
   props: {
     transactions: {
       type: Array,
@@ -151,6 +194,12 @@ export default {
   methods: {
     exportData() {
       this.$emit('export-data');
+    },
+    importData(event) {
+      this.$emit('import-data', event);
+    },
+    triggerImport() {
+      this.$refs.fileInput.click();
     },
     importData(event) {
       this.$emit('import-data', event);
@@ -407,33 +456,23 @@ export default {
 
 <style scoped>
 .dashboard {
-  background: white;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
-}
-
-.dashboard h2 {
-  margin-bottom: 20px;
-  color: #333;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 10px;
+  padding: 20px;
 }
 
 .summary-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
   margin-bottom: 30px;
 }
 
 .card {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  height: 120px;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 .card h3 {
@@ -456,22 +495,32 @@ export default {
   color: #f44336;
 }
 
+.income-card {
+  --el-card-border-color: #4caf50;
+  --el-card-border-width: 2px;
+}
+
+.expense-card {
+  --el-card-border-color: #f44336;
+  --el-card-border-width: 2px;
+}
+
+.investment-card {
+  --el-card-border-color: #2196f3;
+  --el-card-border-width: 2px;
+}
+
 .charts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
   margin-bottom: 30px;
 }
 
 .chart-container {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
+  height: 400px;
 }
 
-.chart-container h3 {
-  margin-top: 0;
-  color: #333;
+.card-header {
+  font-weight: bold;
+  font-size: 1.1rem;
 }
 
 .chart-wrapper {
@@ -484,9 +533,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: #f5f5f5;
   border-radius: 4px;
-  border: 1px dashed #ccc;
 }
 
 .chart-placeholder p {
@@ -495,14 +543,7 @@ export default {
 }
 
 .data-management {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-}
-
-.data-management h3 {
-  margin-top: 0;
-  color: #333;
+  margin-bottom: 30px;
 }
 
 .button-group {
@@ -511,69 +552,10 @@ export default {
   flex-wrap: wrap;
 }
 
-.export-btn,
-.import-label,
-.clear-btn {
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-}
-
-.export-btn {
-  background-color: #28a745;
-  color: white;
-  border: none;
-}
-
-.export-btn:hover {
-  background-color: #218838;
-}
-
-.import-label {
-  background-color: #17a2b8;
-  color: white;
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.import-label:hover {
-  background-color: #138496;
-}
-
-.import-input {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.clear-btn {
-  background-color: #f44336;
-  color: white;
-  border: none;
-}
-
-.clear-btn:hover {
-  background-color: #d32f2f;
-}
-
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .summary-cards {
-    grid-template-columns: 1fr 1fr;
-  }
-  
-  .charts {
-    grid-template-columns: 1fr;
+  .chart-container {
+    margin-bottom: 20px;
   }
   
   .button-group {
