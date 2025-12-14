@@ -234,11 +234,37 @@ export default {
     
     saveTypes() {
       try {
+        // 验证数据有效性
+        const validInvestmentTypes = this.localInvestmentTypes.filter(type => type.trim() !== '');
+        const validIncomeTypes = this.localTransactionTypes.income.filter(type => type.trim() !== '');
+        const validExpenseTypes = this.localTransactionTypes.expense.filter(type => type.trim() !== '');
+        
+        if (validInvestmentTypes.length === 0) {
+          this.$message.error('至少需要保留一种投资类型');
+          return;
+        }
+        
+        if (validIncomeTypes.length === 0) {
+          this.$message.error('至少需要保留一种收入类型');
+          return;
+        }
+        
+        if (validExpenseTypes.length === 0) {
+          this.$message.error('至少需要保留一种支出类型');
+          return;
+        }
+        
+        // 更新本地数据
+        this.localInvestmentTypes = validInvestmentTypes;
+        this.localTransactionTypes.income = validIncomeTypes;
+        this.localTransactionTypes.expense = validExpenseTypes;
+        
+        // 保存到TypeManager
         TypeManager.setInvestmentTypes(this.localInvestmentTypes);
         TypeManager.setTransactionTypes(this.localTransactionTypes);
         
-        // 触发localStorage变化事件，通知其他组件更新
-        window.dispatchEvent(new Event('storage'));
+        // 触发自定义事件通知其他组件类型已更新
+        window.dispatchEvent(new CustomEvent('typesUpdated'));
         
         this.$message.success('类型设置保存成功');
       } catch (error) {
@@ -277,6 +303,18 @@ export default {
     clearData() {
       this.$emit('clear-data');
     }
+  },
+  // 监听typesUpdated事件，确保组件间同步
+  mounted() {
+    const handleTypesUpdated = () => {
+      this.localInvestmentTypes = [...TypeManager.getInvestmentTypes()];
+      this.localTransactionTypes = JSON.parse(JSON.stringify(TypeManager.getTransactionTypes()));
+    };
+    
+    window.addEventListener('typesUpdated', handleTypesUpdated);
+    this.$once('hook:beforeDestroy', () => {
+      window.removeEventListener('typesUpdated', handleTypesUpdated);
+    });
   }
 };
 </script>
