@@ -108,6 +108,10 @@ export default {
     balance: {
       type: Number,
       default: 0
+    },
+    transactions: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
@@ -147,29 +151,41 @@ export default {
     
     // 紧急备用金建议
     emergencyFundAdvice() {
-      if (this.balance <= 0) {
+      // 基于过去6个月的支出记录计算月均支出
+      const expenseTransactions = this.transactions.filter(t => t.type === 'expense');
+      
+      if (expenseTransactions.length === 0) {
         return {
-          message: '您的当前余额为负，请优先考虑增加收入或减少支出。',
+          message: '您还没有任何支出记录，建议先记录至少3个月的支出数据以便更准确地计算紧急备用金。',
           amount: 0
         };
       }
       
-      // 计算紧急备用金（假设月支出为总收入的60%）
-      const monthlyExpense = this.balance * 0.6;
-      const emergencyFund = monthlyExpense * this.emergencyFundMonths;
+      // 获取过去6个月的支出记录
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
       
-      if (this.balance > emergencyFund) {
+      const recentExpenses = expenseTransactions.filter(t => new Date(t.date) >= sixMonthsAgo);
+      
+      if (recentExpenses.length === 0) {
         return {
-          message: `您已拥有足够的紧急备用金。建议保留¥${emergencyFund.toFixed(2)}作为${this.emergencyFundMonths}个月的生活费储备。`,
-          amount: emergencyFund
-        };
-      } else {
-        const needed = emergencyFund - this.balance;
-        return {
-          message: `您的紧急备用金不足。建议额外储备¥${needed.toFixed(2)}以达到${this.emergencyFundMonths}个月生活费的标准。`,
-          amount: emergencyFund
+          message: '您最近6个月没有支出记录，建议先记录至少3个月的支出数据以便更准确地计算紧急备用金。',
+          amount: 0
         };
       }
+      
+      // 计算月均支出
+      const totalExpense = recentExpenses.reduce((sum, transaction) => sum + transaction.amount, 0);
+      const monthsCount = Math.min(6, this.getMonthsCovered(recentExpenses));
+      const averageMonthlyExpense = monthsCount > 0 ? totalExpense / monthsCount : 0;
+      
+      // 紧急备用金通常为3-6个月的支出
+      const emergencyFund = averageMonthlyExpense * this.emergencyFundMonths;
+      
+      return {
+        message: `根据您最近${monthsCount}个月的支出记录，月均支出为¥${averageMonthlyExpense.toFixed(2)}。建议准备${this.emergencyFundMonths}个月的紧急备用金。`,
+        amount: emergencyFund
+      };
     },
     
     // 风险承受能力评估
@@ -230,13 +246,40 @@ export default {
         };
       }
       
-      // 计算紧急备用金（假设月支出为总收入的60%）
-      const monthlyExpense = this.balance * 0.6;
-      const emergencyFund = monthlyExpense * this.emergencyFundMonths;
+      // 计算紧急备用金（基于实际支出数据）
+      const expenseTransactions = this.transactions.filter(t => t.type === 'expense');
+      
+      if (expenseTransactions.length === 0) {
+        return {
+          message: '建议先记录至少3个月的支出数据，以便更准确地计算紧急备用金和制定投资计划。',
+          details: {}
+        };
+      }
+      
+      // 获取过去6个月的支出记录
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      const recentExpenses = expenseTransactions.filter(t => new Date(t.date) >= sixMonthsAgo);
+      
+      if (recentExpenses.length === 0) {
+        return {
+          message: '建议先记录至少3个月的支出数据，以便更准确地计算紧急备用金和制定投资计划。',
+          details: {}
+        };
+      }
+      
+      // 计算月均支出
+      const totalExpense = recentExpenses.reduce((sum, transaction) => sum + transaction.amount, 0);
+      const monthsCount = Math.min(6, this.getMonthsCovered(recentExpenses));
+      const averageMonthlyExpense = monthsCount > 0 ? totalExpense / monthsCount : 0;
+      
+      // 紧急备用金通常为3-6个月的支出
+      const emergencyFund = averageMonthlyExpense * this.emergencyFundMonths;
       
       if (this.balance <= emergencyFund) {
         return {
-          message: '您的资金尚不足以建立充足的紧急备用金，建议优先储备紧急资金。',
+          message: `您的资金尚不足以建立充足的紧急备用金（建议金额: ¥${emergencyFund.toFixed(2)}），建议优先储备紧急资金。`,
           details: {}
         };
       }
@@ -272,7 +315,7 @@ export default {
       });
       
       return {
-        message: `根据您的风险承受能力(${this.riskLevel.label})，建议按以下方式分配投资资金：`,
+        message: `根据您的风险承受能力(${this.riskLevel.label})和财务状况，建议按以下方式分配投资资金：`,
         details: allocation
       };
     },
@@ -320,6 +363,21 @@ export default {
         aggressive: 'aggressive'
       };
       return classes[type] || '';
+    },
+    
+    // 计算支出记录覆盖的月份数量
+    getMonthsCovered(transactions) {
+      if (transactions.length === 0) return 0;
+      
+      // 获取最早的和最晚的交易日期
+      const dates = transactions.map(t => new Date(t.date)).sort((a, b) => a - b);
+      const firstDate = dates[0];
+      const lastDate = dates[dates.length - 1];
+      
+      // 计算月份差
+      const yearDiff = lastDate.getFullYear() - firstDate.getFullYear();
+      const monthDiff = lastDate.getMonth() - firstDate.getMonth();
+      return yearDiff * 12 + monthDiff + 1; // +1表示包含起始和结束月份
     }
   }
 };

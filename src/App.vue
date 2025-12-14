@@ -114,7 +114,10 @@
           advice-mode
         />
         
-        <InvestmentAdvice :balance="balance" />
+        <InvestmentAdvice 
+          :balance="balance" 
+          :transactions="transactions" 
+        />
       </div>
     </main>
   </div>
