@@ -2,3 +2,6 @@
 __pycache__
 .DS_Store
 financial_data.json
+node_modules/
+dist/
+.env
