@@ -300,12 +300,17 @@ export default {
 
 .add-investment {
   margin-bottom: 30px;
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
 }
 
 .form-buttons {
@@ -316,6 +321,10 @@ export default {
 @media (max-width: 768px) {
   .form-buttons {
     flex-direction: column;
+  }
+  
+  .investment-management {
+    padding: 10px;
   }
 }
 </style>

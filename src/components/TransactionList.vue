@@ -1,22 +1,17 @@
 <template>
-  <el-card class="transactions">
-    <template #header>
-      <div class="card-header">
-        <span>交易记录</span>
-        <el-button 
-          type="primary" 
-          @click="addTransaction"
-          class="add-button"
-        >
-          添加交易
-        </el-button>
-      </div>
-    </template>
+  <div class="transactions">
+    <div class="header">
+      <h2>交易记录</h2>
+      <button @click="addTransaction" class="add-btn">添加交易</button>
+    </div>
     
     <div v-if="transactions.length === 0" class="no-transactions">
-      <el-empty description="暂无交易记录">
-        <p>点击上方"添加交易"按钮录入您的第一条交易记录</p>
-      </el-empty>
+      <div class="empty-state">
+        <div class="empty-icon">💰</div>
+        <h3>暂无交易记录</h3>
+        <p>您还没有添加任何交易记录</p>
+        <p class="help-text">点击上方"添加交易"按钮录入您的第一条交易信息</p>
+      </div>
     </div>
     
     <div v-else>
@@ -45,25 +40,13 @@
         
         <el-table-column label="操作" width="150">
           <template #default="scope">
-            <el-button 
-              size="small" 
-              type="primary" 
-              @click="editTransaction(scope.row)"
-            >
-              编辑
-            </el-button>
-            <el-button 
-              size="small" 
-              type="danger" 
-              @click="deleteTransaction(scope.row.id)"
-            >
-              删除
-            </el-button>
+            <button @click="editTransaction(scope.row)" class="edit-btn">编辑</button>
+            <button @click="deleteTransaction(scope.row.id)" class="delete-btn">删除</button>
           </template>
         </el-table-column>
       </el-table>
     </div>
-  </el-card>
+  </div>
 </template>
 
 <script>
@@ -110,19 +93,71 @@ export default {
 </script>
 
 <style scoped>
-.card-header {
+.transactions {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.transactions h2 {
+  margin-bottom: 20px;
+  color: #333;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
 }
 
-.add-button {
-  margin-left: auto;
+.add-btn {
+  background-color: #409eff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
 }
 
-.no-transactions p {
+.add-btn:hover {
+  background-color: #337ecc;
+}
+
+.no-transactions {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.empty-state {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
+  margin-bottom: 10px;
+  color: #666;
+}
+
+.empty-state p {
   color: #999;
+  margin-bottom: 5px;
+}
+
+.help-text {
   font-style: italic;
+  margin-top: 15px;
+  color: #667eea;
 }
 
 .income {
@@ -133,5 +168,40 @@ export default {
 .expense {
   color: #67c23a;
   font-weight: bold;
+}
+
+.edit-btn {
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-right: 5px;
+}
+
+.edit-btn:hover {
+  background-color: #138496;
+}
+
+.delete-btn {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.delete-btn:hover {
+  background-color: #d32f2f;
+}
+
+@media (max-width: 768px) {
+  .transactions {
+    padding: 15px;
+  }
 }
 </style>

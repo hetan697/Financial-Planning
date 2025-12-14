@@ -210,7 +210,7 @@ export default {
 
 <style scoped>
 .transaction-page {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -221,6 +221,17 @@ export default {
 
 .transaction-form-card {
   margin-bottom: 30px;
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .form-buttons {
@@ -231,6 +242,10 @@ export default {
 @media (max-width: 768px) {
   .form-buttons {
     flex-direction: column;
+  }
+  
+  .transaction-page {
+    padding: 10px;
   }
 }
 </style>
