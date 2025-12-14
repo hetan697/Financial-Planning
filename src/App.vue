@@ -580,6 +580,8 @@ export default {
 .mobile-menu {
   border: none !important;
   height: 100%;
+  display: flex;
+  justify-content: space-around;
 }
 
 .mobile-menu :deep(.el-menu-item) {
@@ -590,6 +592,7 @@ export default {
   justify-content: center;
   align-items: center;
   font-size: 0.8rem;
+  flex: 1;
 }
 
 .mobile-menu :deep(.el-menu-item .el-icon) {
