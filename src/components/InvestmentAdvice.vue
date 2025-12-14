@@ -10,6 +10,12 @@
         </div>
         <span class="health-text" :class="healthLevel">{{ healthText }}</span>
       </div>
+      <div v-else-if="balance < 0" class="negative-balance-warning">
+        <p>⚠️ 您的账户余额为负，建议优先增加收入或减少支出</p>
+      </div>
+      <div v-else class="zero-balance-info">
+        <p>ℹ️ 您还没有添加任何交易记录，建议先添加收支信息以便获取个性化投资建议</p>
+      </div>
     </div>
     
     <div class="advice-sections">
@@ -55,6 +61,9 @@
             </div>
             <div class="allocation-description">{{ detail.description }}</div>
           </div>
+        </div>
+        <div v-else class="no-allocation-advice">
+          <p>当前暂无具体的投资分配建议。建议您先建立足够的紧急备用金后再考虑投资。</p>
         </div>
       </div>
       
@@ -396,6 +405,25 @@ export default {
   color: #20c997;
 }
 
+.negative-balance-warning,
+.zero-balance-info {
+  margin-top: 15px;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.negative-balance-warning {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.zero-balance-info {
+  background-color: #cce7ff;
+  color: #004085;
+  border: 1px solid #b8daff;
+}
+
 .advice-sections {
   display: flex;
   flex-direction: column;
@@ -508,6 +536,15 @@ export default {
 .allocation-description {
   font-size: 0.9rem;
   color: #666;
+}
+
+.no-allocation-advice {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+  border: 1px solid #ffeaa7;
 }
 
 .strategy-points {

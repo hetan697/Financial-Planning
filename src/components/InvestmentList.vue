@@ -2,7 +2,12 @@
   <section class="investments">
     <h2>投资组合</h2>
     <div v-if="investments.length === 0" class="no-investments">
-      暂无投资记录
+      <div class="empty-state">
+        <div class="empty-icon">💰</div>
+        <h3>暂无投资记录</h3>
+        <p>您还没有添加任何投资项目</p>
+        <p class="help-text">点击上方"添加投资项目"区域录入您的第一条投资信息</p>
+      </div>
     </div>
     <div v-else class="investment-list">
       <div 
@@ -92,9 +97,33 @@ export default {
 
 .no-investments {
   text-align: center;
+  padding: 40px 20px;
+}
+
+.empty-state {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
+  margin-bottom: 10px;
+  color: #666;
+}
+
+.empty-state p {
   color: #999;
-  padding: 40px 0;
+  margin-bottom: 5px;
+}
+
+.help-text {
   font-style: italic;
+  margin-top: 15px;
+  color: #667eea;
 }
 
 .investment-list {

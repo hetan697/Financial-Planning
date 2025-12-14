@@ -2,7 +2,12 @@
   <section class="transactions">
     <h2>交易记录</h2>
     <div v-if="transactions.length === 0" class="no-transactions">
-      暂无交易记录
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <h3>暂无交易记录</h3>
+        <p>您还没有添加任何收入或支出记录</p>
+        <p class="help-text">点击上方"添加交易"区域录入您的第一条交易记录</p>
+      </div>
     </div>
     <div v-else class="transaction-list">
       <div 
@@ -70,9 +75,33 @@ export default {
 
 .no-transactions {
   text-align: center;
+  padding: 40px 20px;
+}
+
+.empty-state {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
+  margin-bottom: 10px;
+  color: #666;
+}
+
+.empty-state p {
   color: #999;
-  padding: 40px 0;
+  margin-bottom: 5px;
+}
+
+.help-text {
   font-style: italic;
+  margin-top: 15px;
+  color: #667eea;
 }
 
 .transaction-list {
