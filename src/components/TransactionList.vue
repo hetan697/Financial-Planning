@@ -3,12 +3,19 @@
     <template #header>
       <div class="card-header">
         <span>交易记录</span>
+        <el-button 
+          type="primary" 
+          @click="addTransaction"
+          class="add-button"
+        >
+          添加交易
+        </el-button>
       </div>
     </template>
     
     <div v-if="transactions.length === 0" class="no-transactions">
       <el-empty description="暂无交易记录">
-        <p>点击上方"添加交易"区域录入您的第一条交易记录</p>
+        <p>点击上方"添加交易"按钮录入您的第一条交易记录</p>
       </el-empty>
     </div>
     
@@ -83,7 +90,7 @@ export default {
       default: () => []
     }
   },
-  emits: ['delete-transaction', 'edit-transaction'],
+  emits: ['delete-transaction', 'edit-transaction', 'add-transaction'],
   methods: {
     formatDate(dateString) {
       const date = new Date(dateString);
@@ -94,6 +101,9 @@ export default {
     },
     editTransaction(transaction) {
       this.$emit('edit-transaction', transaction);
+    },
+    addTransaction() {
+      this.$emit('add-transaction');
     },
     tableRowClassName({ row }) {
       if (row.type === 'income') {
@@ -108,25 +118,26 @@ export default {
 </script>
 
 <style scoped>
-.transactions {
-  margin-bottom: 30px;
-}
-
 .card-header {
-  font-weight: bold;
-  font-size: 1.1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.no-transactions {
-  text-align: center;
-  padding: 40px 20px;
+.add-button {
+  margin-left: auto;
 }
 
-:deep(.income-row) {
-  background-color: #fef0f0;
+.no-transactions p {
+  color: #999;
+  font-style: italic;
 }
 
-:deep(.expense-row) {
-  background-color: #f0f9ff;
+:deep(.income-row) td {
+  background-color: #fef0f0 !important;
+}
+
+:deep(.expense-row) td {
+  background-color: #f0f9ff !important;
 }
 </style>

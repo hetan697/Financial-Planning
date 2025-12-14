@@ -1,12 +1,16 @@
 <template>
   <section class="investments">
-    <h2>投资组合</h2>
+    <div class="header">
+      <h2>投资组合</h2>
+      <button @click="addInvestment" class="add-btn">添加投资</button>
+    </div>
+    
     <div v-if="investments.length === 0" class="no-investments">
       <div class="empty-state">
         <div class="empty-icon">💰</div>
         <h3>暂无投资记录</h3>
         <p>您还没有添加任何投资项目</p>
-        <p class="help-text">点击上方"添加投资项目"区域录入您的第一条投资信息</p>
+        <p class="help-text">点击上方"添加投资"按钮录入您的第一条投资信息</p>
       </div>
     </div>
     <div v-else class="investment-list">

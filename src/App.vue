@@ -38,8 +38,9 @@
             :balance="balance"
           />
           
-          <!-- 添加/编辑交易 -->
+          <!-- 添加/编辑交易表单（仅在需要时显示）-->
           <TransactionForm 
+            v-if="showTransactionForm"
             :new-transaction="newTransaction" 
             :is-editing="isEditing"
             @add-transaction="addTransaction"
@@ -52,6 +53,7 @@
             :transactions="sortedTransactions" 
             @delete-transaction="deleteTransaction"
             @edit-transaction="editTransaction"
+            @add-transaction="showAddTransactionForm"
           />
         </div>
 
@@ -100,6 +102,7 @@ export default {
       appName: '个人财务管理系统',
       activeTab: 'dashboard',
       isEditing: false,
+      showTransactionForm: false, // 控制是否显示交易表单
       editingTransactionId: null,
       isEditingInvestment: false,
       editingInvestmentId: null,
@@ -165,9 +168,27 @@ export default {
   methods: {
     handleMenuSelect(index) {
       this.activeTab = index;
-      // 切换标签页时取消编辑状态
+      // 切换标签页时取消编辑状态和隐藏表单
       this.isEditing = false;
       this.isEditingInvestment = false;
+      this.showTransactionForm = false;
+    },
+    
+    /**
+     * 显示添加交易的表单
+     */
+    showAddTransactionForm() {
+      // 重置表单状态
+      this.isEditing = false;
+      this.editingTransactionId = null;
+      this.newTransaction = {
+        type: 'income',
+        description: '',
+        notes: '',
+        amount: 0,
+        date: new Date().toISOString().substr(0, 10)
+      };
+      this.showTransactionForm = true;
     },
     updateTransaction(field, value) {
       this.newTransaction[field] = value;
@@ -204,17 +225,14 @@ export default {
 
         this.transactions.push(transaction);
         
-        // 重置表单
-        this.newTransaction.description = '';
-        this.newTransaction.notes = '';
-        this.newTransaction.amount = 0;
-        this.newTransaction.date = new Date().toISOString().substr(0, 10);
-        
         this.$message({
           message: '交易添加成功',
           type: 'success'
         });
       }
+      
+      // 隐藏表单
+      this.showTransactionForm = false;
     },
     
     deleteTransaction(id) {
@@ -239,6 +257,7 @@ export default {
       this.newTransaction = { ...transaction };
       // 切换到财务记录视图以显示编辑表单
       this.activeTab = 'transactions';
+      this.showTransactionForm = true;
     },
     
     cancelEdit() {
@@ -252,6 +271,7 @@ export default {
         amount: 0,
         date: new Date().toISOString().substr(0, 10)
       };
+      this.showTransactionForm = false;
     },
     
     updateInvestment(field, value) {
