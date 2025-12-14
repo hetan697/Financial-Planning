@@ -54,76 +54,101 @@
       <h4>📈 投资组合</h4>
       <p>{{ investmentAllocation.message }}</p>
       
-      <!-- 投资比例调节器 -->
-      <div v-if="balance > 0 && emergencyFundAdvice.amount >= 0 && balance > emergencyFundAdvice.amount" class="allocation-controls">
-        <h5>调整投资比例</h5>
-        <div class="slider-group">
-          <div class="slider-item">
-            <label>稳健理财 ({{ allocationPercentages.conservative }}%)</label>
-            <el-slider
-              v-model="allocationPercentages.conservative"
-              :min="0"
-              :max="100"
-              :step="1"
-              show-input
-              @change="onAllocationChange"
-            />
-          </div>
-          
-          <div class="slider-item">
-            <label>混合基金 ({{ allocationPercentages.moderate }}%)</label>
-            <el-slider
-              v-model="allocationPercentages.moderate"
-              :min="0"
-              :max="100"
-              :step="1"
-              show-input
-              @change="onAllocationChange"
-            />
-          </div>
-          
-          <div class="slider-item">
-            <label>股票投资 ({{ allocationPercentages.aggressive }}%)</label>
-            <el-slider
-              v-model="allocationPercentages.aggressive"
-              :min="0"
-              :max="100"
-              :step="1"
-              show-input
-              @change="onAllocationChange"
-            />
+      <!-- 投资方式管理 -->
+      <div v-if="balance > 0 && emergencyFundAdvice.amount >= 0 && balance > emergencyFundAdvice.amount" class="investment-options">
+        <h5>管理投资方式</h5>
+        <div class="options-controls">
+          <el-button @click="addInvestmentOption" size="small" type="primary">添加投资方式</el-button>
+        </div>
+        
+        <div class="investment-options-list">
+          <div 
+            v-for="(option, index) in investmentOptions" 
+            :key="index"
+            class="investment-option-card"
+          >
+            <div class="option-header">
+              <el-input 
+                v-model="option.name" 
+                placeholder="投资方式名称"
+                size="small"
+                class="option-name-input"
+              />
+              <el-button 
+                @click="removeInvestmentOption(index)" 
+                size="small" 
+                type="danger"
+                circle
+              >
+                ×
+              </el-button>
+            </div>
+            
+            <div class="option-details">
+              <div class="detail-row">
+                <label>预期年化收益率:</label>
+                <el-input-number 
+                  v-model="option.returnRate" 
+                  :min="0" 
+                  :max="100" 
+                  :step="0.1"
+                  size="small"
+                  controls-position="right"
+                /> %
+              </div>
+              
+              <div class="detail-row">
+                <label>分配比例:</label>
+                <el-slider
+                  v-model="option.percentage"
+                  :min="0"
+                  :max="100"
+                  :step="1"
+                  show-input
+                  size="small"
+                />
+              </div>
+            </div>
           </div>
         </div>
         
         <div class="total-percentage" :class="{ 'error': totalPercentage !== 100 }">
-          总计: {{ totalPercentage }}%
+          投资比例总计: {{ totalPercentage }}%
           <span v-if="totalPercentage !== 100" class="warning-text">投资比例总和应为100%</span>
         </div>
-      </div>
-      
-      <div v-if="Object.keys(investmentAllocation.details).length > 0" class="investment-grid">
-        <div 
-          v-for="(detail, key) in investmentAllocation.details" 
-          :key="key"
-          class="investment-card"
-        >
-          <div class="investment-header">
-            <span class="investment-name">{{ detail.name }}</span>
-            <span class="investment-percentage">{{ detail.percentage }}%</span>
-          </div>
-          <div class="investment-amount">¥{{ detail.amount.toFixed(2) }}</div>
-          <div class="investment-progress">
-            <div class="progress-bar">
-              <div 
-                class="progress-fill"
-                :style="{ 
-                  width: detail.percentage + '%',
-                  backgroundColor: getInvestmentColor(key)
-                }"
-              ></div>
+        
+        <div v-if="totalPercentage === 100" class="investment-summary">
+          <h5>投资收益预估</h5>
+          <div class="summary-grid">
+            <div 
+              v-for="(option, index) in investmentOptionsWithReturns" 
+              :key="index"
+              class="summary-card"
+            >
+              <div class="summary-header">
+                <span class="summary-name">{{ option.name }}</span>
+                <span class="summary-percentage">{{ option.percentage }}%</span>
+              </div>
+              <div class="summary-amount">¥{{ option.investmentAmount.toFixed(2) }}</div>
+              <div class="summary-return-rate">{{ option.returnRate }}% 年化收益率</div>
+              <div class="summary-return">预计年收益: ¥{{ option.expectedReturn.toFixed(2) }}</div>
             </div>
           </div>
-          <div class="investment-description">{{ detail.description }}</div>
+          
+          <div class="overall-summary">
+            <div class="summary-row">
+              <span>总投资金额:</span>
+              <span>¥{{ overallInvestmentAmount.toFixed(2) }}</span>
+            </div>
+            <div class="summary-row">
+              <span>预计年总收益:</span>
+              <span>¥{{ overallExpectedReturn.toFixed(2) }}</span>
+            </div>
+            <div class="summary-row">
+              <span>整体年化收益率:</span>
+              <span :class="{ 'positive': overallReturnRate > 0 }">{{ overallReturnRate.toFixed(2) }}%</span>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -160,12 +185,15 @@
 </template>
 
 <script>
-import { ElSlider } from 'element-plus';
+import { ElSlider, ElInput, ElInputNumber, ElButton } from 'element-plus';
 
 export default {
   name: 'InvestmentAdvice',
   components: {
-    ElSlider
+    ElSlider,
+    ElInput,
+    ElInputNumber,
+    ElButton
   },
   props: {
     balance: {
@@ -181,12 +209,28 @@ export default {
   data() {
     return {
       emergencyFundMonths: 3, // 建议的应急资金月数
-      allocationPercentages: {
-        conservative: 30,
-        moderate: 40,
-        aggressive: 30
-      },
-      customAllocation: false
+      investmentOptions: [
+        { 
+          name: '银行定期存款', 
+          percentage: 30, 
+          returnRate: 2.1 
+        },
+        { 
+          name: '货币基金', 
+          percentage: 20, 
+          returnRate: 2.8 
+        },
+        { 
+          name: '债券基金', 
+          percentage: 30, 
+          returnRate: 4.5 
+        },
+        { 
+          name: '股票基金', 
+          percentage: 20, 
+          returnRate: 8.0 
+        }
+      ]
     };
   },
   computed: {
@@ -226,6 +270,11 @@ export default {
         'excellent': '优秀'
       };
       return levels[this.healthLevel];
+    },
+    
+    // 投资比例总计
+    totalPercentage() {
+      return this.investmentOptions.reduce((sum, option) => sum + option.percentage, 0);
     },
     
     // 紧急备用金建议
@@ -316,6 +365,70 @@ export default {
       };
     },
     
+    // 可用于投资的资金
+    investableFund() {
+      if (this.balance <= 0) return 0;
+      
+      // 计算紧急备用金（基于实际支出数据）
+      const expenseTransactions = this.transactions.filter(t => t.type === 'expense');
+      
+      if (expenseTransactions.length === 0) {
+        return 0;
+      }
+      
+      // 获取过去6个月的支出记录
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      const recentExpenses = expenseTransactions.filter(t => new Date(t.date) >= sixMonthsAgo);
+      
+      if (recentExpenses.length === 0) {
+        return 0;
+      }
+      
+      // 计算月均支出
+      const totalExpense = recentExpenses.reduce((sum, transaction) => sum + transaction.amount, 0);
+      const monthsCount = Math.min(6, this.getMonthsCovered(recentExpenses));
+      const averageMonthlyExpense = monthsCount > 0 ? totalExpense / monthsCount : 0;
+      
+      // 紧急备用金通常为3-6个月的支出
+      const emergencyFund = averageMonthlyExpense * this.emergencyFundMonths;
+      
+      return Math.max(0, this.balance - emergencyFund);
+    },
+    
+    // 包含收益计算的投资选项
+    investmentOptionsWithReturns() {
+      if (this.totalPercentage !== 100) return [];
+      
+      return this.investmentOptions.map(option => {
+        const investmentAmount = this.investableFund * (option.percentage / 100);
+        const expectedReturn = investmentAmount * (option.returnRate / 100);
+        
+        return {
+          ...option,
+          investmentAmount,
+          expectedReturn
+        };
+      });
+    },
+    
+    // 总投资金额
+    overallInvestmentAmount() {
+      return this.investmentOptionsWithReturns.reduce((sum, option) => sum + option.investmentAmount, 0);
+    },
+    
+    // 预计年总收益
+    overallExpectedReturn() {
+      return this.investmentOptionsWithReturns.reduce((sum, option) => sum + option.expectedReturn, 0);
+    },
+    
+    // 整体年化收益率
+    overallReturnRate() {
+      if (this.overallInvestmentAmount === 0) return 0;
+      return (this.overallExpectedReturn / this.overallInvestmentAmount) * 100;
+    },
+    
     // 投资分配建议
     investmentAllocation() {
       if (this.balance <= 0) {
@@ -348,79 +461,37 @@ export default {
         };
       }
       
-      // 计算月均支出
-      const totalExpense = recentExpenses.reduce((sum, transaction) => sum + transaction.amount, 0);
-      const monthsCount = Math.min(6, this.getMonthsCovered(recentExpenses));
-      const averageMonthlyExpense = monthsCount > 0 ? totalExpense / monthsCount : 0;
-      
-      // 紧急备用金通常为3-6个月的支出
-      const emergencyFund = averageMonthlyExpense * this.emergencyFundMonths;
-      
-      if (this.balance <= emergencyFund) {
+      if (this.investableFund <= 0) {
+        const expenseTransactions = this.transactions.filter(t => t.type === 'expense');
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const recentExpenses = expenseTransactions.filter(t => new Date(t.date) >= sixMonthsAgo);
+        const totalExpense = recentExpenses.reduce((sum, transaction) => sum + transaction.amount, 0);
+        const monthsCount = Math.min(6, this.getMonthsCovered(recentExpenses));
+        const averageMonthlyExpense = monthsCount > 0 ? totalExpense / monthsCount : 0;
+        const emergencyFund = averageMonthlyExpense * this.emergencyFundMonths;
+        
         return {
           message: `您的资金尚不足以建立充足的紧急备用金（建议金额: ¥${emergencyFund.toFixed(2)}），建议优先储备紧急资金。`,
           details: {}
         };
       }
       
-      // 可用于投资的资金
-      const investableFund = this.balance - emergencyFund;
-      
-      // 根据风险等级调整分配比例或使用自定义比例
-      let allocation = {};
-      if (this.customAllocation && this.totalPercentage === 100) {
-        // 使用用户自定义的比例
-        allocation = {
-          conservative: { 
-            name: '稳健理财', 
-            percentage: this.allocationPercentages.conservative, 
-            description: '银行理财、国债等低风险产品' 
-          },
-          moderate: { 
-            name: '混合基金', 
-            percentage: this.allocationPercentages.moderate, 
-            description: '平衡型基金，适度分散风险' 
-          },
-          aggressive: { 
-            name: '股票投资', 
-            percentage: this.allocationPercentages.aggressive, 
-            description: '配置成长型股票或指数基金' 
-          }
+      // 发送分配建议给父组件
+      const allocationDetails = {};
+      this.investmentOptions.forEach((option, index) => {
+        allocationDetails[`option_${index}`] = {
+          name: option.name,
+          percentage: option.percentage,
+          description: `预期年化收益率: ${option.returnRate}%`
         };
-      } else {
-        // 使用系统推荐的比例
-        if (this.riskLevel.class === 'conservative') {
-          allocation = {
-            conservative: { name: '稳健理财', percentage: 70, description: '银行理财、国债等低风险产品' },
-            moderate: { name: '混合基金', percentage: 20, description: '平衡型基金，适度分散风险' },
-            aggressive: { name: '股票投资', percentage: 10, description: '少量配置优质股票' }
-          };
-        } else if (this.riskLevel.class === 'moderate') {
-          allocation = {
-            conservative: { name: '稳健理财', percentage: 40, description: '银行理财、国债等低风险产品' },
-            moderate: { name: '混合基金', percentage: 40, description: '平衡型基金，适度分散风险' },
-            aggressive: { name: '股票投资', percentage: 20, description: '配置成长型股票或指数基金' }
-          };
-        } else {
-          allocation = {
-            conservative: { name: '稳健理财', percentage: 20, description: '少量配置保本产品' },
-            moderate: { name: '混合基金', percentage: 50, description: '指数基金、主动型基金等' },
-            aggressive: { name: '股票投资', percentage: 30, description: '成长股、行业ETF等' }
-          };
-        }
-      }
-      
-      // 计算各项投资额
-      Object.keys(allocation).forEach(key => {
-        allocation[key].amount = investableFund * (allocation[key].percentage / 100);
       });
       
-      // 发送分配建议给父组件
-      this.$emit('allocation-change', allocation);
+      this.$emit('allocation-change', allocationDetails);
       
       return {
         message: `根据您的风险承受能力(${this.riskLevel.label})和财务状况，建议按以下方式分配投资资金：`,
-        details: allocation
+        details: allocationDetails
       };
     },
     
@@ -457,13 +528,6 @@ export default {
           '关注宏观经济环境变化对投资的影响'
         ]
       };
-    },
-    
-    // 总投资比例
-    totalPercentage() {
-      return this.allocationPercentages.conservative + 
-             this.allocationPercentages.moderate + 
-             this.allocationPercentages.aggressive;
     }
   },
   methods: {
@@ -491,14 +555,21 @@ export default {
       return yearDiff * 12 + monthDiff + 1; // +1表示包含起始和结束月份
     },
     
-    // 处理投资比例变化
-    onAllocationChange() {
-      // 标记用户已自定义分配比例
-      this.customAllocation = true;
-      
-      // 如果总比例不是100%，则不应用自定义比例
-      if (this.totalPercentage !== 100) {
-        console.warn('投资比例总和应为100%');
+    // 添加投资方式
+    addInvestmentOption() {
+      this.investmentOptions.push({
+        name: '新投资方式',
+        percentage: 0,
+        returnRate: 5.0
+      });
+    },
+    
+    // 删除投资方式
+    removeInvestmentOption(index) {
+      if (this.investmentOptions.length > 1) {
+        this.investmentOptions.splice(index, 1);
+      } else {
+        this.$message.warning('至少需要保留一种投资方式');
       }
     }
   }
@@ -663,31 +734,62 @@ export default {
   margin-bottom: 10px;
 }
 
-.allocation-controls {
+.investment-options {
   background-color: #f5f7fa;
   padding: 20px;
   border-radius: 8px;
   margin: 20px 0;
 }
 
-.slider-group {
-  margin-bottom: 15px;
-}
-
-.slider-item {
+.options-controls {
   margin-bottom: 20px;
 }
 
-.slider-item label {
-  display: block;
-  margin-bottom: 10px;
+.investment-options-list {
+  margin-bottom: 20px;
+}
+
+.investment-option-card {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.option-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.option-name-input {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.option-details .detail-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.option-details .detail-row label {
+  width: 120px;
   font-weight: bold;
+}
+
+.option-details .detail-row :deep(.el-input-number) {
+  margin: 0 10px;
+  width: 100px;
 }
 
 .total-percentage {
   font-weight: bold;
   font-size: 1.1em;
   text-align: right;
+  margin-bottom: 20px;
 }
 
 .total-percentage.error {
@@ -697,6 +799,80 @@ export default {
 .warning-text {
   font-size: 0.9em;
   color: #e6a23c;
+}
+
+.investment-summary {
+  margin-top: 20px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.summary-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: #fafafa;
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.summary-name {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.summary-percentage {
+  font-weight: bold;
+  color: #409eff;
+}
+
+.summary-amount {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.summary-return-rate {
+  margin-bottom: 5px;
+  color: #666;
+}
+
+.summary-return {
+  font-weight: bold;
+  color: #67c23a;
+}
+
+.overall-summary {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-row .positive {
+  color: #67c23a;
+  font-weight: bold;
 }
 
 .investment-grid {
@@ -768,7 +944,8 @@ export default {
     padding: 15px;
   }
   
-  .investment-grid {
+  .investment-grid,
+  .summary-grid {
     grid-template-columns: 1fr;
   }
   
@@ -777,8 +954,23 @@ export default {
     align-items: stretch;
   }
   
-  .allocation-controls {
+  .investment-options {
     padding: 15px;
+  }
+  
+  .option-details .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .option-details .detail-row label {
+    width: auto;
+    margin-bottom: 5px;
+  }
+  
+  .option-details .detail-row :deep(.el-input-number) {
+    margin: 5px 0;
+    width: 100%;
   }
 }
 </style>

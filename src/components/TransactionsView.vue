@@ -72,4 +72,15 @@ export default {
 
 <style scoped>
 /* 组件样式可以在这里添加 */
+.transactions-view {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .transactions-view {
+    padding: 10px;
+  }
+}
 </style>
