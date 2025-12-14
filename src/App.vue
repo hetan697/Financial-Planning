@@ -213,6 +213,8 @@ export default {
       this.isEditing = true;
       this.editingTransactionId = transaction.id;
       this.newTransaction = { ...transaction };
+      // 切换到财务记录标签页以显示编辑表单
+      this.activeTab = 'transactions';
     },
     
     cancelEdit() {
