@@ -28,17 +28,9 @@
 
         <!-- 财务记录视图 -->
         <div v-show="activeTab === 'transactions' && !showTransactionPage">
-          <!-- 财务概览 -->
-          <SummarySection 
-            :total-income="totalIncome" 
-            :total-expense="totalExpense" 
-            :balance="balance"
-            :investment-total="totalInvestmentValue"
-          />
-          
-          <!-- 交易列表 -->
-          <TransactionList 
-            :transactions="sortedTransactions" 
+          <TransactionsView
+            :transactions="transactions"
+            :investments="investments"
             @delete-transaction="deleteTransaction"
             @edit-transaction="editTransaction"
             @add-transaction="showAddTransactionPage"
@@ -99,6 +91,7 @@ import TransactionPage from './components/TransactionPage.vue';
 import InvestmentManagement from './components/InvestmentManagement.vue';
 import Dashboard from './components/Dashboard.vue';
 import InvestmentPage from './components/InvestmentPage.vue';
+import TransactionsView from './components/TransactionsView.vue';
 
 export default {
   name: 'FinanceApp',
@@ -115,7 +108,8 @@ export default {
     TransactionPage,
     InvestmentManagement,
     Dashboard,
-    InvestmentPage
+    InvestmentPage,
+    TransactionsView
   },
   data() {
     return {
@@ -134,24 +128,14 @@ export default {
     };
   },
   computed: {
-    totalIncome() {
-      return this.transactions
+    balance() {
+      const totalIncome = this.transactions
         .filter(transaction => transaction.type === 'income')
         .reduce((sum, transaction) => sum + transaction.amount, 0);
-    },
-    totalExpense() {
-      return this.transactions
+      const totalExpense = this.transactions
         .filter(transaction => transaction.type === 'expense')
         .reduce((sum, transaction) => sum + transaction.amount, 0);
-    },
-    balance() {
-      return this.totalIncome - this.totalExpense;
-    },
-    sortedTransactions() {
-      // 按日期降序排列
-      return [...this.transactions].sort((a, b) => 
-        new Date(b.date) - new Date(a.date)
-      );
+      return totalIncome - totalExpense;
     },
     totalInvestmentValue() {
       return this.investments.reduce((sum, investment) => {
