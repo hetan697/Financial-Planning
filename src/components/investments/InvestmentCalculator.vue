@@ -127,7 +127,7 @@
 
 <script>
 import { ElButton, ElInput, ElInputNumber, ElSlider, ElSelect, ElOption } from 'element-plus';
-import TypeManager from '../utils/TypeManager.js';
+import TypeManager from '../../utils/TypeManager.js';
 
 export default {
   name: 'InvestmentCalculator',

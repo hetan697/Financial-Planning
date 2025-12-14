@@ -115,7 +115,7 @@ import {
   ElRow,
   ElCol
 } from 'element-plus';
-import TypeManager from '../utils/TypeManager.js';
+import TypeManager from '../../utils/TypeManager.js';
 
 export default {
   name: 'TransactionForm',

@@ -96,7 +96,7 @@
 </template>
 
 <script>
-import TypeManager from '../utils/TypeManager.js';
+import TypeManager from '../../utils/TypeManager.js';
 
 export default {
   name: 'InvestmentForm',
@@ -139,16 +139,16 @@ export default {
 </script>
 
 <style scoped>
-/* 表单区域 */
 .add-investment {
   background: white;
-  padding: 25px;
-  border-radius: 10px;
+  padding: 20px;
+  border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 30px;
 }
 
 .add-investment h2 {
+  margin-top: 0;
   margin-bottom: 20px;
   color: #333;
   border-bottom: 2px solid #eee;
@@ -156,18 +156,20 @@ export default {
 }
 
 .form-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10px 15px -10px;
 }
 
 .form-group {
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
+  flex: 1;
+  min-width: 200px;
+  padding: 0 10px;
+  margin-bottom: 15px;
 }
 
 .form-group label {
+  display: block;
   margin-bottom: 5px;
   font-weight: bold;
   color: #555;
@@ -175,61 +177,80 @@ export default {
 
 .form-group input,
 .form-group select {
-  padding: 12px;
+  width: 100%;
+  padding: 8px 12px;
   border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 1rem;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
 }
 
 .form-actions {
   display: flex;
   gap: 10px;
+  justify-content: flex-end;
   margin-top: 20px;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #409eff;
   color: white;
   border: none;
-  padding: 12px 25px;
-  border-radius: 5px;
-  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: transform 0.2s;
-  flex: 1;
+  font-size: 14px;
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
+  background-color: #66b1ff;
 }
 
 .btn-secondary {
-  background-color: #6c757d;
-  color: white;
+  background-color: #f4f4f5;
+  color: #606266;
   border: none;
-  padding: 12px 25px;
-  border-radius: 5px;
-  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: transform 0.2s;
-  flex: 1;
+  font-size: 14px;
 }
 
 .btn-secondary:hover {
-  background-color: #5a6268;
+  background-color: #e9e9eb;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+  .add-investment {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
   .form-row {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    margin: 0 0 15px 0;
+  }
+  
+  .form-group {
+    min-width: 100%;
+    padding: 0;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
   }
 }
 </style>
