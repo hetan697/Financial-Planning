@@ -8,19 +8,33 @@
     />
     
     <!-- 投资列表 -->
-    <InvestmentList 
-      :investments="investments"
-      @edit-investment="editInvestment"
-      @delete-investment="requestDeleteInvestment"
-      @add-investment="showAddInvestmentForm"
-    ></InvestmentList>
+    <el-card class="investment-list-card">
+      <template #header>
+        <div class="card-header">
+          <span>投资项目</span>
+          <el-button 
+            type="primary" 
+            size="small" 
+            @click="showAddInvestmentForm"
+          >
+            添加投资
+          </el-button>
+        </div>
+      </template>
+      
+      <InvestmentList 
+        :investments="investments"
+        @edit-investment="editInvestment"
+        @delete-investment="requestDeleteInvestment"
+      />
+    </el-card>
     
     <!-- 投资建议 -->
     <InvestmentAdvice 
       :balance="balance"
       :transactions="transactions"
       :investments="investments"
-    ></InvestmentAdvice>
+    />
   </div>
 </template>
 
@@ -93,6 +107,16 @@ export default {
 </script>
 
 <style scoped>
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.investment-list-card {
+  margin-bottom: 20px;
+}
+
 .investment-management {
   max-width: 1200px;
   margin: 0 auto;

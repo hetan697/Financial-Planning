@@ -36,12 +36,20 @@
       <!-- 投资类型管理 -->
       <div class="type-section">
         <h4>投资类型</h4>
-        <div class="type-list">
+        <draggable 
+          v-model="localInvestmentTypes" 
+          tag="div"
+          class="type-list"
+          handle=".drag-handle"
+        >
           <div 
             v-for="(type, index) in localInvestmentTypes" 
             :key="index"
             class="type-item"
           >
+            <div class="drag-handle">
+              <el-icon><Rank /></el-icon>
+            </div>
             <el-input 
               v-model="localInvestmentTypes[index]" 
               size="small"
@@ -56,7 +64,7 @@
               ×
             </el-button>
           </div>
-        </div>
+        </draggable>
         <el-button @click="addInvestmentType" size="small" type="primary">
           添加投资类型
         </el-button>
@@ -69,12 +77,20 @@
         <div class="transaction-types">
           <div class="transaction-type-group">
             <h5>收入类型</h5>
-            <div class="type-list">
+            <draggable 
+              v-model="localTransactionTypes.income" 
+              tag="div"
+              class="type-list"
+              handle=".drag-handle"
+            >
               <div 
                 v-for="(type, index) in localTransactionTypes.income" 
                 :key="index"
                 class="type-item"
               >
+                <div class="drag-handle">
+                  <el-icon><Rank /></el-icon>
+                </div>
                 <el-input 
                   v-model="localTransactionTypes.income[index]" 
                   size="small"
@@ -89,7 +105,7 @@
                   ×
                 </el-button>
               </div>
-            </div>
+            </draggable>
             <el-button @click="addTransactionType('income')" size="small" type="primary">
               添加收入类型
             </el-button>
@@ -97,12 +113,20 @@
           
           <div class="transaction-type-group">
             <h5>支出类型</h5>
-            <div class="type-list">
+            <draggable 
+              v-model="localTransactionTypes.expense" 
+              tag="div"
+              class="type-list"
+              handle=".drag-handle"
+            >
               <div 
                 v-for="(type, index) in localTransactionTypes.expense" 
                 :key="index"
                 class="type-item"
               >
+                <div class="drag-handle">
+                  <el-icon><Rank /></el-icon>
+                </div>
                 <el-input 
                   v-model="localTransactionTypes.expense[index]" 
                   size="small"
@@ -117,7 +141,7 @@
                   ×
                 </el-button>
               </div>
-            </div>
+            </draggable>
             <el-button @click="addTransactionType('expense')" size="small" type="primary">
               添加支出类型
             </el-button>
@@ -135,7 +159,8 @@
 
 <script>
 import { ElCard, ElButton, ElInput, ElIcon } from 'element-plus';
-import { Upload, Download, Delete } from '@element-plus/icons-vue';
+import { Upload, Download, Delete, Rank } from '@element-plus/icons-vue';
+import draggable from 'vuedraggable';
 import TypeManager from '../utils/TypeManager.js';
 
 export default {
@@ -147,7 +172,9 @@ export default {
     ElIcon,
     Upload,
     Download,
-    Delete
+    Delete,
+    Rank,
+    draggable
   },
   emits: ['export-data', 'import-data', 'clear-data'],
   data() {
@@ -247,63 +274,6 @@ export default {
 </script>
 
 <style scoped>
-.management-card {
-  margin-bottom: 30px;
-}
-
-.card-header {
-  font-weight: bold;
-  font-size: 1.1rem;
-}
-
-.data-management-section {
-  margin-bottom: 30px;
-}
-
-.data-management-section h4 {
-  margin-top: 0;
-  margin-bottom: 15px;
-  color: #333;
-}
-
-.data-management-actions {
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-}
-
-.data-management-actions .el-button {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.type-section {
-  margin-bottom: 30px;
-}
-
-.type-section h4 {
-  margin-top: 0;
-  margin-bottom: 15px;
-  color: #333;
-}
-
-.transaction-types {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.transaction-type-group h5 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  color: #666;
-}
-
-.type-list {
-  margin-bottom: 15px;
-}
-
 .type-item {
   display: flex;
   align-items: center;
@@ -311,32 +281,12 @@ export default {
   gap: 10px;
 }
 
+.drag-handle {
+  cursor: move;
+  padding: 5px;
+}
+
 .type-item :deep(.el-input) {
   flex: 1;
-}
-
-.form-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-/* 响应式设计 - 统一的组件间距 */
-@media (max-width: 768px) {
-  .management-card {
-    margin-bottom: 20px;
-  }
-  
-  .transaction-types {
-    grid-template-columns: 1fr;
-  }
-  
-  .form-actions {
-    flex-direction: column;
-  }
-  
-  .data-management-actions {
-    flex-direction: column;
-  }
 }
 </style>

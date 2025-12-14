@@ -7,8 +7,6 @@
       <InvestmentCalculator
         :investable-fund="availableFunds"
         :total-assets="totalAssets"
-        :emergency-fund="emergencyFund"
-        :monthly-expense="averageMonthlyExpense"
         @update:investment-options="updateInvestmentOptions"
       />
     </div>
@@ -131,9 +129,8 @@ export default {
 .investment-advice h3 {
   margin-top: 0;
   margin-bottom: 20px;
-  color: #333;
-  border-bottom: 2px solid #eee;
   padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
 }
 
 .advice-placeholder {

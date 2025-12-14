@@ -10,21 +10,21 @@
           class="main-navigation"
         >
           <el-menu-item index="0" disabled class="app-title">{{ appName }}</el-menu-item>
-          <el-menu-item index="dashboard">
+          <el-menu-item index="dashboard" class="nav-item">
             <el-icon><DataAnalysis /></el-icon>
-            <span>看板</span>
+            <span class="nav-text">看板</span>
           </el-menu-item>
-          <el-menu-item index="transactions">
+          <el-menu-item index="transactions" class="nav-item">
             <el-icon><TrendCharts /></el-icon>
-            <span>收支</span>
+            <span class="nav-text">收支</span>
           </el-menu-item>
-          <el-menu-item index="investments">
+          <el-menu-item index="investments" class="nav-item">
             <el-icon><Coin /></el-icon>
-            <span>投资</span>
+            <span class="nav-text">投资</span>
           </el-menu-item>
-          <el-menu-item index="type-management">
+          <el-menu-item index="type-management" class="nav-item">
             <el-icon><Setting /></el-icon>
-            <span>管理</span>
+            <span class="nav-text">管理</span>
           </el-menu-item>
         </el-menu>
 
@@ -474,18 +474,51 @@ export default {
 
 <style scoped>
 .finance-app {
-  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
   background-color: #f5f5f5;
+}
+
+.main-navigation {
+  flex-shrink: 0;
 }
 
 .el-main {
   padding: 0;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .app-title {
   font-weight: bold;
   cursor: default;
   opacity: 1.0;
+}
+
+.nav-item .el-icon {
+  margin-right: 5px;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .nav-text {
+    display: none;
+  }
+  
+  .nav-item .el-icon {
+    margin-right: 0;
+  }
+  
+  .app-title {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .nav-item .el-icon {
+    margin-right: 5px;
+  }
 }
 
 </style>

@@ -8,7 +8,7 @@
         </div>
       </template>
       
-      <el-row :gutter="20">
+      <el-row :gutter="15">
         <el-col :span="6" :xs="12">
           <div class="summary-item">
             <h4>总收入</h4>
@@ -45,7 +45,7 @@
     </el-card>
     
     <!-- 图表区域 -->
-    <el-row :gutter="20" class="charts-row">
+    <el-row :gutter="15" class="charts-row">
       <el-col :span="24" v-if="hasTransactions || hasInvestments">
         <el-card>
           <template #header>

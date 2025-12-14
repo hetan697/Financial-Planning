@@ -53,32 +53,20 @@ export default {
 
 <style scoped>
 .summary-section {
-  margin-bottom: 30px;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.summary-section h2 {
-  margin-top: 0;
   margin-bottom: 20px;
-  color: #333;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 10px;
 }
 
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
+  gap: 15px;
 }
 
 .summary-item {
   text-align: center;
   padding: 15px;
-  border-radius: 8px;
-  background-color: #f8f9fa;
+  border-radius: 4px;
+  background-color: #f5f6f7;
 }
 
 .summary-item h3 {
@@ -105,15 +93,11 @@ export default {
   color: #409eff;
 }
 
+/* 响应式设计 */
 @media (max-width: 768px) {
-  .summary-section {
-    padding: 15px;
-    margin-bottom: 20px;
-  }
-  
   .summary-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+    gap: 10px;
   }
   
   .summary-item {
