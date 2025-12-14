@@ -4,4 +4,4 @@ __pycache__
 financial_data.json
 node_modules/
 dist/
-.env
+.env截屏*.png
