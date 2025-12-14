@@ -1,164 +1,120 @@
 <template>
   <div class="investment-advice">
-    <div>
+    <h3>投资建议</h3>
+    
+    <div class="advice-section">
       <p>根据您当前的财务状况，我们为您提供以下投资建议：</p>
-      <div v-if="balance > 0">
-        <span>财务健康度: </span>
-        <el-progress 
-          :percentage="healthPercentage" 
-          :status="healthLevelStatus"
-          :stroke-width="12"
-          :show-text="true"
-        />
-        <span :class="healthLevel">{{ healthText }}</span>
+      
+      <div v-if="balance > 0" class="health-info">
+        <div class="health-bar">
+          <span>财务健康度: </span>
+          <div class="progress-bar">
+            <div 
+              class="progress-fill" 
+              :class="healthLevel"
+              :style="{ width: healthPercentage + '%' }"
+            ></div>
+            <span class="progress-text">{{ healthPercentage }}%</span>
+          </div>
+          <span :class="['health-label', healthLevel]">{{ healthText }}</span>
+        </div>
       </div>
-      <div v-else-if="balance < 0">
-        <el-alert
-          title="您的账户余额为负，建议优先增加收入或减少支出"
-          type="error"
-          show-icon
-        />
+      
+      <div v-else-if="balance < 0" class="alert error">
+        您的账户余额为负，建议优先增加收入或减少支出
       </div>
-      <div v-else>
-        <el-alert
-          title="您还没有添加任何交易记录，建议先添加收支信息以便获取个性化投资建议"
-          type="info"
-          show-icon
-        />
+      
+      <div v-else class="alert info">
+        您还没有添加任何交易记录，建议先添加收支信息以便获取个性化投资建议
       </div>
     </div>
     
-    <el-tabs type="border-card">
-      <el-tab-pane label="💰 紧急备用金">
-        <div>
-          <p>{{ emergencyFundAdvice.message }}</p>
-          <div v-if="emergencyFundAdvice.amount">
-            建议金额: <span>¥{{ emergencyFundAdvice.amount.toFixed(2) }}</span>
-          </div>
-        </div>
-      </el-tab-pane>
-      
-      <el-tab-pane label="📊 风险评估">
-        <div>
-          <p>根据您的资产情况，您的风险承受能力为：<strong :class="riskLevel.class">{{ riskLevel.label }}</strong></p>
-          <el-alert
-            :title="characteristic"
-            v-for="(characteristic, index) in riskLevel.characteristics"
-            :key="index"
-            type="info"
-            style="margin-bottom: 10px;"
-          />
-        </div>
-      </el-tab-pane>
-      
-      <el-tab-pane label="📈 投资组合">
-        <div>
-          <p>{{ investmentAllocation.message }}</p>
-          <div v-if="Object.keys(investmentAllocation.details).length > 0">
-            <el-row :gutter="20">
-              <el-col 
-                v-for="(detail, key) in investmentAllocation.details" 
-                :key="key"
-                :span="8"
-                :xs="24"
-              >
-                <el-card>
-                  <div>
-                    <span>{{ detail.name }}</span>
-                    <span>{{ detail.percentage }}%</span>
-                  </div>
-                  <div>¥{{ detail.amount.toFixed(2) }}</div>
-                  <div>
-                    <el-progress 
-                      :percentage="detail.percentage" 
-                      :show-text="false"
-                      :stroke-width="8"
-                      :color="getInvestmentColor(key)"
-                    />
-                  </div>
-                  <div>{{ detail.description }}</div>
-                </el-card>
-              </el-col>
-            </el-row>
-          </div>
-          <div v-else>
-            <el-alert
-              title="当前暂无具体的投资分配建议。建议您先建立足够的紧急备用金后再考虑投资。"
-              type="warning"
-              show-icon
-            />
-          </div>
-        </div>
-      </el-tab-pane>
-      
-      <el-tab-pane label="🧭 投资策略">
-        <div>
-          <el-timeline>
-            <el-timeline-item
-              v-for="(strategy, index) in investmentStrategies"
-              :key="index"
-              :timestamp="'策略 ' + (index + 1)"
-              placement="top"
-            >
-              <el-card>
-                <h4>{{ strategy.title }}</h4>
-                <p>{{ strategy.description }}</p>
-              </el-card>
-            </el-timeline-item>
-          </el-timeline>
-        </div>
-      </el-tab-pane>
-      
-      <el-tab-pane label="📅 定期复查">
-        <div>
-          <p>{{ reviewAdvice.message }}</p>
-          <el-alert
-            :title="tip"
-            v-for="(tip, index) in reviewAdvice.tips"
-            :key="index"
-            type="success"
-            style="margin-bottom: 10px;"
-          />
-        </div>
-      </el-tab-pane>
-    </el-tabs>
+    <!-- 紧急备用金建议 -->
+    <div class="advice-section">
+      <h4>💰 紧急备用金</h4>
+      <p>{{ emergencyFundAdvice.message }}</p>
+      <div v-if="emergencyFundAdvice.amount" class="fund-amount">
+        建议金额: <span>¥{{ emergencyFundAdvice.amount.toFixed(2) }}</span>
+      </div>
+    </div>
     
-    <div>
-      <el-alert
-        title="以上仅为一般性投资建议，不构成具体投资意见。投资有风险，请谨慎决策。"
-        type="warning"
-        show-icon
-      />
+    <!-- 风险评估 -->
+    <div class="advice-section">
+      <h4>📊 风险评估</h4>
+      <p>根据您的资产情况，您的风险承受能力为：<strong :class="riskLevel.class">{{ riskLevel.label }}</strong></p>
+      <ul class="characteristics">
+        <li v-for="(characteristic, index) in riskLevel.characteristics" :key="index">
+          {{ characteristic }}
+        </li>
+      </ul>
+    </div>
+    
+    <!-- 投资组合 -->
+    <div class="advice-section">
+      <h4>📈 投资组合</h4>
+      <p>{{ investmentAllocation.message }}</p>
+      
+      <div v-if="Object.keys(investmentAllocation.details).length > 0" class="investment-grid">
+        <div 
+          v-for="(detail, key) in investmentAllocation.details" 
+          :key="key"
+          class="investment-card"
+        >
+          <div class="investment-header">
+            <span class="investment-name">{{ detail.name }}</span>
+            <span class="investment-percentage">{{ detail.percentage }}%</span>
+          </div>
+          <div class="investment-amount">¥{{ detail.amount.toFixed(2) }}</div>
+          <div class="investment-progress">
+            <div class="progress-bar">
+              <div 
+                class="progress-fill"
+                :style="{ 
+                  width: detail.percentage + '%',
+                  backgroundColor: getInvestmentColor(key)
+                }"
+              ></div>
+            </div>
+          </div>
+          <div class="investment-description">{{ detail.description }}</div>
+        </div>
+      </div>
+      
+      <div v-else class="alert warning">
+        当前暂无具体的投资分配建议。建议您先建立足够的紧急备用金后再考虑投资。
+      </div>
+    </div>
+    
+    <!-- 投资策略 -->
+    <div class="advice-section">
+      <h4>🧭 投资策略</h4>
+      <ol class="strategy-list">
+        <li v-for="(strategy, index) in investmentStrategies" :key="index">
+          <strong>{{ strategy.title }}</strong>: {{ strategy.description }}
+        </li>
+      </ol>
+    </div>
+    
+    <!-- 定期复查 -->
+    <div class="advice-section">
+      <h4>📅 定期复查</h4>
+      <p>{{ reviewAdvice.message }}</p>
+      <ul class="tips-list">
+        <li v-for="(tip, index) in reviewAdvice.tips" :key="index">
+          {{ tip }}
+        </li>
+      </ul>
+    </div>
+    
+    <div class="disclaimer alert warning">
+      以上仅为一般性投资建议，不构成具体投资意见。投资有风险，请谨慎决策。
     </div>
   </div>
 </template>
 
 <script>
-import { 
-  ElProgress, 
-  ElAlert, 
-  ElTabs, 
-  ElTabPane, 
-  ElRow, 
-  ElCol, 
-  ElCard, 
-  ElTimeline, 
-  ElTimelineItem 
-} from 'element-plus';
-
 export default {
   name: 'InvestmentAdvice',
-  components: {
-    ElProgress,
-    ElAlert,
-    ElTabs,
-    ElTabPane,
-    ElRow,
-    ElCol,
-    ElCard,
-    ElTimeline,
-    ElTimelineItem
-  },
   props: {
     balance: {
       type: Number,
@@ -454,22 +410,204 @@ export default {
 <style scoped>
 .investment-advice {
   margin-bottom: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.poor {
+.investment-advice h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.advice-section {
+  margin-bottom: 25px;
+}
+
+.advice-section h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.health-info {
+  margin: 15px 0;
+}
+
+.health-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 20px;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.progress-fill.poor {
+  background-color: #f56c6c;
+}
+
+.progress-fill.fair {
+  background-color: #e6a23c;
+}
+
+.progress-fill.good {
+  background-color: #67c23a;
+}
+
+.progress-fill.excellent {
+  background-color: #409eff;
+}
+
+.progress-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+}
+
+.health-label {
+  font-weight: bold;
+}
+
+.health-label.poor {
   color: #f56c6c;
 }
 
-.fair {
+.health-label.fair {
   color: #e6a23c;
 }
 
-.good {
+.health-label.good {
   color: #67c23a;
 }
 
-.excellent {
+.health-label.excellent {
   color: #409eff;
+}
+
+.alert {
+  padding: 15px;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.alert.error {
+  background-color: #fef0f0;
+  border-left: 4px solid #f56c6c;
+  color: #f56c6c;
+}
+
+.alert.info {
+  background-color: #f4f4f5;
+  border-left: 4px solid #909399;
+  color: #909399;
+}
+
+.alert.warning {
+  background-color: #fdf6ec;
+  border-left: 4px solid #e6a23c;
+  color: #e6a23c;
+}
+
+.fund-amount {
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #409eff;
+}
+
+.characteristics,
+.tips-list {
+  padding-left: 20px;
+}
+
+.characteristics li,
+.tips-list li {
+  margin-bottom: 8px;
+}
+
+.strategy-list {
+  padding-left: 20px;
+}
+
+.strategy-list li {
+  margin-bottom: 10px;
+}
+
+.investment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.investment-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: #fafafa;
+}
+
+.investment-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.investment-name {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.investment-percentage {
+  font-weight: bold;
+  color: #409eff;
+}
+
+.investment-amount {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.investment-progress {
+  margin-bottom: 10px;
+}
+
+.investment-description {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.disclaimer {
+  margin-top: 20px;
+  font-weight: bold;
 }
 
 .conservative {
@@ -482,5 +620,21 @@ export default {
 
 .aggressive {
   color: #f56c6c;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .investment-advice {
+    padding: 15px;
+  }
+  
+  .investment-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .health-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 </style>
