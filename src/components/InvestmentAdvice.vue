@@ -114,6 +114,7 @@ export default {
       default: () => []
     }
   },
+  emits: ['allocation-change'],
   data() {
     return {
       emergencyFundMonths: 3 // 建议的应急资金月数

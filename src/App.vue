@@ -8,6 +8,12 @@
       <!-- 导航标签 -->
       <nav class="tab-navigation">
         <button 
+          :class="{ active: activeTab === 'dashboard' }" 
+          @click="switchTab('dashboard')"
+        >
+          数据看板
+        </button>
+        <button 
           :class="{ active: activeTab === 'transactions' }" 
           @click="switchTab('transactions')"
         >
@@ -19,13 +25,18 @@
         >
           投资管理
         </button>
-        <button 
-          :class="{ active: activeTab === 'advice' }" 
-          @click="switchTab('advice')"
-        >
-          投资建议
-        </button>
       </nav>
+
+      <!-- 数据看板标签页 -->
+      <div v-show="activeTab === 'dashboard'">
+        <Dashboard 
+          :transactions="transactions"
+          :investments="investments"
+          @export-data="exportData"
+          @import-data="importData"
+          @clear-data="clearAllData"
+        />
+      </div>
 
       <!-- 财务记录标签页 -->
       <div v-show="activeTab === 'transactions'">
@@ -51,72 +62,19 @@
           @delete-transaction="deleteTransaction"
           @edit-transaction="editTransaction"
         />
-        
-        <!-- 数据导入导出 -->
-        <div class="data-actions">
-          <h3>数据管理</h3>
-          <div class="button-group">
-            <button @click="exportData" class="export-btn">导出数据</button>
-            <label class="import-label">
-              导入数据
-              <input type="file" @change="importData" accept=".json" class="import-input">
-            </label>
-            <button @click="clearAllData" class="clear-btn">清除所有数据</button>
-          </div>
-        </div>
       </div>
 
       <!-- 投资管理标签页 -->
       <div v-show="activeTab === 'investments'">
-        <!-- 投资概览 -->
-        <InvestmentSummary 
-          :total-cost="totalInvestmentCost" 
-          :total-value="totalInvestmentValue" 
-          :total-profit="totalInvestmentProfit"
-        />
-        
-        <!-- 添加/编辑投资 -->
-        <InvestmentForm 
-          :new-investment="newInvestment" 
-          :is-editing="isEditingInvestment"
+        <InvestmentManagement
+          :investments="investments"
+          :balance="balance"
+          :transactions="transactions"
           @add-investment="addInvestment"
           @update-investment="updateInvestment"
-          @cancel-edit="cancelInvestmentEdit"
-        />
-        
-        <!-- 投资列表 -->
-        <InvestmentList 
-          :investments="investments" 
           @delete-investment="deleteInvestment"
           @edit-investment="editInvestment"
-        />
-        
-        <!-- 数据导入导出 -->
-        <div class="data-actions">
-          <h3>数据管理</h3>
-          <div class="button-group">
-            <button @click="exportData" class="export-btn">导出数据</button>
-            <label class="import-label">
-              导入数据
-              <input type="file" @change="importData" accept=".json" class="import-input">
-            </label>
-            <button @click="clearAllData" class="clear-btn">清除所有数据</button>
-          </div>
-        </div>
-      </div>
-      
-      <!-- 投资建议标签页 -->
-      <div v-show="activeTab === 'advice'">
-        <SummarySection 
-          :total-income="totalIncome" 
-          :total-expense="totalExpense" 
-          :balance="balance"
-          advice-mode
-        />
-        
-        <InvestmentAdvice 
-          :balance="balance" 
-          :transactions="transactions" 
+          @cancel-edit="cancelInvestmentEdit"
         />
       </div>
     </main>
@@ -127,10 +85,8 @@
 import SummarySection from './components/SummarySection.vue';
 import TransactionForm from './components/TransactionForm.vue';
 import TransactionList from './components/TransactionList.vue';
-import InvestmentSummary from './components/InvestmentSummary.vue';
-import InvestmentForm from './components/InvestmentForm.vue';
-import InvestmentList from './components/InvestmentList.vue';
-import InvestmentAdvice from './components/InvestmentAdvice.vue';
+import InvestmentManagement from './components/InvestmentManagement.vue';
+import Dashboard from './components/Dashboard.vue';
 
 export default {
   name: 'FinanceApp',
@@ -138,15 +94,13 @@ export default {
     SummarySection,
     TransactionForm,
     TransactionList,
-    InvestmentSummary,
-    InvestmentForm,
-    InvestmentList,
-    InvestmentAdvice
+    InvestmentManagement,
+    Dashboard
   },
   data() {
     return {
       appName: '个人财务管理系统',
-      activeTab: 'transactions',
+      activeTab: 'dashboard',
       isEditing: false,
       editingTransactionId: null,
       isEditingInvestment: false,
@@ -183,20 +137,6 @@ export default {
     },
     balance() {
       return this.totalIncome - this.totalExpense;
-    },
-    totalInvestmentValue() {
-      return this.investments.reduce((sum, investment) => {
-        const price = investment.currentPrice || investment.purchasePrice;
-        return sum + (price * investment.quantity);
-      }, 0);
-    },
-    totalInvestmentCost() {
-      return this.investments.reduce((sum, investment) => {
-        return sum + (investment.purchasePrice * investment.quantity);
-      }, 0);
-    },
-    totalInvestmentProfit() {
-      return this.totalInvestmentValue - this.totalInvestmentCost;
     }
   },
   mounted() {
