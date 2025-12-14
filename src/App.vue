@@ -72,11 +72,19 @@
         </div>
       </el-main>
     </el-container>
+    
+    <!-- 全局错误提示 -->
+    <el-dialog v-model="errorDialogVisible" title="错误" width="30%">
+      <span>{{ errorMessage }}</span>
+      <template #footer>
+        <el-button @click="errorDialogVisible = false">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { ElContainer, ElHeader, ElMain, ElMenu, ElMenuItem } from 'element-plus';
+import { ElContainer, ElHeader, ElMain, ElMenu, ElMenuItem, ElDialog, ElButton } from 'element-plus';
 import SummarySection from './components/SummarySection.vue';
 import TransactionList from './components/TransactionList.vue';
 import TransactionPage from './components/TransactionPage.vue';
@@ -91,6 +99,8 @@ export default {
     ElMain,
     ElMenu,
     ElMenuItem,
+    ElDialog,
+    ElButton,
     SummarySection,
     TransactionList,
     TransactionPage,
@@ -101,390 +111,305 @@ export default {
     return {
       appName: '个人财务管理系统',
       activeTab: 'dashboard',
-      isEditing: false,
-      showTransactionPage: false, // 控制是否显示交易页面
-      editingTransactionId: null,
-      isEditingInvestment: false,
-      editingInvestmentId: null,
-      currentTransaction: {
-        type: 'income',
-        description: '',
-        notes: '',
-        amount: 0,
-        date: new Date().toISOString().substr(0, 10)
-      },
-      newInvestment: {
-        type: '股票',
-        name: '',
-        quantity: 0,
-        purchasePrice: 0,
-        currentPrice: 0,
-        purchaseDate: new Date().toISOString().substr(0, 10)
-      },
       transactions: [],
-      investments: []
+      investments: [],
+      showTransactionPage: false,
+      currentTransaction: null,
+      isEditing: false,
+      errorDialogVisible: false,
+      errorMessage: ''
     };
   },
   computed: {
     totalIncome() {
       return this.transactions
-        .filter(t => t.type === 'income')
+        .filter(transaction => transaction.type === 'income')
         .reduce((sum, transaction) => sum + transaction.amount, 0);
     },
     totalExpense() {
       return this.transactions
-        .filter(t => t.type === 'expense')
+        .filter(transaction => transaction.type === 'expense')
         .reduce((sum, transaction) => sum + transaction.amount, 0);
     },
     balance() {
       return this.totalIncome - this.totalExpense;
     },
-    // 按时间倒序排列的交易记录（最新的在前面）
     sortedTransactions() {
-      return [...this.transactions].sort((a, b) => {
-        return new Date(b.date) - new Date(a.date);
-      });
-    }
-  },
-  mounted() {
-    // 页面加载时从localStorage恢复数据
-    this.loadFromLocalStorage();
-  },
-  watch: {
-    // 监听数据变化，自动保存到localStorage
-    transactions: {
-      handler: function() {
-        this.saveToLocalStorage();
-      },
-      deep: true
+      // 按日期降序排列
+      return [...this.transactions].sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+      );
     },
-    investments: {
-      handler: function() {
-        this.saveToLocalStorage();
-      },
-      deep: true
+    totalInvestmentValue() {
+      return this.investments.reduce((sum, investment) => {
+        const currentValue = investment.currentPrice !== null ? 
+          investment.currentPrice : investment.purchasePrice;
+        return sum + (investment.quantity * currentValue);
+      }, 0);
     }
   },
   methods: {
     handleMenuSelect(index) {
       this.activeTab = index;
-      // 切换标签页时取消编辑状态
-      this.isEditing = false;
-      this.isEditingInvestment = false;
-      this.showTransactionPage = false;
     },
+    // 显示错误信息
+    showError(message) {
+      this.errorMessage = message;
+      this.errorDialogVisible = true;
+    },
+    // 数据导入
+    importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          
+          // 验证数据格式
+          if (!this.validateImportData(data)) {
+            this.showError('导入的数据格式不正确');
+            return;
+          }
+          
+          this.transactions = data.transactions || [];
+          this.investments = data.investments || [];
+          this.saveToLocalStorage();
+          this.$message.success('数据导入成功');
+        } catch (error) {
+          console.error('数据导入失败:', error);
+          this.showError('数据导入失败，请检查文件格式');
+        }
+      };
+      reader.readAsText(file);
+    },
+    // 验证导入数据格式
+    validateImportData(data) {
+      if (!data || typeof data !== 'object') return false;
+      
+      // 检查必需的属性
+      if (data.transactions && !Array.isArray(data.transactions)) return false;
+      if (data.investments && !Array.isArray(data.investments)) return false;
+      
+      // 验证交易记录格式
+      if (data.transactions) {
+        for (const transaction of data.transactions) {
+          if (!transaction.id || !transaction.type || !transaction.description || 
+              typeof transaction.amount !== 'number' || !transaction.date) {
+            return false;
+          }
+        }
+      }
+      
+      // 验证投资记录格式
+      if (data.investments) {
+        for (const investment of data.investments) {
+          if (!investment.id || !investment.type || !investment.name || 
+              typeof investment.quantity !== 'number' || 
+              typeof investment.purchasePrice !== 'number') {
+            return false;
+          }
+        }
+      }
+      
+      return true;
+    },
+    exportData() {
+      try {
+        const data = {
+          transactions: this.transactions,
+          investments: this.investments
+        };
+        const jsonData = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'financial_data.json';
+        document.body.appendChild(a);
+        a.click();
+        
+        // 清理
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 100);
+      } catch (error) {
+        console.error('导出数据失败:', error);
+        this.showError('导出数据失败');
+      }
+    },
+    clearAllData() {
+      this.$confirm('此操作将永久删除所有数据，是否继续？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.transactions = [];
+        this.investments = [];
+        this.saveToLocalStorage();
+        this.$message.success('数据已清空');
+      }).catch(() => {
+        // 用户取消操作
+      });
+    },
+    saveToLocalStorage() {
+      try {
+        localStorage.setItem('financeTransactions', JSON.stringify(this.transactions));
+        localStorage.setItem('financeInvestments', JSON.stringify(this.investments));
+      } catch (error) {
+        console.error('保存数据到localStorage失败:', error);
+        this.showError('保存数据失败');
+      }
+    },
+    loadFromLocalStorage() {
+      try {
+        const transactions = localStorage.getItem('financeTransactions');
+        const investments = localStorage.getItem('financeInvestments');
+        
+        if (transactions) {
+          this.transactions = JSON.parse(transactions);
+        }
+        
+        if (investments) {
+          this.investments = JSON.parse(investments);
+        }
+      } catch (error) {
+        console.error('从localStorage加载数据失败:', error);
+        this.showError('加载数据失败');
+      }
+    },
+    // 交易相关方法
     showAddTransactionPage() {
-      // 重置表单状态
-      this.isEditing = false;
-      this.editingTransactionId = null;
       this.currentTransaction = {
+        id: Date.now(),
         type: 'income',
         description: '',
         notes: '',
         amount: 0,
         date: new Date().toISOString().substr(0, 10)
       };
+      this.isEditing = false;
+      this.showTransactionPage = true;
+    },
+    editTransaction(transaction) {
+      this.currentTransaction = { ...transaction };
+      this.isEditing = true;
       this.showTransactionPage = true;
     },
     saveTransaction(transaction) {
       if (!transaction.description || transaction.amount <= 0) {
-        this.$message({
-          message: '请选择有效的明细和金额',
-          type: 'warning'
-        });
+        this.showError('请输入有效的明细和金额');
         return;
       }
 
       if (this.isEditing) {
-        // 更新现有交易
-        const index = this.transactions.findIndex(t => t.id === this.editingTransactionId);
+        const index = this.transactions.findIndex(t => t.id === transaction.id);
         if (index !== -1) {
-          this.transactions[index] = {
-            ...this.transactions[index],
-            ...transaction,
-            id: this.editingTransactionId // 确保ID不变
-          };
+          this.transactions.splice(index, 1, transaction);
         }
-        this.cancelTransaction();
       } else {
-        // 添加新交易
-        const newTransaction = {
-          id: Date.now(), // 简单ID生成方式
-          ...transaction
-        };
-
-        this.transactions.push(newTransaction);
-        
-        this.$message({
-          message: '交易添加成功',
-          type: 'success'
-        });
-        
-        // 返回列表页面
-        this.showTransactionPage = false;
+        this.transactions.push(transaction);
       }
+      
+      this.saveToLocalStorage();
+      this.cancelTransaction();
+      this.$message.success(this.isEditing ? '交易更新成功' : '交易添加成功');
     },
-    
+    cancelTransaction() {
+      this.showTransactionPage = false;
+      this.currentTransaction = null;
+      this.isEditing = false;
+    },
     deleteTransaction(id) {
-      this.$confirm('确定要删除这条交易记录吗？', '确认删除', {
+      this.$confirm('此操作将永久删除该交易记录，是否继续？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         this.transactions = this.transactions.filter(transaction => transaction.id !== id);
-        this.$message({
-          type: 'success',
-          message: '删除成功'
-        });
+        this.saveToLocalStorage();
+        this.$message.success('删除成功');
       }).catch(() => {
-        // 用户取消删除
+        // 用户取消操作
       });
     },
-    
-    editTransaction(transaction) {
-      this.isEditing = true;
-      this.editingTransactionId = transaction.id;
-      this.currentTransaction = { ...transaction };
-      this.showTransactionPage = true;
-    },
-    
-    cancelTransaction() {
-      this.isEditing = false;
-      this.editingTransactionId = null;
-      this.showTransactionPage = false;
-    },
-    
-    updateInvestment(field, value) {
-      this.newInvestment[field] = value;
-    },
-    addInvestment() {
-      if (!this.newInvestment.name.trim() || this.newInvestment.quantity <= 0 || this.newInvestment.purchasePrice <= 0) {
-        this.$message({
-          message: '请填写有效的投资信息',
-          type: 'warning'
-        });
+    // 投资相关方法
+    addInvestment(investment) {
+      if (!investment.name || investment.quantity <= 0 || investment.purchasePrice <= 0) {
+        this.showError('请输入有效的投资名称、数量和买入价');
         return;
       }
 
-      if (this.isEditingInvestment) {
-        // 更新现有投资
-        const index = this.investments.findIndex(i => i.id === this.editingInvestmentId);
-        if (index !== -1) {
-          this.investments[index] = {
-            ...this.investments[index],
-            ...this.newInvestment
-          };
-        }
-        this.cancelInvestmentEdit();
-      } else {
-        // 添加新投资
-        const investment = {
-          id: Date.now(),
-          type: this.newInvestment.type,
-          name: this.newInvestment.name,
-          quantity: parseFloat(this.newInvestment.quantity),
-          purchasePrice: parseFloat(this.newInvestment.purchasePrice),
-          currentPrice: this.newInvestment.currentPrice ? parseFloat(this.newInvestment.currentPrice) : null,
-          purchaseDate: this.newInvestment.purchaseDate
-        };
+      this.investments.push({
+        ...investment,
+        id: Date.now()
+      });
+      
+      this.saveToLocalStorage();
+      this.$message.success('投资添加成功');
+    },
+    updateInvestment(investment) {
+      if (!investment.name || investment.quantity <= 0 || investment.purchasePrice <= 0) {
+        this.showError('请输入有效的投资名称、数量和买入价');
+        return;
+      }
 
-        this.investments.push(investment);
-        
-        // 重置表单
-        this.newInvestment.name = '';
-        this.newInvestment.quantity = 0;
-        this.newInvestment.purchasePrice = 0;
-        this.newInvestment.currentPrice = 0;
-        this.newInvestment.purchaseDate = new Date().toISOString().substr(0, 10);
-        
-        this.$message({
-          message: '投资添加成功',
-          type: 'success'
-        });
+      const index = this.investments.findIndex(i => i.id === investment.id);
+      if (index !== -1) {
+        this.investments.splice(index, 1, investment);
+        this.saveToLocalStorage();
+        this.$message.success('投资更新成功');
       }
     },
-    
     deleteInvestment(id) {
-      this.$confirm('确定要删除这项投资记录吗？', '确认删除', {
+      this.$confirm('此操作将永久删除该投资记录，是否继续？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         this.investments = this.investments.filter(investment => investment.id !== id);
-        this.$message({
-          type: 'success',
-          message: '删除成功'
-        });
-      }).catch(() => {
-        // 用户取消删除
-      });
-    },
-    
-    editInvestment(investment) {
-      this.isEditingInvestment = true;
-      this.editingInvestmentId = investment.id;
-      this.newInvestment = { ...investment };
-      // 切换到投资管理视图以显示编辑表单
-      this.activeTab = 'investments';
-    },
-    
-    cancelInvestmentEdit() {
-      this.isEditingInvestment = false;
-      this.editingInvestmentId = null;
-      // 重置表单
-      this.newInvestment = {
-        type: '股票',
-        name: '',
-        quantity: 0,
-        purchasePrice: 0,
-        currentPrice: 0,
-        purchaseDate: new Date().toISOString().substr(0, 10)
-      };
-    },
-    
-    saveToLocalStorage() {
-      localStorage.setItem('financeTransactions', JSON.stringify(this.transactions));
-      localStorage.setItem('financeInvestments', JSON.stringify(this.investments));
-    },
-    
-    loadFromLocalStorage() {
-      const savedTransactions = localStorage.getItem('financeTransactions');
-      const savedInvestments = localStorage.getItem('financeInvestments');
-      
-      if (savedTransactions) {
-        this.transactions = JSON.parse(savedTransactions);
-      }
-      
-      if (savedInvestments) {
-        this.investments = JSON.parse(savedInvestments);
-      }
-    },
-    
-    exportData() {
-      const data = {
-        transactions: this.transactions,
-        investments: this.investments
-      };
-      
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `financial-data-${new Date().toISOString().slice(0, 10)}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      this.$message({
-        message: '数据导出成功',
-        type: 'success'
-      });
-    },
-    
-    importData(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const data = JSON.parse(e.target.result);
-          
-          if (data.transactions && data.investments) {
-            this.transactions = data.transactions;
-            this.investments = data.investments;
-            this.$message({
-              message: '数据导入成功！',
-              type: 'success'
-            });
-          } else {
-            this.$message({
-              message: '数据格式不正确！',
-              type: 'error'
-            });
-          }
-        } catch (error) {
-          this.$message({
-            message: '导入失败：' + error.message,
-            type: 'error'
-          });
-        }
-      };
-      reader.readAsText(file);
-      
-      // 重置文件输入框
-      event.target.value = '';
-    },
-    
-    clearAllData() {
-      this.$confirm(
-        '确定要清除所有数据吗？此操作不可撤销！', 
-        '确认清除', 
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }
-      ).then(() => {
-        this.transactions = [];
-        this.investments = [];
-        localStorage.removeItem('financeTransactions');
-        localStorage.removeItem('financeInvestments');
-        
-        this.$message({
-          type: 'success',
-          message: '数据已清除'
-        });
+        this.saveToLocalStorage();
+        this.$message.success('删除成功');
       }).catch(() => {
         // 用户取消操作
       });
+    },
+    editInvestment(investment) {
+      this.$emit('edit-investment', investment);
+    },
+    cancelInvestmentEdit() {
+      this.$emit('cancel-edit');
     }
+  },
+  mounted() {
+    this.loadFromLocalStorage();
   }
 };
 </script>
 
 <style scoped>
 .finance-app {
-  margin: 0 auto;
+  min-height: 100vh;
+  background-color: #f5f5f5;
 }
 
 .el-header {
+  background-color: #409eff;
+  color: white;
   text-align: center;
-  margin-bottom: 20px;
-  padding: 15px 0 !important;
-}
-
-.el-header h1 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin: 0;
+  line-height: 60px;
 }
 
 .main-navigation {
   margin-bottom: 20px;
 }
 
-:deep(.el-main) {
-  padding: 0 !important;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .finance-app {
-  }
-  
-  .el-header {
-    margin-bottom: 10px;
-    padding: 10px 0 !important;
-  }
-  
-  .el-header h1 {
-    font-size: 1.3rem;
-  }
-  
-  .main-navigation {
-    margin-bottom: 10px;
-  }
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

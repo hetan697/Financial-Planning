@@ -5,12 +5,14 @@
     <el-card class="transaction-form-card">
       <el-form 
         :model="localTransaction" 
+        :rules="rules"
+        ref="transactionForm"
         label-position="top"
         @submit.prevent="saveTransaction"
       >
         <el-row :gutter="20">
           <el-col :span="12" :xs="24">
-            <el-form-item label="类型:">
+            <el-form-item label="类型:" prop="type">
               <el-select 
                 v-model="localTransaction.type" 
                 placeholder="请选择类型"
@@ -23,7 +25,7 @@
           </el-col>
           
           <el-col :span="12" :xs="24">
-            <el-form-item label="日期:">
+            <el-form-item label="日期:" prop="date">
               <el-date-picker
                 v-model="localTransaction.date"
                 type="date"
@@ -36,7 +38,7 @@
           </el-col>
         </el-row>
         
-        <el-form-item label="明细:">
+        <el-form-item label="明细:" prop="description">
           <el-select 
             v-model="localTransaction.description" 
             placeholder="请选择明细"
@@ -61,14 +63,14 @@
           </el-select>
         </el-form-item>
         
-        <el-form-item label="备注 (可选):">
+        <el-form-item label="备注 (可选):" prop="notes">
           <el-input 
             v-model="localTransaction.notes" 
             placeholder="请输入备注信息"
           />
         </el-form-item>
         
-        <el-form-item label="金额:">
+        <el-form-item label="金额:" prop="amount">
           <el-input-number 
             v-model="localTransaction.amount" 
             :min="0"
@@ -100,7 +102,7 @@
 
 <script>
 import { ElCard, ElForm, ElFormItem, ElSelect, ElOption, ElOptionGroup, 
-         ElDatePicker, ElInput, ElInputNumber, ElButton, ElRow, ElCol, ElPageHeader } from 'element-plus';
+         ElDatePicker, ElInput, ElInputNumber, ElButton, ElRow, ElCol, ElPageHeader, ElMessage } from 'element-plus';
 
 export default {
   name: 'TransactionPage',
@@ -159,23 +161,48 @@ export default {
         '保险',
         '投资支出',
         '其他支出'
-      ]
+      ],
+      rules: {
+        type: [
+          { required: true, message: '请选择类型', trigger: 'change' }
+        ],
+        date: [
+          { required: true, message: '请选择日期', trigger: 'change' }
+        ],
+        description: [
+          { required: true, message: '请选择明细', trigger: 'change' }
+        ],
+        amount: [
+          { required: true, message: '请输入金额', trigger: 'change' },
+          { type: 'number', min: 0.01, message: '金额必须大于0', trigger: 'change' }
+        ]
+      }
     };
   },
   methods: {
     saveTransaction() {
-      if (!this.localTransaction.description || this.localTransaction.amount <= 0) {
-        this.$message({
-          message: '请选择有效的明细和金额',
-          type: 'warning'
-        });
-        return;
-      }
-      
-      this.$emit('save', this.localTransaction);
+      this.$refs.transactionForm.validate((valid) => {
+        if (valid) {
+          this.$emit('save', this.localTransaction);
+        } else {
+          ElMessage({
+            message: '请填写所有必填字段',
+            type: 'warning'
+          });
+          return false;
+        }
+      });
     },
     goBack() {
       this.$emit('cancel');
+    }
+  },
+  watch: {
+    transaction: {
+      handler(newVal) {
+        this.localTransaction = { ...newVal };
+      },
+      deep: true
     }
   }
 };
@@ -199,15 +226,9 @@ export default {
 .form-buttons {
   display: flex;
   gap: 10px;
-  margin-top: 20px;
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
-  .transaction-page {
-    padding: 10px;
-  }
-  
   .form-buttons {
     flex-direction: column;
   }

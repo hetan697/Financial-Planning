@@ -3,12 +3,13 @@
 请创建一个名为"个人财务管理系统"的Vue.js Web应用程序，采用组件化架构，包含以下功能和特性：
 
 1. **核心技术要求：**
-   - 使用Vue 3 (原生JavaScript，无需构建工具)
+   - 使用Vue 3 (Composition API)
    - HTML5, CSS3 (含Flexbox和Grid布局)
    - localStorage API实现数据持久化
    - Chart.js 实现数据可视化
    - Element Plus UI组件库提升用户体验
    - 响应式设计，适配移动端和桌面端
+   - 使用Vite作为开发服务器和构建工具
 
 2. **核心功能模块：**
    
@@ -55,12 +56,12 @@
    ├── src/                    # 源代码目录
    │   ├── main.js             # Vue应用入口
    │   ├── App.vue             # 主应用组件
-   │   ├── assets/             # 静态资源
    │   └── components/         # Vue组件
    │       ├── Dashboard.vue           # 数据看板组件
    │       ├── SummarySection.vue      # 摘要展示组件
    │       ├── TransactionForm.vue     # 交易表单组件
    │       ├── TransactionList.vue     # 交易列表组件
+   │       ├── TransactionPage.vue     # 交易页面组件
    │       ├── InvestmentManagement.vue # 投资管理与建议组件
    │       ├── InvestmentSummary.vue   # 投资摘要组件
    │       ├── InvestmentForm.vue      # 投资表单组件
@@ -89,3 +90,4 @@
    - 提供运行和开发指南
 
 请按照以上规格从零开始实现整个项目，确保各组件职责分明、代码结构清晰、功能完整且用户体验良好。
+每次对项目的编辑结束后，更新本文档，并将更改添加至git仓库。

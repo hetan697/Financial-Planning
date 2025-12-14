@@ -1,7 +1,5 @@
 <template>
   <div class="investment-management">
-    <h2>投资管理与建议</h2>
-    
     <!-- 投资概览 -->
     <InvestmentSummary 
       :total-cost="totalInvestmentCost" 
@@ -20,12 +18,14 @@
       
       <el-form 
         :model="newInvestment" 
+        :rules="investmentRules"
+        ref="investmentForm"
         label-position="top"
-        @submit.prevent="addInvestment"
+        @submit.prevent="submitInvestment"
       >
         <el-row :gutter="20">
           <el-col :span="12" :xs="24">
-            <el-form-item label="投资类型:">
+            <el-form-item label="投资类型:" prop="type">
               <el-select 
                 v-model="newInvestment.type" 
                 placeholder="请选择投资类型"
@@ -41,7 +41,7 @@
           </el-col>
           
           <el-col :span="12" :xs="24">
-            <el-form-item label="名称:">
+            <el-form-item label="名称:" prop="name">
               <el-input 
                 v-model="newInvestment.name" 
                 placeholder="请输入投资名称"
@@ -52,7 +52,7 @@
         
         <el-row :gutter="20">
           <el-col :span="8" :xs="24">
-            <el-form-item label="数量:">
+            <el-form-item label="数量:" prop="quantity">
               <el-input-number 
                 v-model="newInvestment.quantity" 
                 :min="0"
@@ -64,7 +64,7 @@
           </el-col>
           
           <el-col :span="8" :xs="24">
-            <el-form-item label="买入价:">
+            <el-form-item label="买入价:" prop="purchasePrice">
               <el-input-number 
                 v-model="newInvestment.purchasePrice" 
                 :min="0"
@@ -76,7 +76,7 @@
           </el-col>
           
           <el-col :span="8" :xs="24">
-            <el-form-item label="当前价 (可选):">
+            <el-form-item label="当前价 (可选):" prop="currentPrice">
               <el-input-number 
                 v-model="newInvestment.currentPrice" 
                 :min="0"
@@ -88,7 +88,7 @@
           </el-col>
         </el-row>
         
-        <el-form-item label="买入日期:">
+        <el-form-item label="买入日期:" prop="purchaseDate">
           <el-date-picker
             v-model="newInvestment.purchaseDate"
             type="date"
@@ -102,11 +102,11 @@
         <div class="form-buttons">
           <el-button 
             type="primary" 
-            @click="addInvestment"
+            native-type="submit" 
+            style="flex: 1"
           >
             {{ isEditingInvestment ? '更新投资' : '添加投资' }}
           </el-button>
-          <el-button @click="resetForm">重置</el-button>
         </div>
       </el-form>
     </el-card>
@@ -114,23 +114,22 @@
     <!-- 投资列表 -->
     <InvestmentList 
       :investments="investments"
-      @delete-investment="deleteInvestment"
       @edit-investment="editInvestment"
-      @add-investment="showAddInvestmentForm"
+      @delete-investment="requestDeleteInvestment"
     />
     
     <!-- 投资建议 -->
     <InvestmentAdvice 
-      :balance="availableBalance"
+      :balance="balance"
       :transactions="transactions"
-      @allocation-change="handleAllocationChange"
+      :investments="investments"
     />
   </div>
 </template>
 
 <script>
-import { ElCard, ElForm, ElFormItem, ElRow, ElCol, ElSelect, ElOption, 
-         ElInput, ElInputNumber, ElDatePicker, ElButton } from 'element-plus';
+import { ElCard, ElForm, ElFormItem, ElSelect, ElOption, ElInput, 
+         ElInputNumber, ElButton, ElRow, ElCol, ElDatePicker, ElMessage, ElMessageBox } from 'element-plus';
 import InvestmentSummary from './InvestmentSummary.vue';
 import InvestmentList from './InvestmentList.vue';
 import InvestmentAdvice from './InvestmentAdvice.vue';
@@ -141,14 +140,14 @@ export default {
     ElCard,
     ElForm,
     ElFormItem,
-    ElRow,
-    ElCol,
     ElSelect,
     ElOption,
     ElInput,
     ElInputNumber,
-    ElDatePicker,
     ElButton,
+    ElRow,
+    ElCol,
+    ElDatePicker,
     InvestmentSummary,
     InvestmentList,
     InvestmentAdvice
@@ -170,128 +169,116 @@ export default {
   emits: ['add-investment', 'update-investment', 'delete-investment', 'edit-investment', 'cancel-edit'],
   data() {
     return {
+      showInvestmentForm: false,
       isEditingInvestment: false,
-      editingInvestmentId: null,
-      showInvestmentForm: false, // 控制是否显示投资表单
-      newInvestment: {
-        type: '股票',
-        name: '',
-        quantity: 0,
-        purchasePrice: 0,
-        currentPrice: 0,
-        purchaseDate: new Date().toISOString().substr(0, 10)
+      newInvestment: this.getEmptyInvestment(),
+      investmentRules: {
+        type: [
+          { required: true, message: '请选择投资类型', trigger: 'change' }
+        ],
+        name: [
+          { required: true, message: '请输入投资名称', trigger: 'blur' },
+          { min: 1, max: 50, message: '投资名称长度在1-50个字符之间', trigger: 'blur' }
+        ],
+        quantity: [
+          { required: true, message: '请输入数量', trigger: 'change' },
+          { type: 'number', min: 0.001, message: '数量必须大于0', trigger: 'change' }
+        ],
+        purchasePrice: [
+          { required: true, message: '请输入买入价', trigger: 'change' },
+          { type: 'number', min: 0.01, message: '买入价必须大于0', trigger: 'change' }
+        ],
+        purchaseDate: [
+          { required: true, message: '请选择买入日期', trigger: 'change' }
+        ]
       }
     };
   },
   computed: {
     totalInvestmentCost() {
-      return this.investments.reduce((sum, investment) => {
-        return sum + (investment.purchasePrice * investment.quantity);
-      }, 0);
+      return this.investments.reduce((sum, investment) => 
+        sum + (investment.quantity * investment.purchasePrice), 0);
     },
     totalInvestmentValue() {
       return this.investments.reduce((sum, investment) => {
-        const price = investment.currentPrice || investment.purchasePrice;
-        return sum + (price * investment.quantity);
+        const currentValue = investment.currentPrice !== null && investment.currentPrice !== undefined ? 
+          investment.currentPrice : investment.purchasePrice;
+        return sum + (investment.quantity * currentValue);
       }, 0);
     },
     totalInvestmentProfit() {
-      return this.investments.reduce((sum, investment) => {
-        const price = investment.currentPrice || investment.purchasePrice;
-        return sum + ((price - investment.purchasePrice) * investment.quantity);
-      }, 0);
-    },
-    availableBalance() {
-      // 可用于投资的资金 = 总余额 - 已投资金额
-      const investedAmount = this.investments.reduce((sum, investment) => {
-        return sum + (investment.purchasePrice * investment.quantity);
-      }, 0);
-      return this.balance - investedAmount;
+      return this.totalInvestmentValue - this.totalInvestmentCost;
     }
   },
   methods: {
-    showAddInvestmentForm() {
-      // 重置表单状态
-      this.isEditingInvestment = false;
-      this.editingInvestmentId = null;
-      this.newInvestment = {
+    getEmptyInvestment() {
+      return {
+        id: Date.now(),
         type: '股票',
         name: '',
         quantity: 0,
         purchasePrice: 0,
-        currentPrice: 0,
+        currentPrice: null,
         purchaseDate: new Date().toISOString().substr(0, 10)
       };
-      this.showInvestmentForm = true;
     },
-    addInvestment() {
-      if (!this.newInvestment.name.trim() || this.newInvestment.quantity <= 0 || this.newInvestment.purchasePrice <= 0) {
-        this.$message({
-          message: '请填写有效的投资信息',
-          type: 'warning'
-        });
-        return;
-      }
-
-      if (this.isEditingInvestment) {
-        // 更新现有投资
-        this.$emit('update-investment', this.editingInvestmentId, this.newInvestment);
-        this.cancelEdit();
-      } else {
-        // 添加新投资
-        this.$emit('add-investment', this.newInvestment);
-        
-        this.$message({
-          message: '投资添加成功',
-          type: 'success'
-        });
-      }
-      
-      // 隐藏表单
-      this.showInvestmentForm = false;
-    },
-    
-    deleteInvestment(id) {
-      this.$emit('delete-investment', id);
-    },
-    
-    editInvestment(investment) {
-      this.isEditingInvestment = true;
-      this.editingInvestmentId = investment.id;
-      this.newInvestment = { ...investment };
-      this.showInvestmentForm = true;
-    },
-    
-    cancelEdit() {
-      this.isEditingInvestment = false;
-      this.editingInvestmentId = null;
-      this.showInvestmentForm = false;
-      this.$emit('cancel-edit');
-    },
-    
-    resetForm() {
-      if (this.isEditingInvestment) {
-        // 如果是编辑状态，重置为原始数据
-        const investment = this.investments.find(i => i.id === this.editingInvestmentId);
-        if (investment) {
-          this.newInvestment = { ...investment };
+    submitInvestment() {
+      this.$refs.investmentForm.validate((valid) => {
+        if (valid) {
+          if (this.isEditingInvestment) {
+            this.$emit('update-investment', this.newInvestment);
+          } else {
+            this.$emit('add-investment', this.newInvestment);
+          }
+          this.resetForm();
+        } else {
+          ElMessage({
+            message: '请填写所有必填字段并确保输入有效',
+            type: 'warning'
+          });
+          return false;
         }
-      } else {
-        // 如果是新增状态，重置为空表单
-        this.newInvestment = {
-          type: '股票',
-          name: '',
-          quantity: 0,
-          purchasePrice: 0,
-          currentPrice: 0,
-          purchaseDate: new Date().toISOString().substr(0, 10)
-        };
+      });
+    },
+    resetForm() {
+      this.showInvestmentForm = false;
+      this.isEditingInvestment = false;
+      this.newInvestment = this.getEmptyInvestment();
+      if (this.$refs.investmentForm) {
+        this.$refs.investmentForm.resetFields();
       }
     },
-    
-    handleAllocationChange(allocation) {
-      // 可以在这里处理投资分配建议的变化
-      console.log('投资分配建议:', allocation);
+    editInvestment(investment) {
+      this.newInvestment = { ...investment };
+      this.isEditingInvestment = true;
+      this.showInvestmentForm = true;
+    },
+    requestDeleteInvestment(id) {
+      ElMessageBox.confirm('此操作将永久删除该投资记录，是否继续？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$emit('delete-investment', id);
+        ElMessage.success('删除成功');
+      }).catch(() => {
+        // 用户取消操作
+        ElMessage.info('已取消删除');
+      });
+    },
+    cancelEdit() {
+      this.resetForm();
+    }
+  },
+  watch: {
+    showInvestmentForm(val) {
+      if (!val) {
+        this.$nextTick(() => {
+          if (this.$refs.investmentForm) {
+            this.$refs.investmentForm.clearValidate();
+          }
+        });
+      }
     }
   }
 };
@@ -299,24 +286,16 @@ export default {
 
 <style scoped>
 .investment-management {
-  margin-bottom: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.investment-management h2 {
-  margin-bottom: 20px;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 10px;
-}
-
-.add-investment,
-.investments,
-.investment-advice-section {
+.add-investment {
   margin-bottom: 30px;
 }
 
 .card-header {
-  font-weight: bold;
-  font-size: 1.1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -325,55 +304,8 @@ export default {
 .form-buttons {
   display: flex;
   gap: 10px;
-  margin-top: 20px;
 }
 
-.profit {
-  font-weight: bold;
-}
-
-.loss {
-  font-weight: bold;
-}
-
-.custom-allocation h3 {
-  margin-top: 30px;
-  margin-bottom: 20px;
-}
-
-.allocation-card {
-  margin-bottom: 20px;
-}
-
-.allocation-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-  font-weight: bold;
-}
-
-.allocation-name {
-  font-size: 1.1rem;
-}
-
-.allocation-control {
-  margin-bottom: 15px;
-}
-
-.allocation-amount {
-  font-weight: bold;
-}
-
-.allocation-summary {
-  margin-top: 30px;
-}
-
-.allocation-summary h3 {
-  margin-top: 0;
-  margin-bottom: 20px;
-}
-
-/* 响应式设计 */
 @media (max-width: 768px) {
   .form-buttons {
     flex-direction: column;
