@@ -95,7 +95,7 @@ export default {
 <style scoped>
 .transactions {
   background: white;
-  padding: 25px;
+  padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 30px;
@@ -201,7 +201,7 @@ export default {
 
 @media (max-width: 768px) {
   .transactions {
-    padding: 15px;
+    padding: 10px;
   }
 }
 </style>
