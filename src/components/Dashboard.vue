@@ -4,7 +4,7 @@
     
     <!-- 财务概览 -->
     <el-row :gutter="10" class="summary-cards">
-      <el-col :span="12" :xs="12">
+      <el-col :span="12" :xs="24">
         <el-card class="card">
           <div class="card-content">
             <h3>总收入</h3>
@@ -12,7 +12,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="12" :xs="12">
+      <el-col :span="12" :xs="24">
         <el-card class="card">
           <div class="card-content">
             <h3>总支出</h3>
@@ -20,7 +20,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="12" :xs="12">
+      <el-col :span="12" :xs="24">
         <el-card class="card">
           <div class="card-content">
             <h3>账户余额</h3>
@@ -30,7 +30,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="12" :xs="12">
+      <el-col :span="12" :xs="24">
         <el-card class="card">
           <div class="card-content">
             <h3>投资总额</h3>
@@ -101,7 +101,7 @@
           <span>数据管理</span>
         </div>
       </template>
-      <div>
+      <div class="button-group">
         <el-button type="success" @click="exportData">导出数据</el-button>
         <el-button type="primary" @click="triggerImport">导入数据</el-button>
         <input ref="fileInput" type="file" @change="importData" accept=".json" style="display: none;">
@@ -113,7 +113,7 @@
 
 <script>
 import { Chart, registerables } from 'chart.js';
-import { ElRow, ElCol, ElCard, ElButton, ElMessage, ElMessageBox } from 'element-plus';
+import { ElRow, ElCol, ElCard, ElButton } from 'element-plus';
 Chart.register(...registerables);
 
 export default {
@@ -517,10 +517,21 @@ export default {
   margin-bottom: 20px;
 }
 
+.button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .dashboard {
     padding: 5px;
+  }
+  
+  .card {
+    height: 80px;
+    margin-bottom: 5px;
   }
   
   .card h3 {
@@ -537,6 +548,10 @@ export default {
   
   .card-header {
     font-size: 0.9rem;
+  }
+  
+  .button-group {
+    flex-direction: column;
   }
 }
 </style>
