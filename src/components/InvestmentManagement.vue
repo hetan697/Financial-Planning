@@ -117,14 +117,14 @@
       @edit-investment="editInvestment"
       @delete-investment="requestDeleteInvestment"
       @add-investment="showAddInvestmentForm"  <!-- 添加事件监听 -->
-    />
+    ></InvestmentList>
     
     <!-- 投资建议 -->
     <InvestmentAdvice 
       :balance="balance"
       :transactions="transactions"
       :investments="investments"
-    />
+    ></InvestmentAdvice>
   </div>
 </template>
 
