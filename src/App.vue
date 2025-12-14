@@ -36,18 +36,34 @@
           :balance="balance"
         />
         
-        <!-- 添加交易 -->
+        <!-- 添加/编辑交易 -->
         <TransactionForm 
           :new-transaction="newTransaction" 
+          :is-editing="isEditing"
           @add-transaction="addTransaction"
           @update-transaction="updateTransaction"
+          @cancel-edit="cancelEdit"
         />
         
         <!-- 交易列表 -->
         <TransactionList 
           :transactions="transactions" 
           @delete-transaction="deleteTransaction"
+          @edit-transaction="editTransaction"
         />
+        
+        <!-- 数据导入导出 -->
+        <div class="data-actions">
+          <h3>数据管理</h3>
+          <div class="button-group">
+            <button @click="exportData" class="export-btn">导出数据</button>
+            <label class="import-label">
+              导入数据
+              <input type="file" @change="importData" accept=".json" class="import-input">
+            </label>
+            <button @click="clearAllData" class="clear-btn">清除所有数据</button>
+          </div>
+        </div>
       </div>
 
       <!-- 投资管理标签页 -->
@@ -59,18 +75,34 @@
           :total-profit="totalInvestmentProfit"
         />
         
-        <!-- 添加投资 -->
+        <!-- 添加/编辑投资 -->
         <InvestmentForm 
           :new-investment="newInvestment" 
+          :is-editing="isEditingInvestment"
           @add-investment="addInvestment"
           @update-investment="updateInvestment"
+          @cancel-edit="cancelInvestmentEdit"
         />
         
         <!-- 投资列表 -->
         <InvestmentList 
           :investments="investments" 
           @delete-investment="deleteInvestment"
+          @edit-investment="editInvestment"
         />
+        
+        <!-- 数据导入导出 -->
+        <div class="data-actions">
+          <h3>数据管理</h3>
+          <div class="button-group">
+            <button @click="exportData" class="export-btn">导出数据</button>
+            <label class="import-label">
+              导入数据
+              <input type="file" @change="importData" accept=".json" class="import-input">
+            </label>
+            <button @click="clearAllData" class="clear-btn">清除所有数据</button>
+          </div>
+        </div>
       </div>
       
       <!-- 投资建议标签页 -->
@@ -85,11 +117,6 @@
         <InvestmentAdvice :balance="balance" />
       </div>
     </main>
-    
-    <!-- 数据管理 -->
-    <footer class="data-management">
-      <button @click="clearAllData" class="clear-btn">清除所有数据</button>
-    </footer>
   </div>
 </template>
 
@@ -117,6 +144,10 @@ export default {
     return {
       appName: '个人财务管理系统',
       activeTab: 'transactions',
+      isEditing: false,
+      editingTransactionId: null,
+      isEditingInvestment: false,
+      editingInvestmentId: null,
       newTransaction: {
         type: 'income',
         description: '',
@@ -186,6 +217,9 @@ export default {
   methods: {
     switchTab(tab) {
       this.activeTab = tab;
+      // 切换标签页时取消编辑状态
+      this.isEditing = false;
+      this.isEditingInvestment = false;
     },
     updateTransaction(field, value) {
       this.newTransaction[field] = value;
@@ -196,24 +230,55 @@ export default {
         return;
       }
 
-      const transaction = {
-        id: Date.now(), // 简单ID生成方式
-        type: this.newTransaction.type,
-        description: this.newTransaction.description,
-        amount: parseFloat(this.newTransaction.amount),
-        date: this.newTransaction.date
-      };
+      if (this.isEditing) {
+        // 更新现有交易
+        const index = this.transactions.findIndex(t => t.id === this.editingTransactionId);
+        if (index !== -1) {
+          this.transactions[index] = {
+            ...this.transactions[index],
+            ...this.newTransaction
+          };
+        }
+        this.cancelEdit();
+      } else {
+        // 添加新交易
+        const transaction = {
+          id: Date.now(), // 简单ID生成方式
+          type: this.newTransaction.type,
+          description: this.newTransaction.description,
+          amount: parseFloat(this.newTransaction.amount),
+          date: this.newTransaction.date
+        };
 
-      this.transactions.push(transaction);
-      
-      // 重置表单
-      this.newTransaction.description = '';
-      this.newTransaction.amount = 0;
-      this.newTransaction.date = new Date().toISOString().substr(0, 10);
+        this.transactions.push(transaction);
+        
+        // 重置表单
+        this.newTransaction.description = '';
+        this.newTransaction.amount = 0;
+        this.newTransaction.date = new Date().toISOString().substr(0, 10);
+      }
     },
     
     deleteTransaction(id) {
       this.transactions = this.transactions.filter(transaction => transaction.id !== id);
+    },
+    
+    editTransaction(transaction) {
+      this.isEditing = true;
+      this.editingTransactionId = transaction.id;
+      this.newTransaction = { ...transaction };
+    },
+    
+    cancelEdit() {
+      this.isEditing = false;
+      this.editingTransactionId = null;
+      // 重置表单
+      this.newTransaction = {
+        type: 'income',
+        description: '',
+        amount: 0,
+        date: new Date().toISOString().substr(0, 10)
+      };
     },
     
     updateInvestment(field, value) {
@@ -225,28 +290,61 @@ export default {
         return;
       }
 
-      const investment = {
-        id: Date.now(),
-        type: this.newInvestment.type,
-        name: this.newInvestment.name,
-        quantity: parseFloat(this.newInvestment.quantity),
-        purchasePrice: parseFloat(this.newInvestment.purchasePrice),
-        currentPrice: this.newInvestment.currentPrice ? parseFloat(this.newInvestment.currentPrice) : null,
-        purchaseDate: this.newInvestment.purchaseDate
-      };
+      if (this.isEditingInvestment) {
+        // 更新现有投资
+        const index = this.investments.findIndex(i => i.id === this.editingInvestmentId);
+        if (index !== -1) {
+          this.investments[index] = {
+            ...this.investments[index],
+            ...this.newInvestment
+          };
+        }
+        this.cancelInvestmentEdit();
+      } else {
+        // 添加新投资
+        const investment = {
+          id: Date.now(),
+          type: this.newInvestment.type,
+          name: this.newInvestment.name,
+          quantity: parseFloat(this.newInvestment.quantity),
+          purchasePrice: parseFloat(this.newInvestment.purchasePrice),
+          currentPrice: this.newInvestment.currentPrice ? parseFloat(this.newInvestment.currentPrice) : null,
+          purchaseDate: this.newInvestment.purchaseDate
+        };
 
-      this.investments.push(investment);
-      
-      // 重置表单
-      this.newInvestment.name = '';
-      this.newInvestment.quantity = 0;
-      this.newInvestment.purchasePrice = 0;
-      this.newInvestment.currentPrice = 0;
-      this.newInvestment.purchaseDate = new Date().toISOString().substr(0, 10);
+        this.investments.push(investment);
+        
+        // 重置表单
+        this.newInvestment.name = '';
+        this.newInvestment.quantity = 0;
+        this.newInvestment.purchasePrice = 0;
+        this.newInvestment.currentPrice = 0;
+        this.newInvestment.purchaseDate = new Date().toISOString().substr(0, 10);
+      }
     },
     
     deleteInvestment(id) {
       this.investments = this.investments.filter(investment => investment.id !== id);
+    },
+    
+    editInvestment(investment) {
+      this.isEditingInvestment = true;
+      this.editingInvestmentId = investment.id;
+      this.newInvestment = { ...investment };
+    },
+    
+    cancelInvestmentEdit() {
+      this.isEditingInvestment = false;
+      this.editingInvestmentId = null;
+      // 重置表单
+      this.newInvestment = {
+        type: '股票',
+        name: '',
+        quantity: 0,
+        purchasePrice: 0,
+        currentPrice: 0,
+        purchaseDate: new Date().toISOString().substr(0, 10)
+      };
     },
     
     saveToLocalStorage() {
@@ -265,6 +363,67 @@ export default {
       if (savedInvestments) {
         this.investments = JSON.parse(savedInvestments);
       }
+    },
+    
+    saveToLocalStorage() {
+      localStorage.setItem('financeTransactions', JSON.stringify(this.transactions));
+      localStorage.setItem('financeInvestments', JSON.stringify(this.investments));
+    },
+    
+    loadFromLocalStorage() {
+      const savedTransactions = localStorage.getItem('financeTransactions');
+      const savedInvestments = localStorage.getItem('financeInvestments');
+      
+      if (savedTransactions) {
+        this.transactions = JSON.parse(savedTransactions);
+      }
+      
+      if (savedInvestments) {
+        this.investments = JSON.parse(savedInvestments);
+      }
+    },
+    
+    exportData() {
+      const data = {
+        transactions: this.transactions,
+        investments: this.investments
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `financial-data-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    },
+    
+    importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          
+          if (data.transactions && data.investments) {
+            this.transactions = data.transactions;
+            this.investments = data.investments;
+            alert('数据导入成功！');
+          } else {
+            alert('数据格式不正确！');
+          }
+        } catch (error) {
+          alert('导入失败：' + error.message);
+        }
+      };
+      reader.readAsText(file);
+      
+      // 重置文件输入框
+      event.target.value = '';
     },
     
     clearAllData() {
@@ -330,21 +489,75 @@ header h1 {
 }
 
 /* 数据管理 */
-.data-management {
-  text-align: center;
+.data-actions {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
+}
+
+.data-actions h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.export-btn,
+.import-label,
+.clear-btn {
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.export-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+}
+
+.export-btn:hover {
+  background-color: #218838;
+}
+
+.import-label {
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.import-label:hover {
+  background-color: #138496;
+}
+
+.import-input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .clear-btn {
   background-color: #f44336;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
 }
 
 .clear-btn:hover {

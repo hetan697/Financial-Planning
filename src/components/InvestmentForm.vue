@@ -1,6 +1,6 @@
 <template>
   <section class="add-investment">
-    <h2>添加投资项目</h2>
+    <h2>{{ isEditing ? '编辑投资' : '添加投资项目' }}</h2>
     <form @submit.prevent="addInvestment">
       <div class="form-row">
         <div class="form-group">
@@ -78,7 +78,17 @@
         >
       </div>
       
-      <button type="submit" class="add-btn">添加投资</button>
+      <div class="form-buttons">
+        <button type="submit" class="add-btn">{{ isEditing ? '更新' : '添加投资' }}</button>
+        <button 
+          v-if="isEditing" 
+          type="button" 
+          class="cancel-btn"
+          @click="cancelEdit"
+        >
+          取消
+        </button>
+      </div>
     </form>
   </section>
 </template>
@@ -90,15 +100,22 @@ export default {
     newInvestment: {
       type: Object,
       required: true
+    },
+    isEditing: {
+      type: Boolean,
+      default: false
     }
   },
-  emits: ['add-investment', 'update-investment'],
+  emits: ['add-investment', 'update-investment', 'cancel-edit'],
   methods: {
     addInvestment() {
       this.$emit('add-investment');
     },
     updateInvestment(field, value) {
       this.$emit('update-investment', field, value);
+    },
+    cancelEdit() {
+      this.$emit('cancel-edit');
     }
   }
 };
@@ -154,6 +171,12 @@ export default {
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
 }
 
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
 .add-btn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -163,10 +186,27 @@ export default {
   font-size: 1rem;
   cursor: pointer;
   transition: transform 0.2s;
+  flex: 1;
 }
 
 .add-btn:hover {
   transform: translateY(-2px);
+}
+
+.cancel-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+  flex: 1;
+}
+
+.cancel-btn:hover {
+  background-color: #5a6268;
 }
 
 /* 响应式设计 */

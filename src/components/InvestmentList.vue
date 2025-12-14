@@ -23,7 +23,10 @@
           <div>总价值: ¥{{ currentValue(investment).toFixed(2) }}</div>
           <div :class="profitClass(investment)">盈亏: ¥{{ profit(investment).toFixed(2) }} ({{ profitPercent(investment).toFixed(2) }}%)</div>
         </div>
-        <button @click="deleteInvestment(investment.id)" class="delete-btn">删除</button>
+        <div class="investment-actions">
+          <button @click="editInvestment(investment)" class="edit-btn">编辑</button>
+          <button @click="deleteInvestment(investment.id)" class="delete-btn">删除</button>
+        </div>
       </div>
     </div>
   </section>
@@ -38,7 +41,7 @@ export default {
       default: () => []
     }
   },
-  emits: ['delete-investment'],
+  emits: ['delete-investment', 'edit-investment'],
   methods: {
     formatDate(dateString) {
       const date = new Date(dateString);
@@ -63,6 +66,9 @@ export default {
     },
     deleteInvestment(id) {
       this.$emit('delete-investment', id);
+    },
+    editInvestment(investment) {
+      this.$emit('edit-investment', investment);
     }
   }
 };
@@ -147,6 +153,25 @@ export default {
   color: #f44336;
 }
 
+.investment-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-btn {
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.edit-btn:hover {
+  background-color: #138496;
+}
+
 .delete-btn {
   background-color: #f44336;
   color: white;
@@ -178,6 +203,10 @@ export default {
   
   .investment-value {
     margin: 10px 0;
+  }
+  
+  .investment-actions {
+    align-self: flex-end;
   }
 }
 </style>

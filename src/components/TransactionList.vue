@@ -18,7 +18,10 @@
         <div class="transaction-amount">
           ¥{{ transaction.amount.toFixed(2) }}
         </div>
-        <button @click="deleteTransaction(transaction.id)" class="delete-btn">删除</button>
+        <div class="transaction-actions">
+          <button @click="editTransaction(transaction)" class="edit-btn">编辑</button>
+          <button @click="deleteTransaction(transaction.id)" class="delete-btn">删除</button>
+        </div>
       </div>
     </div>
   </section>
@@ -33,7 +36,7 @@ export default {
       default: () => []
     }
   },
-  emits: ['delete-transaction'],
+  emits: ['delete-transaction', 'edit-transaction'],
   methods: {
     formatDate(dateString) {
       const date = new Date(dateString);
@@ -41,6 +44,9 @@ export default {
     },
     deleteTransaction(id) {
       this.$emit('delete-transaction', id);
+    },
+    editTransaction(transaction) {
+      this.$emit('edit-transaction', transaction);
     }
   }
 };
@@ -124,6 +130,25 @@ export default {
   color: #f44336;
 }
 
+.transaction-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-btn {
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.edit-btn:hover {
+  background-color: #138496;
+}
+
 .delete-btn {
   background-color: #f44336;
   color: white;
@@ -147,6 +172,10 @@ export default {
   
   .transaction-amount {
     margin: 10px 0;
+  }
+  
+  .transaction-actions {
+    align-self: flex-end;
   }
 }
 </style>
