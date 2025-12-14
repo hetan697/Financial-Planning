@@ -41,29 +41,28 @@
           tag="div"
           class="type-list"
           handle=".drag-handle"
+          item-key="index"
         >
-          <div 
-            v-for="(type, index) in localInvestmentTypes" 
-            :key="index"
-            class="type-item"
-          >
-            <div class="drag-handle">
-              <el-icon><Rank /></el-icon>
+          <template #item="{ element, index }">
+            <div class="type-item">
+              <div class="drag-handle">
+                <el-icon><Rank /></el-icon>
+              </div>
+              <el-input 
+                v-model="localInvestmentTypes[index]" 
+                size="small"
+                @blur="validateInvestmentType(index)"
+              />
+              <el-button 
+                @click="removeInvestmentType(index)" 
+                size="small" 
+                type="danger"
+                circle
+              >
+                ×
+              </el-button>
             </div>
-            <el-input 
-              v-model="localInvestmentTypes[index]" 
-              size="small"
-              @blur="validateInvestmentType(index)"
-            />
-            <el-button 
-              @click="removeInvestmentType(index)" 
-              size="small" 
-              type="danger"
-              circle
-            >
-              ×
-            </el-button>
-          </div>
+          </template>
         </draggable>
         <el-button @click="addInvestmentType" size="small" type="primary">
           添加投资类型
@@ -82,29 +81,28 @@
               tag="div"
               class="type-list"
               handle=".drag-handle"
+              item-key="index"
             >
-              <div 
-                v-for="(type, index) in localTransactionTypes.income" 
-                :key="index"
-                class="type-item"
-              >
-                <div class="drag-handle">
-                  <el-icon><Rank /></el-icon>
+              <template #item="{ element, index }">
+                <div class="type-item">
+                  <div class="drag-handle">
+                    <el-icon><Rank /></el-icon>
+                  </div>
+                  <el-input 
+                    v-model="localTransactionTypes.income[index]" 
+                    size="small"
+                    @blur="validateTransactionType('income', index)"
+                  />
+                  <el-button 
+                    @click="removeTransactionType('income', index)" 
+                    size="small" 
+                    type="danger"
+                    circle
+                  >
+                    ×
+                  </el-button>
                 </div>
-                <el-input 
-                  v-model="localTransactionTypes.income[index]" 
-                  size="small"
-                  @blur="validateTransactionType('income', index)"
-                />
-                <el-button 
-                  @click="removeTransactionType('income', index)" 
-                  size="small" 
-                  type="danger"
-                  circle
-                >
-                  ×
-                </el-button>
-              </div>
+              </template>
             </draggable>
             <el-button @click="addTransactionType('income')" size="small" type="primary">
               添加收入类型
@@ -118,29 +116,28 @@
               tag="div"
               class="type-list"
               handle=".drag-handle"
+              item-key="index"
             >
-              <div 
-                v-for="(type, index) in localTransactionTypes.expense" 
-                :key="index"
-                class="type-item"
-              >
-                <div class="drag-handle">
-                  <el-icon><Rank /></el-icon>
+              <template #item="{ element, index }">
+                <div class="type-item">
+                  <div class="drag-handle">
+                    <el-icon><Rank /></el-icon>
+                  </div>
+                  <el-input 
+                    v-model="localTransactionTypes.expense[index]" 
+                    size="small"
+                    @blur="validateTransactionType('expense', index)"
+                  />
+                  <el-button 
+                    @click="removeTransactionType('expense', index)" 
+                    size="small" 
+                    type="danger"
+                    circle
+                  >
+                    ×
+                  </el-button>
                 </div>
-                <el-input 
-                  v-model="localTransactionTypes.expense[index]" 
-                  size="small"
-                  @blur="validateTransactionType('expense', index)"
-                />
-                <el-button 
-                  @click="removeTransactionType('expense', index)" 
-                  size="small" 
-                  type="danger"
-                  circle
-                >
-                  ×
-                </el-button>
-              </div>
+              </template>
             </draggable>
             <el-button @click="addTransactionType('expense')" size="small" type="primary">
               添加支出类型
