@@ -455,19 +455,10 @@ export default {
   padding: 0;
 }
 
-.main-navigation {
-  margin-bottom: 20px;
-}
-
 .app-title {
-  font-size: 1.5rem;
   font-weight: bold;
   cursor: default;
+  opacity: 1.0;
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 </style>

@@ -520,7 +520,7 @@ export default {
   margin-bottom: 30px;
 }
 
-.data-buttons {
+.button-group {
   display: flex;
   gap: 15px;
   flex-wrap: wrap;
@@ -531,7 +531,7 @@ export default {
     padding: 10px;
   }
   
-  .data-buttons {
+  .button-group {
     flex-direction: column;
   }
   
