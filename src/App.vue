@@ -56,16 +56,26 @@
         </div>
 
         <!-- 投资管理视图 -->
-        <div v-show="activeTab === 'investments'">
+        <div v-show="activeTab === 'investments' && !showInvestmentPage">
           <InvestmentManagement
             :investments="investments"
             :balance="balance"
             :transactions="transactions"
-            @add-investment="addInvestment"
+            @add-investment="showAddInvestmentPage"
             @update-investment="updateInvestment"
             @delete-investment="deleteInvestment"
             @edit-investment="editInvestment"
             @cancel-edit="cancelInvestmentEdit"
+          />
+        </div>
+        
+        <!-- 添加/编辑投资页面 -->
+        <div v-show="activeTab === 'investments' && showInvestmentPage">
+          <InvestmentPage
+            :investment="currentInvestment"
+            :is-editing="isEditingInvestment"
+            @save="saveInvestment"
+            @cancel="cancelInvestment"
           />
         </div>
       </el-main>
@@ -88,6 +98,7 @@ import TransactionList from './components/TransactionList.vue';
 import TransactionPage from './components/TransactionPage.vue';
 import InvestmentManagement from './components/InvestmentManagement.vue';
 import Dashboard from './components/Dashboard.vue';
+import InvestmentPage from './components/InvestmentPage.vue';
 
 export default {
   name: 'FinanceApp',
@@ -103,7 +114,8 @@ export default {
     TransactionList,
     TransactionPage,
     InvestmentManagement,
-    Dashboard
+    Dashboard,
+    InvestmentPage
   },
   data() {
     return {
@@ -112,8 +124,11 @@ export default {
       transactions: [],
       investments: [],
       showTransactionPage: false,
+      showInvestmentPage: false,
       currentTransaction: null,
+      currentInvestment: null,
       isEditing: false,
+      isEditingInvestment: false,
       errorDialogVisible: false,
       errorMessage: ''
     };
@@ -335,6 +350,51 @@ export default {
       });
     },
     // 投资相关方法
+    showAddInvestmentPage() {
+      this.currentInvestment = {
+        id: Date.now(),
+        type: '股票',
+        name: '',
+        quantity: 0,
+        purchasePrice: 0,
+        currentPrice: null,
+        purchaseDate: new Date().toISOString().substr(0, 10)
+      };
+      this.isEditingInvestment = false;
+      this.showInvestmentPage = true;
+    },
+    editInvestment(investment) {
+      this.currentInvestment = { ...investment };
+      this.isEditingInvestment = true;
+      this.showInvestmentPage = true;
+    },
+    saveInvestment(investment) {
+      if (!investment.name || investment.quantity <= 0 || investment.purchasePrice <= 0) {
+        this.showError('请输入有效的投资名称、数量和买入价');
+        return;
+      }
+
+      if (this.isEditingInvestment) {
+        const index = this.investments.findIndex(i => i.id === investment.id);
+        if (index !== -1) {
+          this.investments.splice(index, 1, investment);
+        }
+      } else {
+        this.investments.push({
+          ...investment,
+          id: Date.now()
+        });
+      }
+      
+      this.saveToLocalStorage();
+      this.cancelInvestment();
+      this.$message.success(this.isEditingInvestment ? '投资更新成功' : '投资添加成功');
+    },
+    cancelInvestment() {
+      this.showInvestmentPage = false;
+      this.currentInvestment = null;
+      this.isEditingInvestment = false;
+    },
     addInvestment(investment) {
       if (!investment.name || investment.quantity <= 0 || investment.purchasePrice <= 0) {
         this.showError('请输入有效的投资名称、数量和买入价');
