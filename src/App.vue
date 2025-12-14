@@ -10,6 +10,7 @@
         @select="handleMenuSelect"
         class="sidebar-menu"
         :collapse="false"
+        mode="vertical"
       >
         <el-menu-item index="dashboard" class="nav-item">
           <el-icon><DataAnalysis /></el-icon>
@@ -486,6 +487,7 @@ export default {
   display: flex;
   height: 100vh;
   background-color: #f5f6f7;
+  position: relative;
 }
 
 .desktop-sidebar {
@@ -572,10 +574,12 @@ export default {
   background: white;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   z-index: 100;
+  height: 60px;
 }
 
 .mobile-menu {
   border: none !important;
+  height: 100%;
 }
 
 .mobile-menu :deep(.el-menu-item) {
