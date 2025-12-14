@@ -168,7 +168,7 @@ export default {
     },
     addTransaction() {
       if (!this.newTransaction.description || this.newTransaction.amount <= 0) {
-        ElMessage({
+        this.$message({
           message: '请选择有效的明细和金额',
           type: 'warning'
         });
@@ -204,7 +204,7 @@ export default {
         this.newTransaction.amount = 0;
         this.newTransaction.date = new Date().toISOString().substr(0, 10);
         
-        ElMessage({
+        this.$message({
           message: '交易添加成功',
           type: 'success'
         });
@@ -212,13 +212,13 @@ export default {
     },
     
     deleteTransaction(id) {
-      ElMessageBox.confirm('确定要删除这条交易记录吗？', '确认删除', {
+      this.$confirm('确定要删除这条交易记录吗？', '确认删除', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         this.transactions = this.transactions.filter(transaction => transaction.id !== id);
-        ElMessage({
+        this.$message({
           type: 'success',
           message: '删除成功'
         });
@@ -253,7 +253,7 @@ export default {
     },
     addInvestment() {
       if (!this.newInvestment.name.trim() || this.newInvestment.quantity <= 0 || this.newInvestment.purchasePrice <= 0) {
-        ElMessage({
+        this.$message({
           message: '请填写有效的投资信息',
           type: 'warning'
         });
@@ -291,7 +291,7 @@ export default {
         this.newInvestment.currentPrice = 0;
         this.newInvestment.purchaseDate = new Date().toISOString().substr(0, 10);
         
-        ElMessage({
+        this.$message({
           message: '投资添加成功',
           type: 'success'
         });
@@ -299,13 +299,13 @@ export default {
     },
     
     deleteInvestment(id) {
-      ElMessageBox.confirm('确定要删除这项投资记录吗？', '确认删除', {
+      this.$confirm('确定要删除这项投资记录吗？', '确认删除', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         this.investments = this.investments.filter(investment => investment.id !== id);
-        ElMessage({
+        this.$message({
           type: 'success',
           message: '删除成功'
         });
@@ -368,7 +368,7 @@ export default {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       
-      ElMessage({
+      this.$message({
         message: '数据导出成功',
         type: 'success'
       });
@@ -410,7 +410,7 @@ export default {
     },
     
     clearAllData() {
-      ElMessageBox.confirm(
+      this.$confirm(
         '确定要清除所有数据吗？此操作不可撤销！', 
         '确认清除', 
         {
@@ -438,27 +438,19 @@ export default {
 
 <style scoped>
 .finance-app {
-  max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 10px;
 }
 
 .el-header {
   text-align: center;
-  margin-bottom: 30px;
-  padding: 20px 0 !important;
+  margin-bottom: 20px;
+  padding: 15px 0 !important;
 }
 
 .el-header h1 {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: bold;
   margin: 0;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .finance-app {
-    padding: 10px;
-  }
 }
 </style>

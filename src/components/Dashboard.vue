@@ -3,8 +3,8 @@
     <h2>数据看板</h2>
     
     <!-- 财务概览 -->
-    <el-row :gutter="20" class="summary-cards">
-      <el-col :span="6" :xs="12">
+    <el-row :gutter="10" class="summary-cards">
+      <el-col :span="12" :xs="12">
         <el-card class="card">
           <div class="card-content">
             <h3>总收入</h3>
@@ -12,7 +12,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6" :xs="12">
+      <el-col :span="12" :xs="12">
         <el-card class="card">
           <div class="card-content">
             <h3>总支出</h3>
@@ -20,7 +20,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6" :xs="12">
+      <el-col :span="12" :xs="12">
         <el-card class="card">
           <div class="card-content">
             <h3>账户余额</h3>
@@ -30,7 +30,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6" :xs="12">
+      <el-col :span="12" :xs="12">
         <el-card class="card">
           <div class="card-content">
             <h3>投资总额</h3>
@@ -41,9 +41,9 @@
     </el-row>
     
     <!-- 图表区域 -->
-    <el-row :gutter="20" class="charts">
+    <el-row :gutter="10" class="charts">
       <!-- 收支趋势图 -->
-      <el-col :span="8" :xs="24">
+      <el-col :span="24" :xs="24">
         <el-card class="chart-container">
           <template #header>
             <div class="card-header">
@@ -60,7 +60,7 @@
       </el-col>
       
       <!-- 支出分类饼图 -->
-      <el-col :span="8" :xs="24">
+      <el-col :span="24" :xs="24">
         <el-card class="chart-container">
           <template #header>
             <div class="card-header">
@@ -77,7 +77,7 @@
       </el-col>
       
       <!-- 投资收益趋势图 -->
-      <el-col :span="8" :xs="24">
+      <el-col :span="24" :xs="24">
         <el-card class="chart-container">
           <template #header>
             <div class="card-header">
@@ -101,7 +101,7 @@
           <span>数据管理</span>
         </div>
       </template>
-      <div class="button-group">
+      <div>
         <el-button type="success" @click="exportData">导出数据</el-button>
         <el-button type="primary" @click="triggerImport">导入数据</el-button>
         <input ref="fileInput" type="file" @change="importData" accept=".json" style="display: none;">
@@ -314,7 +314,7 @@ export default {
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              position: 'right',
+              position: 'bottom',
             },
             tooltip: {
               callbacks: {
@@ -453,15 +453,15 @@ export default {
 
 <style scoped>
 .dashboard {
-  padding: 20px;
+  padding: 10px;
 }
 
 .summary-cards {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .card {
-  height: 120px;
+  height: 100px;
 }
 
 .card-content {
@@ -473,33 +473,31 @@ export default {
 }
 
 .card h3 {
-  margin: 0 0 10px 0;
-  color: #666;
-  font-size: 1rem;
+  margin: 0 0 5px 0;
+  font-size: 0.9rem;
 }
 
 .amount {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: bold;
   margin: 0;
 }
 
-
 .charts {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .chart-container {
-  height: 400px;
+  margin-bottom: 20px;
 }
 
 .card-header {
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .chart-wrapper {
-  height: 300px;
+  height: 250px;
   position: relative;
 }
 
@@ -508,33 +506,37 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
   border-radius: 4px;
 }
 
 .chart-placeholder p {
-  color: #999;
   font-style: italic;
 }
 
 .data-management {
-  margin-bottom: 30px;
-}
-
-.button-group {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .chart-container {
-    margin-bottom: 20px;
+  .dashboard {
+    padding: 5px;
   }
   
-  .button-group {
-    flex-direction: column;
+  .card h3 {
+    font-size: 0.8rem;
+  }
+  
+  .amount {
+    font-size: 1rem;
+  }
+  
+  .chart-wrapper {
+    height: 200px;
+  }
+  
+  .card-header {
+    font-size: 0.9rem;
   }
 }
 </style>
