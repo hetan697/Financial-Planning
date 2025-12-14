@@ -461,8 +461,19 @@ export default {
       });
     },
     cancelInvestmentEdit() {
-      this.$emit('cancel-edit');
+      this.isEditingInvestment = false;
+      this.currentInvestment = null;
     },
+    
+    // 更新投资（用于实时价格更新）
+    updateInvestment(investment) {
+      const index = this.investments.findIndex(i => i.id === investment.id);
+      if (index !== -1) {
+        this.investments.splice(index, 1, investment);
+        this.saveToLocalStorage();
+      }
+    },
+    
     checkIsMobile() {
       this.isMobile = window.innerWidth <= 768;
     }
