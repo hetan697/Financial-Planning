@@ -4,7 +4,6 @@
 
 1. **核心技术要求：**
    - 使用Vue 3 (Composition API)
-   - HTML5, CSS3 (含Flexbox和Grid布局)
    - localStorage API实现数据持久化
    - Chart.js 实现数据可视化
    - Element Plus UI组件库提升用户体验
