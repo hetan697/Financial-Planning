@@ -6,14 +6,19 @@
       </el-header>
       
       <el-main>
-        <!-- 导航标签 -->
-        <el-tabs v-model="activeTab" type="border-card" @tab-change="onTabChange">
-          <el-tab-pane name="dashboard" label="数据看板"></el-tab-pane>
-          <el-tab-pane name="transactions" label="财务记录"></el-tab-pane>
-          <el-tab-pane name="investments" label="投资管理"></el-tab-pane>
-        </el-tabs>
+        <!-- 导航菜单 -->
+        <el-menu 
+          :default-active="activeTab" 
+          mode="horizontal" 
+          @select="handleMenuSelect"
+          class="main-navigation"
+        >
+          <el-menu-item index="dashboard">数据看板</el-menu-item>
+          <el-menu-item index="transactions">财务记录</el-menu-item>
+          <el-menu-item index="investments">投资管理</el-menu-item>
+        </el-menu>
 
-        <!-- 数据看板标签页 -->
+        <!-- 数据看板视图 -->
         <div v-show="activeTab === 'dashboard'">
           <Dashboard 
             :transactions="transactions"
@@ -24,7 +29,7 @@
           />
         </div>
 
-        <!-- 财务记录标签页 -->
+        <!-- 财务记录视图 -->
         <div v-show="activeTab === 'transactions'">
           <!-- 财务概览 -->
           <SummarySection 
@@ -50,7 +55,7 @@
           />
         </div>
 
-        <!-- 投资管理标签页 -->
+        <!-- 投资管理视图 -->
         <div v-show="activeTab === 'investments'">
           <InvestmentManagement
             :investments="investments"
@@ -69,7 +74,7 @@
 </template>
 
 <script>
-import { ElContainer, ElHeader, ElMain, ElTabs, ElTabPane } from 'element-plus';
+import { ElContainer, ElHeader, ElMain, ElMenu, ElMenuItem } from 'element-plus';
 import SummarySection from './components/SummarySection.vue';
 import TransactionForm from './components/TransactionForm.vue';
 import TransactionList from './components/TransactionList.vue';
@@ -82,8 +87,8 @@ export default {
     ElContainer,
     ElHeader,
     ElMain,
-    ElTabs,
-    ElTabPane,
+    ElMenu,
+    ElMenuItem,
     SummarySection,
     TransactionForm,
     TransactionList,
@@ -158,7 +163,8 @@ export default {
     }
   },
   methods: {
-    onTabChange(tab) {
+    handleMenuSelect(index) {
+      this.activeTab = index;
       // 切换标签页时取消编辑状态
       this.isEditing = false;
       this.isEditingInvestment = false;
@@ -231,7 +237,7 @@ export default {
       this.isEditing = true;
       this.editingTransactionId = transaction.id;
       this.newTransaction = { ...transaction };
-      // 切换到财务记录标签页以显示编辑表单
+      // 切换到财务记录视图以显示编辑表单
       this.activeTab = 'transactions';
     },
     
@@ -318,6 +324,8 @@ export default {
       this.isEditingInvestment = true;
       this.editingInvestmentId = investment.id;
       this.newInvestment = { ...investment };
+      // 切换到投资管理视图以显示编辑表单
+      this.activeTab = 'investments';
     },
     
     cancelInvestmentEdit() {
@@ -386,18 +394,18 @@ export default {
           if (data.transactions && data.investments) {
             this.transactions = data.transactions;
             this.investments = data.investments;
-            ElMessage({
+            this.$message({
               message: '数据导入成功！',
               type: 'success'
             });
           } else {
-            ElMessage({
+            this.$message({
               message: '数据格式不正确！',
               type: 'error'
             });
           }
         } catch (error) {
-          ElMessage({
+          this.$message({
             message: '导入失败：' + error.message,
             type: 'error'
           });
@@ -424,7 +432,7 @@ export default {
         localStorage.removeItem('financeTransactions');
         localStorage.removeItem('financeInvestments');
         
-        ElMessage({
+        this.$message({
           type: 'success',
           message: '数据已清除'
         });
@@ -453,6 +461,10 @@ export default {
   margin: 0;
 }
 
+.main-navigation {
+  margin-bottom: 20px;
+}
+
 :deep(.el-main) {
   padding: 0 !important;
 }
@@ -469,6 +481,10 @@ export default {
   
   .el-header h1 {
     font-size: 1.3rem;
+  }
+  
+  .main-navigation {
+    margin-bottom: 10px;
   }
 }
 </style>
