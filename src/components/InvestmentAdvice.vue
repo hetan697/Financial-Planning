@@ -58,6 +58,7 @@
       <div v-if="balance > 0 && emergencyFundAdvice.amount >= 0 && balance > emergencyFundAdvice.amount">
         <InvestmentCalculator 
           :investable-fund="investableFund"
+          :total-assets="balance"
           @update:investment-options="handleInvestmentOptionsUpdate"
         />
       </div>

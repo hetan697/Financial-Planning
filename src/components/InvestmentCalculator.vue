@@ -96,6 +96,10 @@
           <span>整体年化收益率:</span>
           <span :class="{ 'positive': overallReturnRate > 0 }">{{ overallReturnRate.toFixed(2) }}%</span>
         </div>
+        <div class="summary-row">
+          <span>整体资产收益率 (相对于总资产):</span>
+          <span :class="{ 'positive': assetReturnRate > 0 }">{{ assetReturnRate.toFixed(2) }}%</span>
+        </div>
       </div>
     </div>
     
@@ -118,6 +122,10 @@ export default {
   },
   props: {
     investableFund: {
+      type: Number,
+      default: 0
+    },
+    totalAssets: {
       type: Number,
       default: 0
     }
@@ -184,6 +192,12 @@ export default {
     overallReturnRate() {
       if (this.overallInvestmentAmount === 0) return 0;
       return (this.overallExpectedReturn / this.overallInvestmentAmount) * 100;
+    },
+    
+    // 整体资产收益率 (相对于总资产)
+    assetReturnRate() {
+      if (this.totalAssets === 0) return 0;
+      return (this.overallExpectedReturn / this.totalAssets) * 100;
     }
   },
   methods: {
