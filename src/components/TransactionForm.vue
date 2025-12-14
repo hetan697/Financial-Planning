@@ -10,15 +10,48 @@
         </select>
       </div>
       
-      <div class="form-group">
-        <label>描述:</label>
-        <input 
-          type="text" 
-          :value="newTransaction.description" 
-          @input="updateTransaction('description', $event.target.value)"
-          placeholder="例如：工资、房租、餐饮等" 
-          required
-        >
+      <div class="form-row">
+        <div class="form-group">
+          <label>明细:</label>
+          <select 
+            :value="newTransaction.description" 
+            @change="updateTransaction('description', $event.target.value)"
+            required
+          >
+            <option value="" disabled selected>请选择明细</option>
+            <optgroup label="收入">
+              <option value="工资">工资</option>
+              <option value="奖金">奖金</option>
+              <option value="投资收益">投资收益</option>
+              <option value="兼职收入">兼职收入</option>
+              <option value="礼金">礼金</option>
+              <option value="其他收入">其他收入</option>
+            </optgroup>
+            <optgroup label="支出">
+              <option value="房租">房租</option>
+              <option value="水电费">水电费</option>
+              <option value="餐饮">餐饮</option>
+              <option value="交通">交通</option>
+              <option value="购物">购物</option>
+              <option value="娱乐">娱乐</option>
+              <option value="医疗">医疗</option>
+              <option value="教育">教育</option>
+              <option value="保险">保险</option>
+              <option value="投资支出">投资支出</option>
+              <option value="其他支出">其他支出</option>
+            </optgroup>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>备注 (可选):</label>
+          <input 
+            type="text" 
+            :value="newTransaction.notes || ''" 
+            @input="updateTransaction('notes', $event.target.value)"
+            placeholder="请输入备注信息" 
+          >
+        </div>
       </div>
       
       <div class="form-group">
@@ -104,6 +137,12 @@ export default {
   padding-bottom: 10px;
 }
 
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
 .form-group {
   margin-bottom: 20px;
   display: flex;
@@ -167,5 +206,12 @@ export default {
 
 .cancel-btn:hover {
   background-color: #5a6268;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

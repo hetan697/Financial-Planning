@@ -19,6 +19,7 @@
         <div class="transaction-info">
           <h4>{{ transaction.description }}</h4>
           <p>{{ formatDate(transaction.date) }}</p>
+          <p v-if="transaction.notes" class="notes">{{ transaction.notes }}</p>
         </div>
         <div class="transaction-amount">
           ¥{{ transaction.amount.toFixed(2) }}
@@ -143,6 +144,12 @@ export default {
 .transaction-info p {
   color: #777;
   font-size: 0.9rem;
+}
+
+.transaction-info .notes {
+  color: #555;
+  font-style: italic;
+  margin-top: 3px;
 }
 
 .transaction-amount {

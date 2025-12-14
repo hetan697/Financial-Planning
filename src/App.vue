@@ -151,6 +151,7 @@ export default {
       newTransaction: {
         type: 'income',
         description: '',
+        notes: '',
         amount: 0,
         date: new Date().toISOString().substr(0, 10)
       },
@@ -225,8 +226,8 @@ export default {
       this.newTransaction[field] = value;
     },
     addTransaction() {
-      if (!this.newTransaction.description.trim() || this.newTransaction.amount <= 0) {
-        alert('请填写有效的描述和金额');
+      if (!this.newTransaction.description || this.newTransaction.amount <= 0) {
+        alert('请选择有效的明细和金额');
         return;
       }
 
@@ -246,6 +247,7 @@ export default {
           id: Date.now(), // 简单ID生成方式
           type: this.newTransaction.type,
           description: this.newTransaction.description,
+          notes: this.newTransaction.notes,
           amount: parseFloat(this.newTransaction.amount),
           date: this.newTransaction.date
         };
@@ -254,6 +256,7 @@ export default {
         
         // 重置表单
         this.newTransaction.description = '';
+        this.newTransaction.notes = '';
         this.newTransaction.amount = 0;
         this.newTransaction.date = new Date().toISOString().substr(0, 10);
       }
@@ -276,6 +279,7 @@ export default {
       this.newTransaction = {
         type: 'income',
         description: '',
+        notes: '',
         amount: 0,
         date: new Date().toISOString().substr(0, 10)
       };
