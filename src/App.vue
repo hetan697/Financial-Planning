@@ -9,7 +9,9 @@
           @select="handleMenuSelect"
           class="main-navigation"
         >
-          <el-menu-item index="0" disabled class="app-title">{{ appName }}</el-menu-item>
+          <el-menu-item index="0" disabled class="app-title">
+            <span class="app-name-text">{{ appName }}</span>
+          </el-menu-item>
           <el-menu-item index="dashboard" class="nav-item">
             <el-icon><DataAnalysis /></el-icon>
             <span class="nav-text">看板</span>
@@ -511,6 +513,10 @@ export default {
   }
   
   .app-title {
+    display: none;
+  }
+  
+  .app-name-text {
     display: none;
   }
 }
