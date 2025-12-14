@@ -2,6 +2,32 @@
   <div class="type-management">
     <h3>类型管理</h3>
     
+    <!-- 数据管理 -->
+    <div class="data-management-section">
+      <h4>数据管理</h4>
+      <div class="data-management-actions">
+        <el-button @click="exportData" type="primary">
+          <el-icon><Upload /></el-icon>
+          导出数据
+        </el-button>
+        <el-button @click="triggerImport" type="success">
+          <el-icon><Download /></el-icon>
+          导入数据
+        </el-button>
+        <el-button @click="clearData" type="danger">
+          <el-icon><Delete /></el-icon>
+          清除数据
+        </el-button>
+        <input 
+          ref="fileInput" 
+          type="file" 
+          accept=".json" 
+          @change="importData" 
+          style="display: none;"
+        />
+      </div>
+    </div>
+    
     <!-- 投资类型管理 -->
     <div class="type-section">
       <h4>投资类型</h4>
@@ -102,15 +128,21 @@
 </template>
 
 <script>
-import { ElButton, ElInput } from 'element-plus';
+import { ElButton, ElInput, ElIcon } from 'element-plus';
+import { Upload, Download, Delete } from '@element-plus/icons-vue';
 import TypeManager from '../utils/TypeManager.js';
 
 export default {
   name: 'TypeManagement',
   components: {
     ElButton,
-    ElInput
+    ElInput,
+    ElIcon,
+    Upload,
+    Download,
+    Delete
   },
+  emits: ['export-data', 'import-data', 'clear-data'],
   data() {
     return {
       localInvestmentTypes: [...TypeManager.getInvestmentTypes()],
@@ -186,6 +218,22 @@ export default {
       }).catch(() => {
         // 用户取消操作
       });
+    },
+    
+    exportData() {
+      this.$emit('export-data');
+    },
+    
+    triggerImport() {
+      this.$refs.fileInput.click();
+    },
+    
+    importData(event) {
+      this.$emit('import-data', event);
+    },
+    
+    clearData() {
+      this.$emit('clear-data');
     }
   }
 };
@@ -206,6 +254,28 @@ export default {
   color: #333;
   border-bottom: 2px solid #eee;
   padding-bottom: 10px;
+}
+
+.data-management-section {
+  margin-bottom: 30px;
+}
+
+.data-management-section h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.data-management-actions {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.data-management-actions .el-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .type-section {
@@ -263,6 +333,10 @@ export default {
   }
   
   .form-actions {
+    flex-direction: column;
+  }
+  
+  .data-management-actions {
     flex-direction: column;
   }
 }

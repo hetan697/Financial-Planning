@@ -10,10 +10,22 @@
           class="main-navigation"
         >
           <el-menu-item index="0" disabled class="app-title">{{ appName }}</el-menu-item>
-          <el-menu-item index="dashboard">数据看板</el-menu-item>
-          <el-menu-item index="transactions">财务记录</el-menu-item>
-          <el-menu-item index="investments">投资管理</el-menu-item>
-          <el-menu-item index="type-management">类型管理</el-menu-item>
+          <el-menu-item index="dashboard">
+            <el-icon><DataAnalysis /></el-icon>
+            <span>看板</span>
+          </el-menu-item>
+          <el-menu-item index="transactions">
+            <el-icon><TrendCharts /></el-icon>
+            <span>收支</span>
+          </el-menu-item>
+          <el-menu-item index="investments">
+            <el-icon><Coin /></el-icon>
+            <span>投资</span>
+          </el-menu-item>
+          <el-menu-item index="type-management">
+            <el-icon><Setting /></el-icon>
+            <span>管理</span>
+          </el-menu-item>
         </el-menu>
 
         <!-- 数据看板视图 -->
@@ -21,9 +33,6 @@
           <Dashboard 
             :transactions="transactions"
             :investments="investments"
-            @export-data="exportData"
-            @import-data="importData"
-            @clear-data="clearAllData"
           />
         </div>
 
@@ -74,7 +83,11 @@
         
         <!-- 类型管理视图 -->
         <div v-show="activeTab === 'type-management'">
-          <TypeManagement />
+          <TypeManagement 
+            @export-data="exportData"
+            @import-data="importData"
+            @clear-data="clearAllData"
+          />
         </div>
       </el-main>
     </el-container>
@@ -90,7 +103,8 @@
 </template>
 
 <script>
-import { ElContainer, ElHeader, ElMain, ElMenu, ElMenuItem, ElDialog, ElButton } from 'element-plus';
+import { ElContainer, ElHeader, ElMain, ElMenu, ElMenuItem, ElDialog, ElButton, ElIcon } from 'element-plus';
+import { DataAnalysis, TrendCharts, Coin, Setting } from '@element-plus/icons-vue';
 import SummarySection from './components/SummarySection.vue';
 import TypeManagement from './components/TypeManagement.vue';
 import TransactionsView from './components/transactions/TransactionsView.vue';
@@ -110,6 +124,11 @@ export default {
     ElMenuItem,
     ElDialog,
     ElButton,
+    ElIcon,
+    DataAnalysis,
+    TrendCharts,
+    Coin,
+    Setting,
     SummarySection,
     TransactionPage,
     InvestmentManagement,
