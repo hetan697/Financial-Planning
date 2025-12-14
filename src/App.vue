@@ -439,7 +439,6 @@ export default {
 <style scoped>
 .finance-app {
   margin: 0 auto;
-  padding: 10px;
 }
 
 .el-header {
@@ -452,5 +451,24 @@ export default {
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0;
+}
+
+:deep(.el-main) {
+  padding: 0 !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .finance-app {
+  }
+  
+  .el-header {
+    margin-bottom: 10px;
+    padding: 10px 0 !important;
+  }
+  
+  .el-header h1 {
+    font-size: 1.3rem;
+  }
 }
 </style>
