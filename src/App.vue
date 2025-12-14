@@ -69,7 +69,7 @@
 </template>
 
 <script>
-import { ElContainer, ElHeader, ElMain, ElTabs, ElTabPane, ElMessage, ElMessageBox } from 'element-plus';
+import { ElContainer, ElHeader, ElMain, ElTabs, ElTabPane } from 'element-plus';
 import SummarySection from './components/SummarySection.vue';
 import TransactionForm from './components/TransactionForm.vue';
 import TransactionList from './components/TransactionList.vue';
@@ -447,10 +447,6 @@ export default {
   text-align: center;
   margin-bottom: 30px;
   padding: 20px 0 !important;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .el-header h1 {

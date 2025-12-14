@@ -5,33 +5,33 @@
     <!-- 财务概览 -->
     <el-row :gutter="20" class="summary-cards">
       <el-col :span="6" :xs="12">
-        <el-card class="card income-card">
+        <el-card class="card">
           <div class="card-content">
             <h3>总收入</h3>
-            <p class="amount income">¥{{ totalIncome.toFixed(2) }}</p>
+            <p class="amount">¥{{ totalIncome.toFixed(2) }}</p>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6" :xs="12">
-        <el-card class="card expense-card">
+        <el-card class="card">
           <div class="card-content">
             <h3>总支出</h3>
-            <p class="amount expense">¥{{ totalExpense.toFixed(2) }}</p>
+            <p class="amount">¥{{ totalExpense.toFixed(2) }}</p>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6" :xs="12">
-        <el-card class="card" :class="balance >= 0 ? 'income-card' : 'expense-card'">
+        <el-card class="card">
           <div class="card-content">
             <h3>账户余额</h3>
-            <p class="amount" :class="{ expense: balance < 0, income: balance >= 0 }">
+            <p class="amount">
               ¥{{ balance.toFixed(2) }}
             </p>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6" :xs="12">
-        <el-card class="card investment-card">
+        <el-card class="card">
           <div class="card-content">
             <h3>投资总额</h3>
             <p class="amount">¥{{ totalInvestmentValue.toFixed(2) }}</p>
@@ -242,16 +242,16 @@ export default {
             {
               label: '收入',
               data: incomeData,
-              borderColor: '#4caf50',
-              backgroundColor: 'rgba(76, 175, 80, 0.1)',
+              borderColor: '#f56c6c',
+              backgroundColor: 'rgba(245, 108, 108, 0.1)',
               tension: 0.4,
               fill: true
             },
             {
               label: '支出',
               data: expenseData,
-              borderColor: '#f44336',
-              backgroundColor: 'rgba(244, 67, 54, 0.1)',
+              borderColor: '#67c23a',
+              backgroundColor: 'rgba(103, 194, 58, 0.1)',
               tension: 0.4,
               fill: true
             }
@@ -345,13 +345,13 @@ export default {
         return currentValue - cost;
       });
       
-      // 设置颜色（正收益为绿色，负收益为红色）
+      // 设置颜色（正收益为红色，负收益为绿色）
       const backgroundColors = profitData.map(profit => 
-        profit >= 0 ? 'rgba(76, 175, 80, 0.6)' : 'rgba(244, 67, 54, 0.6)'
+        profit >= 0 ? 'rgba(245, 108, 108, 0.6)' : 'rgba(103, 194, 58, 0.6)'
       );
       
       const borderColors = profitData.map(profit => 
-        profit >= 0 ? 'rgb(76, 175, 80)' : 'rgb(244, 67, 54)'
+        profit >= 0 ? 'rgb(245, 108, 108)' : 'rgb(103, 194, 58)'
       );
       
       this.investmentReturnChart = new Chart(ctx, {
@@ -484,28 +484,6 @@ export default {
   margin: 0;
 }
 
-.income {
-  color: #4caf50;
-}
-
-.expense {
-  color: #f44336;
-}
-
-.income-card {
-  --el-card-border-color: #4caf50;
-  --el-card-border-width: 2px;
-}
-
-.expense-card {
-  --el-card-border-color: #f44336;
-  --el-card-border-width: 2px;
-}
-
-.investment-card {
-  --el-card-border-color: #2196f3;
-  --el-card-border-width: 2px;
-}
 
 .charts {
   margin-bottom: 30px;

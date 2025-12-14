@@ -1,8 +1,8 @@
 <template>
   <div class="investment-advice">
-    <div class="advice-summary">
+    <div>
       <p>根据您当前的财务状况，我们为您提供以下投资建议：</p>
-      <div class="financial-health" v-if="balance > 0">
+      <div v-if="balance > 0">
         <span>财务健康度: </span>
         <el-progress 
           :percentage="healthPercentage" 
@@ -10,16 +10,16 @@
           :stroke-width="12"
           :show-text="true"
         />
-        <span class="health-text" :class="healthLevel">{{ healthText }}</span>
+        <span :class="healthLevel">{{ healthText }}</span>
       </div>
-      <div v-else-if="balance < 0" class="negative-balance-warning">
+      <div v-else-if="balance < 0">
         <el-alert
           title="您的账户余额为负，建议优先增加收入或减少支出"
           type="error"
           show-icon
         />
       </div>
-      <div v-else class="zero-balance-info">
+      <div v-else>
         <el-alert
           title="您还没有添加任何交易记录，建议先添加收支信息以便获取个性化投资建议"
           type="info"
@@ -30,16 +30,16 @@
     
     <el-tabs type="border-card">
       <el-tab-pane label="💰 紧急备用金">
-        <div class="advice-section">
+        <div>
           <p>{{ emergencyFundAdvice.message }}</p>
-          <div v-if="emergencyFundAdvice.amount" class="amount-display">
-            建议金额: <span class="amount">¥{{ emergencyFundAdvice.amount.toFixed(2) }}</span>
+          <div v-if="emergencyFundAdvice.amount">
+            建议金额: <span>¥{{ emergencyFundAdvice.amount.toFixed(2) }}</span>
           </div>
         </div>
       </el-tab-pane>
       
       <el-tab-pane label="📊 风险评估">
-        <div class="advice-section">
+        <div>
           <p>根据您的资产情况，您的风险承受能力为：<strong :class="riskLevel.class">{{ riskLevel.label }}</strong></p>
           <el-alert
             :title="characteristic"
@@ -52,9 +52,9 @@
       </el-tab-pane>
       
       <el-tab-pane label="📈 投资组合">
-        <div class="advice-section">
+        <div>
           <p>{{ investmentAllocation.message }}</p>
-          <div class="allocation-chart" v-if="Object.keys(investmentAllocation.details).length > 0">
+          <div v-if="Object.keys(investmentAllocation.details).length > 0">
             <el-row :gutter="20">
               <el-col 
                 v-for="(detail, key) in investmentAllocation.details" 
@@ -62,13 +62,13 @@
                 :span="8"
                 :xs="24"
               >
-                <el-card class="allocation-item">
-                  <div class="allocation-header">
-                    <span class="allocation-name">{{ detail.name }}</span>
-                    <span class="allocation-percentage">{{ detail.percentage }}%</span>
+                <el-card>
+                  <div>
+                    <span>{{ detail.name }}</span>
+                    <span>{{ detail.percentage }}%</span>
                   </div>
-                  <div class="allocation-amount">¥{{ detail.amount.toFixed(2) }}</div>
-                  <div class="allocation-bar">
+                  <div>¥{{ detail.amount.toFixed(2) }}</div>
+                  <div>
                     <el-progress 
                       :percentage="detail.percentage" 
                       :show-text="false"
@@ -76,12 +76,12 @@
                       :color="getInvestmentColor(key)"
                     />
                   </div>
-                  <div class="allocation-description">{{ detail.description }}</div>
+                  <div>{{ detail.description }}</div>
                 </el-card>
               </el-col>
             </el-row>
           </div>
-          <div v-else class="no-allocation-advice">
+          <div v-else>
             <el-alert
               title="当前暂无具体的投资分配建议。建议您先建立足够的紧急备用金后再考虑投资。"
               type="warning"
@@ -92,7 +92,7 @@
       </el-tab-pane>
       
       <el-tab-pane label="🧭 投资策略">
-        <div class="advice-section">
+        <div>
           <el-timeline>
             <el-timeline-item
               v-for="(strategy, index) in investmentStrategies"
@@ -110,7 +110,7 @@
       </el-tab-pane>
       
       <el-tab-pane label="📅 定期复查">
-        <div class="advice-section">
+        <div>
           <p>{{ reviewAdvice.message }}</p>
           <el-alert
             :title="tip"
@@ -123,7 +123,7 @@
       </el-tab-pane>
     </el-tabs>
     
-    <div class="disclaimer">
+    <div>
       <el-alert
         title="以上仅为一般性投资建议，不构成具体投资意见。投资有风险，请谨慎决策。"
         type="warning"
@@ -426,11 +426,11 @@ export default {
   methods: {
     getInvestmentColor(type) {
       const colors = {
-        conservative: '#17a2b8',
-        moderate: '#28a745',
-        aggressive: '#dc3545'
+        conservative: '#409eff',
+        moderate: '#67c23a',
+        aggressive: '#f56c6c'
       };
-      return colors[type] || '#667eea';
+      return colors[type] || '#409eff';
     },
     
     // 计算支出记录覆盖的月份数量
@@ -456,112 +456,31 @@ export default {
   margin-bottom: 30px;
 }
 
-.advice-summary {
-  margin-bottom: 25px;
+.poor {
+  color: #f56c6c;
 }
 
-.financial-health {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-top: 15px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+.fair {
+  color: #e6a23c;
 }
 
-.health-text {
-  font-weight: bold;
-  min-width: 60px;
-  text-align: center;
+.good {
+  color: #67c23a;
 }
 
-.health-text.poor {
-  color: #dc3545;
-}
-
-.health-text.fair {
-  color: #ffc107;
-}
-
-.health-text.good {
-  color: #28a745;
-}
-
-.health-text.excellent {
-  color: #20c997;
-}
-
-.negative-balance-warning,
-.zero-balance-info {
-  margin-top: 15px;
-}
-
-.advice-section {
-  padding: 20px 0;
-}
-
-.amount-display {
-  margin-top: 10px;
-  font-size: 1.1rem;
-}
-
-.amount {
-  font-weight: bold;
-  color: #28a745;
+.excellent {
+  color: #409eff;
 }
 
 .conservative {
-  color: #17a2b8;
+  color: #409eff;
 }
 
 .moderate {
-  color: #28a745;
+  color: #67c23a;
 }
 
 .aggressive {
-  color: #dc3545;
-}
-
-.allocation-chart {
-  margin-top: 15px;
-}
-
-.allocation-item {
-  margin-bottom: 20px;
-}
-
-.allocation-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.allocation-name {
-  font-weight: bold;
-}
-
-.allocation-percentage {
-  font-weight: bold;
-}
-
-.allocation-amount {
-  font-size: 1.1rem;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.allocation-description {
-  font-size: 0.9rem;
-  color: #666;
-  margin-top: 10px;
-}
-
-.no-allocation-advice {
-  margin-top: 15px;
-}
-
-.disclaimer {
-  margin-top: 30px;
+  color: #f56c6c;
 }
 </style>

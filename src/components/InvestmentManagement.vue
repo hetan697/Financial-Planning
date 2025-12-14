@@ -496,7 +496,6 @@ export default {
 
 .investment-management h2 {
   margin-bottom: 20px;
-  color: #333;
   border-bottom: 2px solid #eee;
   padding-bottom: 10px;
 }
@@ -519,19 +518,16 @@ export default {
 }
 
 .profit {
-  color: #4caf50;
   font-weight: bold;
 }
 
 .loss {
-  color: #f44336;
   font-weight: bold;
 }
 
 .custom-allocation h3 {
   margin-top: 30px;
   margin-bottom: 20px;
-  color: #333;
 }
 
 .allocation-card {
@@ -555,7 +551,6 @@ export default {
 
 .allocation-amount {
   font-weight: bold;
-  color: #333;
 }
 
 .allocation-summary {
@@ -565,7 +560,6 @@ export default {
 .allocation-summary h3 {
   margin-top: 0;
   margin-bottom: 20px;
-  color: #333;
 }
 
 /* 响应式设计 */

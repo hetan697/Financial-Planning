@@ -29,7 +29,7 @@
             :class="{ profit: totalProfit >= 0, loss: totalProfit < 0 }"
           >
             {{ totalProfit >= 0 ? '+' : '' }}¥{{ totalProfit.toFixed(2) }}
-            <span class="percentage">
+            <span>
               ({{ totalProfitPercent.toFixed(2) }}%)
             </span>
           </p>
@@ -72,9 +72,14 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .investment-summary {
   margin-bottom: 30px;
+}
+
+.card-header {
+  font-weight: bold;
+  font-size: 1.1rem;
 }
 
 .summary-item {
@@ -84,7 +89,7 @@ export default {
 
 .summary-item h4 {
   margin: 0 0 10px 0;
-  color: #666;
+  font-size: 1rem;
 }
 
 .amount {
@@ -94,15 +99,10 @@ export default {
 }
 
 .profit {
-  color: #4caf50;
+  color: #f56c6c;
 }
 
 .loss {
-  color: #f44336;
-}
-
-.percentage {
-  font-size: 0.8rem;
-  margin-left: 0.5rem;
+  color: #67c23a;
 }
 </style>

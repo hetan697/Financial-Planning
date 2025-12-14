@@ -8,7 +8,7 @@
     
     <div v-if="transactions.length === 0" class="no-transactions">
       <el-empty description="暂无交易记录">
-        <p class="help-text">点击上方"添加交易"区域录入您的第一条交易记录</p>
+        <p>点击上方"添加交易"区域录入您的第一条交易记录</p>
       </el-empty>
     </div>
     
@@ -122,9 +122,11 @@ export default {
   padding: 40px 20px;
 }
 
-.help-text {
-  font-style: italic;
-  color: #667eea;
-  margin-top: 15px;
+:deep(.income-row) {
+  background-color: #fef0f0;
+}
+
+:deep(.expense-row) {
+  background-color: #f0f9ff;
 }
 </style>
