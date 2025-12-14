@@ -107,7 +107,10 @@ import {
   ArcElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  LineController,
+  BarController,
+  PieController
 } from 'chart.js';
 
 // 注册Chart.js组件
@@ -120,7 +123,10 @@ Chart.register(
   ArcElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  LineController,
+  BarController,
+  PieController
 );
 
 export default {
@@ -234,6 +240,12 @@ export default {
       const ctx = this.$refs.trendChart?.getContext('2d');
       if (!ctx) return;
       
+      // 如果图表已存在，先销毁它
+      if (this.trendChart) {
+        this.trendChart.destroy();
+        this.trendChart = null;
+      }
+      
       // 按月份分组数据
       const monthlyData = {};
       
@@ -282,6 +294,7 @@ export default {
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: {
               position: 'top',
@@ -302,6 +315,12 @@ export default {
     renderExpenseChart() {
       const ctx = this.$refs.expenseChart?.getContext('2d');
       if (!ctx) return;
+      
+      // 如果图表已存在，先销毁它
+      if (this.expenseChart) {
+        this.expenseChart.destroy();
+        this.expenseChart = null;
+      }
       
       // 按描述分组支出数据
       const expenseData = {};
@@ -343,6 +362,7 @@ export default {
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: {
               position: 'right',
@@ -358,6 +378,12 @@ export default {
     renderInvestmentChart() {
       const ctx = this.$refs.investmentChart?.getContext('2d');
       if (!ctx) return;
+      
+      // 如果图表已存在，先销毁它
+      if (this.investmentChart) {
+        this.investmentChart.destroy();
+        this.investmentChart = null;
+      }
       
       // 计算每个投资的收益
       const investmentLabels = [];
@@ -394,6 +420,7 @@ export default {
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: {
               display: false
