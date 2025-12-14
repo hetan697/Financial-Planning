@@ -99,19 +99,16 @@ export default {
       this.investmentOptions = options;
     },
     
-    // 计算支出记录覆盖的月份数量
+    // 计算覆盖的月份数量
     getMonthsCovered(transactions) {
       if (transactions.length === 0) return 0;
       
-      // 获取最早的和最晚的交易日期
-      const dates = transactions.map(t => new Date(t.date)).sort((a, b) => a - b);
-      const firstDate = dates[0];
-      const lastDate = dates[dates.length - 1];
+      const dates = transactions.map(t => new Date(t.date));
+      const minDate = new Date(Math.min.apply(null, dates));
+      const maxDate = new Date(Math.max.apply(null, dates));
       
-      // 计算月份差
-      const yearDiff = lastDate.getFullYear() - firstDate.getFullYear();
-      const monthDiff = lastDate.getMonth() - firstDate.getMonth();
-      return yearDiff * 12 + monthDiff + 1; // +1表示包含起始和结束月份
+      return (maxDate.getFullYear() - minDate.getFullYear()) * 12 + 
+             (maxDate.getMonth() - minDate.getMonth()) + 1;
     }
   }
 };
@@ -120,17 +117,17 @@ export default {
 <style scoped>
 .investment-advice {
   background: white;
+  border-radius: 20px;
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 .investment-advice h3 {
   margin-top: 0;
   margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .advice-placeholder {
@@ -139,11 +136,15 @@ export default {
   color: #999;
 }
 
-/* 响应式设计 */
+.advice-placeholder p {
+  margin: 0;
+  font-size: 16px;
+}
+
 @media (max-width: 768px) {
   .investment-advice {
+    border-radius: 16px;
     padding: 15px;
-    margin-bottom: 20px;
   }
 }
 </style>

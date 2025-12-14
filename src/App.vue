@@ -443,11 +443,11 @@ export default {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-/* Glass effect styles */
+/* Glass effect styles - iOS style */
 .glass-effect {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
@@ -458,6 +458,10 @@ export default {
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .app-header {
@@ -485,7 +489,7 @@ export default {
   align-items: center;
   padding: 15px 20px;
   margin: 5px 15px;
-  border-radius: 12px;
+  border-radius: 16px; /* Squircle effect */
   background: transparent;
   border: none;
   color: rgba(255, 255, 255, 0.8);
@@ -493,6 +497,8 @@ export default {
   transition: all 0.2s ease;
   font-size: 16px;
   font-weight: 500;
+  position: relative;
+  overflow: hidden;
 }
 
 .nav-item:hover {
@@ -557,12 +563,12 @@ export default {
 }
 
 .app-container:not(.mobile-view) .view-container {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 24px; /* More rounded corners for iOS look */
   padding: 20px;
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   height: calc(100% - 40px);
   overflow: hidden;
 }
@@ -588,7 +594,7 @@ export default {
 }
 
 .app-container.mobile-view .main-content {
-  padding: 0;
+  padding: 15px;
   height: calc(100% - 70px); /* 减去底部导航栏的高度 */
 }
 
@@ -611,9 +617,13 @@ export default {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 10px 0;
+  padding: 12px 0;
   height: 70px;
   z-index: 100;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .bottom-bar .nav-item {
@@ -624,13 +634,15 @@ export default {
   justify-content: center;
   padding: 8px 0;
   margin: 0 5px;
-  border-radius: 12px;
+  border-radius: 16px; /* Squircle effect */
   background: transparent;
+  height: 100%;
 }
 
 .bottom-bar .nav-label {
   font-size: 12px;
   margin-top: 4px;
+  font-weight: 500;
 }
 
 /* Responsive adjustments */

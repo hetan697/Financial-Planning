@@ -322,7 +322,7 @@ export default {
 <style scoped>
 .investment-calculator {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
@@ -352,9 +352,10 @@ export default {
 
 .investment-option-card {
   background: #F2F2F7;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 15px;
   margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .option-header {
@@ -368,7 +369,7 @@ export default {
 .option-name-input {
   padding: 8px 12px;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 14px;
 }
 
@@ -400,7 +401,7 @@ export default {
 .detail-row input[type="number"] {
   padding: 8px 12px;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 14px;
   width: 100px;
 }
@@ -416,7 +417,7 @@ export default {
 
 .total-percentage {
   padding: 15px;
-  border-radius: 12px;
+  border-radius: 16px;
   background: #F2F2F7;
   margin-bottom: 20px;
   font-weight: 500;
@@ -448,7 +449,7 @@ export default {
 
 .summary-card {
   background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 15px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
@@ -494,7 +495,7 @@ export default {
 
 .overall-summary {
   background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
@@ -516,7 +517,7 @@ export default {
 
 .alert {
   padding: 15px;
-  border-radius: 12px;
+  border-radius: 16px;
   text-align: center;
 }
 
@@ -528,7 +529,7 @@ export default {
 .btn-primary, .btn-secondary, .btn-danger {
   padding: 8px 15px;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -542,6 +543,7 @@ export default {
 
 .btn-primary:hover {
   background: #0062cc;
+  transform: scale(1.02);
 }
 
 .btn-secondary {
@@ -551,6 +553,7 @@ export default {
 
 .btn-secondary:hover {
   background: #e0e0e6;
+  transform: scale(1.02);
 }
 
 .btn-danger {
@@ -566,9 +569,15 @@ export default {
 
 .btn-danger:hover {
   background: #d73329;
+  transform: scale(1.02);
 }
 
 @media (max-width: 768px) {
+  .investment-calculator {
+    border-radius: 16px;
+    padding: 15px;
+  }
+  
   .option-details {
     grid-template-columns: 1fr;
   }

@@ -101,12 +101,11 @@ export default {
   flex-direction: column;
   gap: 20px;
   height: 100%;
-  overflow-y: auto;
 }
 
 .card-section {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
@@ -127,12 +126,12 @@ export default {
 }
 
 .btn-primary {
+  padding: 10px 20px;
   background: #007AFF;
   color: white;
   border: none;
-  border-radius: 10px;
-  padding: 10px 16px;
-  font-size: 15px;
+  border-radius: 12px;
+  font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -140,10 +139,17 @@ export default {
 
 .btn-primary:hover {
   background: #0062cc;
-  transform: translateY(-1px);
+  transform: scale(1.02);
 }
 
-.btn-primary:active {
-  transform: translateY(0);
+@media (max-width: 768px) {
+  .investment-management {
+    gap: 15px;
+  }
+  
+  .card-section {
+    border-radius: 16px;
+    padding: 15px;
+  }
 }
 </style>

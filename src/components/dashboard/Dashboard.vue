@@ -339,43 +339,36 @@ export default {
       
       // 计算投资数据
       const investmentLabels = this.investments.map(inv => inv.name);
-      const investmentValues = this.investments.map(inv => {
-        const currentValue = inv.currentPrice !== null ? 
-          inv.currentPrice : inv.purchasePrice;
-        return inv.quantity * currentValue;
-      });
-      
-      const profitLoss = this.investments.map(inv => {
+      const investmentProfits = this.investments.map(inv => {
         const currentValue = inv.currentPrice !== null ? 
           inv.currentPrice : inv.purchasePrice;
         return (currentValue - inv.purchasePrice) * inv.quantity;
       });
       
+      // 只有当有数据时才渲染图表
+      if (investmentLabels.length === 0) {
+        return;
+      }
+      
       this.investmentChart = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: investmentLabels,
-          datasets: [
-            {
-              label: '投资价值',
-              data: investmentValues,
-              backgroundColor: '#34C759',
-              borderWidth: 0
-            },
-            {
-              label: '盈亏',
-              data: profitLoss,
-              backgroundColor: profitLoss.map(p => p >= 0 ? '#34C759' : '#FF3B30'),
-              borderWidth: 0
-            }
-          ]
+          datasets: [{
+            label: '投资收益',
+            data: investmentProfits,
+            backgroundColor: investmentProfits.map(profit => 
+              profit >= 0 ? '#34C759' : '#FF3B30'),
+            borderRadius: 8,
+            borderSkipped: false
+          }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              position: 'top',
+              display: false
             }
           },
           scales: {
@@ -394,24 +387,24 @@ export default {
         }
       });
     },
-    initCharts() {
-      if (this.hasTransactions || this.hasInvestments) {
-        this.$nextTick(() => {
-          if (this.hasTransactions) {
-            this.initTrendChart();
-            if (this.hasExpenseTransactions) {
-              this.initExpenseChart();
-            }
-          }
-          if (this.hasInvestments) {
-            this.initInvestmentChart();
-          }
-        });
-      }
+    refreshCharts() {
+      this.$nextTick(() => {
+        if (this.hasTransactions || this.hasInvestments) {
+          this.initTrendChart();
+        }
+        
+        if (this.hasExpenseData) {
+          this.initExpenseChart();
+        }
+        
+        if (this.hasInvestments) {
+          this.initInvestmentChart();
+        }
+      });
     }
   },
   mounted() {
-    this.initCharts();
+    this.refreshCharts();
   },
   beforeUnmount() {
     if (this.trendChart) {
@@ -427,13 +420,13 @@ export default {
   watch: {
     transactions: {
       handler() {
-        this.initCharts();
+        this.refreshCharts();
       },
       deep: true
     },
     investments: {
       handler() {
-        this.initCharts();
+        this.refreshCharts();
       },
       deep: true
     }
@@ -447,12 +440,11 @@ export default {
   flex-direction: column;
   gap: 20px;
   height: 100%;
-  overflow-y: auto;
 }
 
 .card-section {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
@@ -476,26 +468,24 @@ export default {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
-  margin-bottom: 10px;
 }
 
 .summary-item {
   text-align: center;
-  padding: 15px;
-  border-radius: 12px;
+  padding: 20px;
+  border-radius: 16px;
   background: #F2F2F7;
 }
 
 .summary-item h4 {
   margin: 0 0 10px 0;
-  font-size: 14px;
-  font-weight: 500;
   color: #666;
+  font-weight: 500;
 }
 
 .amount {
   margin: 0;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
 }
 
@@ -511,36 +501,63 @@ export default {
   color: #007AFF;
 }
 
-.charts-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
 }
 
 .charts-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
-}
-
-.chart-container {
-  height: 300px;
-  position: relative;
 }
 
 .empty-state {
   text-align: center;
-  padding: 40px 20px;
+  padding: 60px 20px;
   color: #999;
 }
 
+.empty-state p {
+  margin: 0;
+  font-size: 16px;
+}
+
 @media (max-width: 768px) {
+  .dashboard {
+    gap: 15px;
+  }
+  
+  .card-section {
+    border-radius: 16px;
+    padding: 15px;
+  }
+  
   .summary-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  
+  .summary-item {
+    padding: 15px 10px;
+  }
+  
+  .summary-item h4 {
+    font-size: 14px;
+  }
+  
+  .amount {
+    font-size: 18px;
+  }
+  
+  .chart-container {
+    height: 250px;
   }
   
   .charts-row {
     grid-template-columns: 1fr;
+    gap: 15px;
   }
 }
 </style>
