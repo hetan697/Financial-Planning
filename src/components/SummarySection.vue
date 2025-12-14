@@ -1,23 +1,29 @@
 <template>
   <el-card class="summary-section" :class="{ 'advice-mode': adviceMode }">
+    <template #header>
+      <div class="card-header">
+        <span>财务概览</span>
+      </div>
+    </template>
+    
     <el-row :gutter="20">
       <el-col :span="adviceMode ? 8 : 6" :xs="12">
         <div class="summary-item">
-          <h3>总收入</h3>
+          <h4>总收入</h4>
           <p class="amount income">¥{{ totalIncome.toFixed(2) }}</p>
         </div>
       </el-col>
       
       <el-col :span="adviceMode ? 8 : 6" :xs="12">
         <div class="summary-item">
-          <h3>总支出</h3>
+          <h4>总支出</h4>
           <p class="amount expense">¥{{ totalExpense.toFixed(2) }}</p>
         </div>
       </el-col>
       
       <el-col :span="adviceMode ? 8 : 6" :xs="12">
         <div class="summary-item">
-          <h3>账户余额</h3>
+          <h4>账户余额</h4>
           <p 
             class="amount" 
             :class="{ expense: balance < 0, income: balance >= 0 }"
@@ -29,8 +35,8 @@
       
       <el-col v-if="!adviceMode" :span="6" :xs="12">
         <div class="summary-item">
-          <h3>投资总额</h3>
-          <p class="amount">¥0.00</p>
+          <h4>投资总额</h4>
+          <p class="amount">¥{{ investmentTotal.toFixed(2) }}</p>
         </div>
       </el-col>
     </el-row>
@@ -60,6 +66,10 @@ export default {
       type: Number,
       default: 0
     },
+    investmentTotal: {
+      type: Number,
+      default: 0
+    },
     adviceMode: {
       type: Boolean,
       default: false
@@ -78,14 +88,18 @@ export default {
   border-color: #2196f3;
 }
 
+.card-header {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
 .summary-item {
   text-align: center;
   padding: 20px 0;
 }
 
-.summary-item h3 {
+.summary-item h4 {
   margin: 0 0 10px 0;
-  color: #666;
   font-size: 1rem;
 }
 
@@ -96,10 +110,10 @@ export default {
 }
 
 .income {
-  color: #4caf50;
+  color: #f56c6c;
 }
 
 .expense {
-  color: #f44336;
+  color: #67c23a;
 }
 </style>

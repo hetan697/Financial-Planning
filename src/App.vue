@@ -33,6 +33,7 @@
             :total-income="totalIncome" 
             :total-expense="totalExpense" 
             :balance="balance"
+            :investment-total="totalInvestmentValue"
           />
           
           <!-- 交易列表 -->

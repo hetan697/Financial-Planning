@@ -1,42 +1,48 @@
 <template>
   <div class="dashboard">
     <!-- 财务概览 -->
-    <el-row :gutter="10" class="summary-cards">
-      <el-col :span="12">
-        <el-card class="card">
-          <div class="card-content">
-            <h3>总收入</h3>
-            <p class="amount">¥{{ totalIncome.toFixed(2) }}</p>
+    <el-card class="summary-cards">
+      <template #header>
+        <div class="card-header">
+          <span>财务概览</span>
+        </div>
+      </template>
+      
+      <el-row :gutter="20">
+        <el-col :span="6" :xs="12">
+          <div class="summary-item">
+            <h4>总收入</h4>
+            <p class="amount income">¥{{ totalIncome.toFixed(2) }}</p>
           </div>
-        </el-card>
-      </el-col>
-      <el-col :span="12">
-        <el-card class="card">
-          <div class="card-content">
-            <h3>总支出</h3>
-            <p class="amount">¥{{ totalExpense.toFixed(2) }}</p>
+        </el-col>
+        
+        <el-col :span="6" :xs="12">
+          <div class="summary-item">
+            <h4>总支出</h4>
+            <p class="amount expense">¥{{ totalExpense.toFixed(2) }}</p>
           </div>
-        </el-card>
-      </el-col>
-      <el-col :span="12">
-        <el-card class="card">
-          <div class="card-content">
-            <h3>账户余额</h3>
-            <p class="amount">
+        </el-col>
+        
+        <el-col :span="6" :xs="12">
+          <div class="summary-item">
+            <h4>账户余额</h4>
+            <p 
+              class="amount" 
+              :class="{ expense: balance < 0, income: balance >= 0 }"
+            >
               ¥{{ balance.toFixed(2) }}
             </p>
           </div>
-        </el-card>
-      </el-col>
-      <el-col :span="12">
-        <el-card class="card">
-          <div class="card-content">
-            <h3>投资总额</h3>
+        </el-col>
+        
+        <el-col :span="6" :xs="12">
+          <div class="summary-item">
+            <h4>投资总额</h4>
             <p class="amount">¥{{ totalInvestmentValue.toFixed(2) }}</p>
           </div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </el-col>
+      </el-row>
+    </el-card>
     
     <!-- 图表区域 -->
     <el-row :gutter="10" class="charts">
@@ -451,105 +457,90 @@ export default {
 
 <style scoped>
 .dashboard {
-  padding: 10px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 .summary-cards {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
-.card {
-  height: 100px;
+.card-header {
+  font-weight: bold;
+  font-size: 1.1rem;
 }
 
-.card-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
+.summary-item {
+  text-align: center;
+  padding: 20px 0;
 }
 
-.card h3 {
-  margin: 0 0 5px 0;
-  font-size: 0.9rem;
+.summary-item h4 {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
 }
 
 .amount {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: bold;
   margin: 0;
 }
 
+.income {
+  color: #f56c6c;
+}
+
+.expense {
+  color: #67c23a;
+}
+
 .charts {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .chart-container {
   margin-bottom: 20px;
 }
 
-.card-header {
-  font-weight: bold;
-  font-size: 1rem;
-}
-
 .chart-wrapper {
-  height: 250px;
   position: relative;
+  height: 300px;
 }
 
 .chart-placeholder {
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-}
-
-.chart-placeholder p {
-  font-style: italic;
+  height: 300px;
+  color: #999;
 }
 
 .data-management {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
-.button-group {
+.data-buttons {
   display: flex;
-  gap: 10px;
+  gap: 15px;
   flex-wrap: wrap;
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
   .dashboard {
-    padding: 5px;
+    padding: 10px;
   }
   
-  .card {
-    height: 80px;
-    margin-bottom: 5px;
+  .data-buttons {
+    flex-direction: column;
   }
   
-  .card h3 {
-    font-size: 0.8rem;
+  .summary-item {
+    padding: 10px 0;
   }
   
   .amount {
-    font-size: 1rem;
-  }
-  
-  .chart-wrapper {
-    height: 200px;
-  }
-  
-  .card-header {
-    font-size: 0.9rem;
-  }
-  
-  .button-group {
-    flex-direction: column;
+    font-size: 1.2rem;
   }
 }
 </style>
