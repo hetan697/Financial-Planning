@@ -4,7 +4,7 @@
     
     <!-- 财务概览 -->
     <el-row :gutter="10" class="summary-cards">
-      <el-col :span="12" :xs="24">
+      <el-col :span="6" :xs="24">
         <el-card class="card">
           <div class="card-content">
             <h3>总收入</h3>
@@ -12,7 +12,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="12" :xs="24">
+      <el-col :span="6" :xs="24">
         <el-card class="card">
           <div class="card-content">
             <h3>总支出</h3>
@@ -20,7 +20,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="12" :xs="24">
+      <el-col :span="6" :xs="24">
         <el-card class="card">
           <div class="card-content">
             <h3>账户余额</h3>
@@ -30,7 +30,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="12" :xs="24">
+      <el-col :span="6" :xs="24">
         <el-card class="card">
           <div class="card-content">
             <h3>投资总额</h3>
