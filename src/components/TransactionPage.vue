@@ -240,6 +240,10 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .transaction-page {
+    padding: 10px;
+  }
+
   .form-buttons {
     flex-direction: column;
   }

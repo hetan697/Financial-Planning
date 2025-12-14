@@ -54,6 +54,53 @@
       <h4>📈 投资组合</h4>
       <p>{{ investmentAllocation.message }}</p>
       
+      <!-- 投资比例调节器 -->
+      <div v-if="balance > 0 && emergencyFundAdvice.amount >= 0 && balance > emergencyFundAdvice.amount" class="allocation-controls">
+        <h5>调整投资比例</h5>
+        <div class="slider-group">
+          <div class="slider-item">
+            <label>稳健理财 ({{ allocationPercentages.conservative }}%)</label>
+            <el-slider
+              v-model="allocationPercentages.conservative"
+              :min="0"
+              :max="100"
+              :step="1"
+              show-input
+              @change="onAllocationChange"
+            />
+          </div>
+          
+          <div class="slider-item">
+            <label>混合基金 ({{ allocationPercentages.moderate }}%)</label>
+            <el-slider
+              v-model="allocationPercentages.moderate"
+              :min="0"
+              :max="100"
+              :step="1"
+              show-input
+              @change="onAllocationChange"
+            />
+          </div>
+          
+          <div class="slider-item">
+            <label>股票投资 ({{ allocationPercentages.aggressive }}%)</label>
+            <el-slider
+              v-model="allocationPercentages.aggressive"
+              :min="0"
+              :max="100"
+              :step="1"
+              show-input
+              @change="onAllocationChange"
+            />
+          </div>
+        </div>
+        
+        <div class="total-percentage" :class="{ 'error': totalPercentage !== 100 }">
+          总计: {{ totalPercentage }}%
+          <span v-if="totalPercentage !== 100" class="warning-text">投资比例总和应为100%</span>
+        </div>
+      </div>
+      
       <div v-if="Object.keys(investmentAllocation.details).length > 0" class="investment-grid">
         <div 
           v-for="(detail, key) in investmentAllocation.details" 
@@ -113,8 +160,13 @@
 </template>
 
 <script>
+import { ElSlider } from 'element-plus';
+
 export default {
   name: 'InvestmentAdvice',
+  components: {
+    ElSlider
+  },
   props: {
     balance: {
       type: Number,
@@ -128,7 +180,13 @@ export default {
   emits: ['allocation-change'],
   data() {
     return {
-      emergencyFundMonths: 3 // 建议的应急资金月数
+      emergencyFundMonths: 3, // 建议的应急资金月数
+      allocationPercentages: {
+        conservative: 30,
+        moderate: 40,
+        aggressive: 30
+      },
+      customAllocation: false
     };
   },
   computed: {
@@ -308,26 +366,48 @@ export default {
       // 可用于投资的资金
       const investableFund = this.balance - emergencyFund;
       
-      // 根据风险等级调整分配比例
+      // 根据风险等级调整分配比例或使用自定义比例
       let allocation = {};
-      if (this.riskLevel.class === 'conservative') {
+      if (this.customAllocation && this.totalPercentage === 100) {
+        // 使用用户自定义的比例
         allocation = {
-          conservative: { name: '稳健理财', percentage: 70, description: '银行理财、国债等低风险产品' },
-          moderate: { name: '混合基金', percentage: 20, description: '平衡型基金，适度分散风险' },
-          aggressive: { name: '股票投资', percentage: 10, description: '少量配置优质股票' }
-        };
-      } else if (this.riskLevel.class === 'moderate') {
-        allocation = {
-          conservative: { name: '稳健理财', percentage: 40, description: '银行理财、国债等低风险产品' },
-          moderate: { name: '混合基金', percentage: 40, description: '平衡型基金，适度分散风险' },
-          aggressive: { name: '股票投资', percentage: 20, description: '配置成长型股票或指数基金' }
+          conservative: { 
+            name: '稳健理财', 
+            percentage: this.allocationPercentages.conservative, 
+            description: '银行理财、国债等低风险产品' 
+          },
+          moderate: { 
+            name: '混合基金', 
+            percentage: this.allocationPercentages.moderate, 
+            description: '平衡型基金，适度分散风险' 
+          },
+          aggressive: { 
+            name: '股票投资', 
+            percentage: this.allocationPercentages.aggressive, 
+            description: '配置成长型股票或指数基金' 
+          }
         };
       } else {
-        allocation = {
-          conservative: { name: '稳健理财', percentage: 20, description: '少量配置保本产品' },
-          moderate: { name: '混合基金', percentage: 50, description: '指数基金、主动型基金等' },
-          aggressive: { name: '股票投资', percentage: 30, description: '成长股、行业ETF等' }
-        };
+        // 使用系统推荐的比例
+        if (this.riskLevel.class === 'conservative') {
+          allocation = {
+            conservative: { name: '稳健理财', percentage: 70, description: '银行理财、国债等低风险产品' },
+            moderate: { name: '混合基金', percentage: 20, description: '平衡型基金，适度分散风险' },
+            aggressive: { name: '股票投资', percentage: 10, description: '少量配置优质股票' }
+          };
+        } else if (this.riskLevel.class === 'moderate') {
+          allocation = {
+            conservative: { name: '稳健理财', percentage: 40, description: '银行理财、国债等低风险产品' },
+            moderate: { name: '混合基金', percentage: 40, description: '平衡型基金，适度分散风险' },
+            aggressive: { name: '股票投资', percentage: 20, description: '配置成长型股票或指数基金' }
+          };
+        } else {
+          allocation = {
+            conservative: { name: '稳健理财', percentage: 20, description: '少量配置保本产品' },
+            moderate: { name: '混合基金', percentage: 50, description: '指数基金、主动型基金等' },
+            aggressive: { name: '股票投资', percentage: 30, description: '成长股、行业ETF等' }
+          };
+        }
       }
       
       // 计算各项投资额
@@ -377,6 +457,13 @@ export default {
           '关注宏观经济环境变化对投资的影响'
         ]
       };
+    },
+    
+    // 总投资比例
+    totalPercentage() {
+      return this.allocationPercentages.conservative + 
+             this.allocationPercentages.moderate + 
+             this.allocationPercentages.aggressive;
     }
   },
   methods: {
@@ -402,6 +489,17 @@ export default {
       const yearDiff = lastDate.getFullYear() - firstDate.getFullYear();
       const monthDiff = lastDate.getMonth() - firstDate.getMonth();
       return yearDiff * 12 + monthDiff + 1; // +1表示包含起始和结束月份
+    },
+    
+    // 处理投资比例变化
+    onAllocationChange() {
+      // 标记用户已自定义分配比例
+      this.customAllocation = true;
+      
+      // 如果总比例不是100%，则不应用自定义比例
+      if (this.totalPercentage !== 100) {
+        console.warn('投资比例总和应为100%');
+      }
     }
   }
 };
@@ -429,6 +527,12 @@ export default {
 }
 
 .advice-section h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.advice-section h5 {
   margin-top: 0;
   margin-bottom: 15px;
   color: #333;
@@ -559,6 +663,42 @@ export default {
   margin-bottom: 10px;
 }
 
+.allocation-controls {
+  background-color: #f5f7fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.slider-group {
+  margin-bottom: 15px;
+}
+
+.slider-item {
+  margin-bottom: 20px;
+}
+
+.slider-item label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.total-percentage {
+  font-weight: bold;
+  font-size: 1.1em;
+  text-align: right;
+}
+
+.total-percentage.error {
+  color: #f56c6c;
+}
+
+.warning-text {
+  font-size: 0.9em;
+  color: #e6a23c;
+}
+
 .investment-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -635,6 +775,10 @@ export default {
   .health-bar {
     flex-direction: column;
     align-items: stretch;
+  }
+  
+  .allocation-controls {
+    padding: 15px;
   }
 }
 </style>
