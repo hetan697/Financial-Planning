@@ -58,7 +58,7 @@
         
         <!-- 交易列表 -->
         <TransactionList 
-          :transactions="transactions" 
+          :transactions="sortedTransactions" 
           @delete-transaction="deleteTransaction"
           @edit-transaction="editTransaction"
         />
@@ -137,6 +137,12 @@ export default {
     },
     balance() {
       return this.totalIncome - this.totalExpense;
+    },
+    // 按时间倒序排列的交易记录（最新的在前面）
+    sortedTransactions() {
+      return [...this.transactions].sort((a, b) => {
+        return new Date(b.date) - new Date(a.date);
+      });
     }
   },
   mounted() {
