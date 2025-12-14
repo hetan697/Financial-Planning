@@ -9,10 +9,13 @@
             :value="newInvestment.type" 
             @change="updateInvestment('type', $event.target.value)"
           >
-            <option value="股票">股票</option>
-            <option value="基金">基金</option>
-            <option value="债券">债券</option>
-            <option value="其他">其他</option>
+            <option 
+              v-for="type in investmentTypes" 
+              :key="type" 
+              :value="type"
+            >
+              {{ type }}
+            </option>
           </select>
         </div>
         
@@ -54,38 +57,37 @@
             required
           >
         </div>
-        
+      </div>
+      
+      <div class="form-row">
         <div class="form-group">
           <label>当前价格:</label>
           <input 
             type="number" 
-            :value="newInvestment.currentPrice" 
-            @input="updateInvestment('currentPrice', parseFloat($event.target.value) || 0)"
+            :value="newInvestment.currentPrice || ''" 
+            @input="updateInvestment('currentPrice', $event.target.value ? parseFloat($event.target.value) : null)"
             min="0" 
             step="0.01" 
-            placeholder="0.00 (可选)"
+            placeholder="可选"
+          >
+        </div>
+        
+        <div class="form-group">
+          <label>买入日期:</label>
+          <input 
+            type="date" 
+            :value="newInvestment.purchaseDate" 
+            @input="updateInvestment('purchaseDate', $event.target.value)"
+            required
           >
         </div>
       </div>
       
-      <div class="form-group">
-        <label>买入日期:</label>
-        <input 
-          type="date" 
-          :value="newInvestment.purchaseDate" 
-          @input="updateInvestment('purchaseDate', $event.target.value)"
-          required
-        >
-      </div>
-      
-      <div class="form-buttons">
-        <button type="submit" class="add-btn">{{ isEditing ? '更新' : '添加投资' }}</button>
-        <button 
-          v-if="isEditing" 
-          type="button" 
-          class="cancel-btn"
-          @click="cancelEdit"
-        >
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">
+          {{ isEditing ? '更新投资' : '添加投资' }}
+        </button>
+        <button type="button" class="btn-secondary" @click="cancelEdit">
           取消
         </button>
       </div>
@@ -94,6 +96,8 @@
 </template>
 
 <script>
+import TypeManager from '../utils/TypeManager.js';
+
 export default {
   name: 'InvestmentForm',
   props: {
@@ -106,17 +110,30 @@ export default {
       default: false
     }
   },
-  emits: ['add-investment', 'update-investment', 'cancel-edit'],
+  emits: ['update-investment', 'add-investment', 'cancel-edit'],
+  data() {
+    return {
+      investmentTypes: TypeManager.getInvestmentTypes()
+    };
+  },
   methods: {
-    addInvestment() {
-      this.$emit('add-investment');
-    },
     updateInvestment(field, value) {
-      this.$emit('update-investment', field, value);
+      this.$emit('update-investment', { field, value });
+    },
+    addInvestment() {
+      this.$emit('add-investment', this.newInvestment);
     },
     cancelEdit() {
       this.$emit('cancel-edit');
     }
+  },
+  mounted() {
+    // 监听localStorage变化以更新投资类型
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'investmentTypes') {
+        this.investmentTypes = TypeManager.getInvestmentTypes();
+      }
+    });
   }
 };
 </script>
@@ -171,13 +188,13 @@ export default {
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
 }
 
-.form-buttons {
+.form-actions {
   display: flex;
   gap: 10px;
   margin-top: 20px;
 }
 
-.add-btn {
+.btn-primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
@@ -189,11 +206,11 @@ export default {
   flex: 1;
 }
 
-.add-btn:hover {
+.btn-primary:hover {
   transform: translateY(-2px);
 }
 
-.cancel-btn {
+.btn-secondary {
   background-color: #6c757d;
   color: white;
   border: none;
@@ -205,7 +222,7 @@ export default {
   flex: 1;
 }
 
-.cancel-btn:hover {
+.btn-secondary:hover {
   background-color: #5a6268;
 }
 

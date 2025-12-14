@@ -47,7 +47,7 @@
         >
           <el-option-group label="收入">
             <el-option 
-              v-for="item in incomeOptions" 
+              v-for="item in transactionTypes.income" 
               :key="item" 
               :label="item" 
               :value="item"
@@ -55,7 +55,7 @@
           </el-option-group>
           <el-option-group label="支出">
             <el-option 
-              v-for="item in expenseOptions" 
+              v-for="item in transactionTypes.expense" 
               :key="item" 
               :label="item" 
               :value="item"
@@ -115,6 +115,7 @@ import {
   ElRow,
   ElCol
 } from 'element-plus';
+import TypeManager from '../utils/TypeManager.js';
 
 export default {
   name: 'TransactionForm',
@@ -145,27 +146,7 @@ export default {
   emits: ['add-transaction', 'update-transaction', 'cancel-edit'],
   data() {
     return {
-      incomeOptions: [
-        '工资',
-        '奖金',
-        '投资收益',
-        '兼职收入',
-        '礼金',
-        '其他收入'
-      ],
-      expenseOptions: [
-        '房租',
-        '水电费',
-        '餐饮',
-        '交通',
-        '购物',
-        '娱乐',
-        '医疗',
-        '教育',
-        '保险',
-        '投资支出',
-        '其他支出'
-      ]
+      transactionTypes: TypeManager.getTransactionTypes()
     };
   },
   methods: {
@@ -186,6 +167,14 @@ export default {
     cancelEdit() {
       this.$emit('cancel-edit');
     }
+  },
+  mounted() {
+    // 监听localStorage变化以更新交易类型
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'transactionTypes') {
+        this.transactionTypes = TypeManager.getTransactionTypes();
+      }
+    });
   }
 };
 </script>

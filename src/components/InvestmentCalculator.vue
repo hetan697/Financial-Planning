@@ -22,10 +22,12 @@
             size="small"
             class="option-type-select"
           >
-            <el-option label="股票" value="股票"></el-option>
-            <el-option label="基金" value="基金"></el-option>
-            <el-option label="债券" value="债券"></el-option>
-            <el-option label="其他" value="其他"></el-option>
+            <el-option 
+              v-for="type in investmentTypes" 
+              :key="type" 
+              :label="type" 
+              :value="type"
+            ></el-option>
           </el-select>
           
           <el-input 
@@ -125,6 +127,7 @@
 
 <script>
 import { ElButton, ElInput, ElInputNumber, ElSlider, ElSelect, ElOption } from 'element-plus';
+import TypeManager from '../utils/TypeManager.js';
 
 export default {
   name: 'InvestmentCalculator',
@@ -148,6 +151,7 @@ export default {
   },
   data() {
     return {
+      investmentTypes: TypeManager.getInvestmentTypes(),
       investmentOptions: [
         { 
           type: '股票',
@@ -223,8 +227,9 @@ export default {
   methods: {
     // 添加投资方式
     addInvestmentOption() {
+      const firstType = this.investmentTypes.length > 0 ? this.investmentTypes[0] : '股票';
       this.investmentOptions.push({
-        type: '股票',
+        type: firstType,
         name: '新投资方式',
         percentage: 0,
         returnRate: 5.0
@@ -248,6 +253,14 @@ export default {
       },
       deep: true
     }
+  },
+  mounted() {
+    // 监听localStorage变化以更新投资类型
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'investmentTypes') {
+        this.investmentTypes = TypeManager.getInvestmentTypes();
+      }
+    });
   }
 };
 </script>

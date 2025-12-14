@@ -47,7 +47,14 @@
      * 计算整体资产收益率（相对于用户总资产的收益率）
      * 使用独立的 InvestmentCalculator 组件封装复杂计算逻辑
 
-   d. **数据导入导出功能：**
+   d. **类型管理：**
+   - 支持自定义投资类型和交易类型（收入/支出明细）
+   - 所有类型存储在localStorage中，前端读取localStorage字段生成选项
+   - 提供类型管理界面，允许用户添加、删除和修改类型
+   - 类型可以和其他数据一起导入和导出
+   - 应用启动时自动初始化类型数据
+
+   e. **数据导入导出功能：**
    - 支持将所有数据导出为JSON文件
    - 支持从JSON文件导入数据
    - 提供数据清除功能
@@ -63,6 +70,8 @@
    ├── src/                    # 源代码目录
    │   ├── main.js             # Vue应用入口
    │   ├── App.vue             # 主应用组件
+   │   ├── utils/              # 工具函数目录
+   │   │   └── TypeManager.js  # 类型管理工具
    │   └── components/         # Vue组件
    │       ├── Dashboard.vue           # 数据看板组件
    │       ├── SummarySection.vue      # 摘要展示组件
@@ -74,7 +83,9 @@
    │       ├── InvestmentForm.vue      # 投资表单组件
    │       ├── InvestmentList.vue      # 投资列表组件
    │       ├── InvestmentAdvice.vue    # 投资建议组件
-   │       └── InvestmentCalculator.vue # 投资计算器组件
+   │       ├── InvestmentCalculator.vue # 投资计算器组件
+   │       ├── TypeManagement.vue      # 类型管理组件
+   │       └── TransactionsView.vue    # 财务记录视图组件
    └── docs/                   # 文档目录
    ```
 
@@ -85,7 +96,7 @@
    - 支持数据导入导出功能
 
 5. **用户体验要求：**
-   - 导航栏式界面（数据看板、财务记录、投资管理）
+   - 导航栏式界面（数据看板、财务记录、投资管理、类型管理）
    - 美观现代的UI设计，使用Element Plus组件库
    - 数据可视化展示（进度条、图表等）
    - 清晰的操作反馈和错误提示

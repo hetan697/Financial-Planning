@@ -13,6 +13,7 @@
           <el-menu-item index="dashboard">数据看板</el-menu-item>
           <el-menu-item index="transactions">财务记录</el-menu-item>
           <el-menu-item index="investments">投资管理</el-menu-item>
+          <el-menu-item index="type-management">类型管理</el-menu-item>
         </el-menu>
 
         <!-- 数据看板视图 -->
@@ -70,6 +71,11 @@
             @cancel="cancelInvestment"
           />
         </div>
+        
+        <!-- 类型管理视图 -->
+        <div v-show="activeTab === 'type-management'">
+          <TypeManagement />
+        </div>
       </el-main>
     </el-container>
     
@@ -92,6 +98,8 @@ import InvestmentManagement from './components/InvestmentManagement.vue';
 import Dashboard from './components/Dashboard.vue';
 import InvestmentPage from './components/InvestmentPage.vue';
 import TransactionsView from './components/TransactionsView.vue';
+import TypeManagement from './components/TypeManagement.vue';
+import TypeManager from './utils/TypeManager.js';
 
 export default {
   name: 'FinanceApp',
@@ -109,7 +117,8 @@ export default {
     InvestmentManagement,
     Dashboard,
     InvestmentPage,
-    TransactionsView
+    TransactionsView,
+    TypeManagement
   },
   data() {
     return {
@@ -172,6 +181,16 @@ export default {
           
           this.transactions = data.transactions || [];
           this.investments = data.investments || [];
+          
+          // 如果有类型数据，则导入类型数据
+          if (data.investmentTypes) {
+            TypeManager.setInvestmentTypes(data.investmentTypes);
+          }
+          
+          if (data.transactionTypes) {
+            TypeManager.setTransactionTypes(data.transactionTypes);
+          }
+          
           this.saveToLocalStorage();
           this.$message.success('数据导入成功');
         } catch (error) {
@@ -216,7 +235,9 @@ export default {
       try {
         const data = {
           transactions: this.transactions,
-          investments: this.investments
+          investments: this.investments,
+          investmentTypes: TypeManager.getInvestmentTypes(),
+          transactionTypes: TypeManager.getTransactionTypes()
         };
         const jsonData = JSON.stringify(data, null, 2);
         const blob = new Blob([jsonData], { type: 'application/json' });
@@ -246,6 +267,9 @@ export default {
       }).then(() => {
         this.transactions = [];
         this.investments = [];
+        // 重置为默认类型
+        TypeManager.setInvestmentTypes(TypeManager.defaultInvestmentTypes);
+        TypeManager.setTransactionTypes(TypeManager.defaultTransactionTypes);
         this.saveToLocalStorage();
         this.$message.success('数据已清空');
       }).catch(() => {
@@ -424,6 +448,8 @@ export default {
     }
   },
   mounted() {
+    // 初始化类型管理器
+    TypeManager.initialize();
     this.loadFromLocalStorage();
   }
 };
