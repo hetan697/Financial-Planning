@@ -3,174 +3,168 @@
     <el-tabs v-model="activeTab" type="card">
       <!-- 数据管理标签页 -->
       <el-tab-pane label="数据管理" name="data">
-        <el-card class="management-card">
-          <template #header>
-            <div class="card-header">
-              <span>数据管理</span>
-            </div>
-          </template>
-          
-          <div class="data-management-section">
-            <h4>数据操作</h4>
-            <div class="data-management-actions">
-              <el-button @click="exportData" type="primary">
-                <el-icon><Upload /></el-icon>
-                导出数据
-              </el-button>
-              <el-button @click="triggerImport" type="success">
-                <el-icon><Download /></el-icon>
-                导入数据
-              </el-button>
-              <el-button @click="clearData" type="danger">
-                <el-icon><Delete /></el-icon>
-                清除数据
-              </el-button>
-              <input 
-                ref="fileInput" 
-                type="file" 
-                accept=".json" 
-                @change="importData" 
-                style="display: none;"
-              />
+        <div class="management-section">
+          <h2 class="section-title">数据管理</h2>
+          <div class="data-management-content">
+            <div class="management-card">
+              <h3>数据操作</h3>
+              <div class="data-management-actions">
+                <el-button @click="exportData" type="primary" round>
+                  <el-icon><Upload /></el-icon>
+                  导出数据
+                </el-button>
+                <el-button @click="triggerImport" type="success" round>
+                  <el-icon><Download /></el-icon>
+                  导入数据
+                </el-button>
+                <el-button @click="clearData" type="danger" round>
+                  <el-icon><Delete /></el-icon>
+                  清除数据
+                </el-button>
+                <input 
+                  ref="fileInput" 
+                  type="file" 
+                  accept=".json" 
+                  @change="importData" 
+                  style="display: none;"
+                />
+              </div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-tab-pane>
       
       <!-- 类型管理标签页 -->
       <el-tab-pane label="类型管理" name="types">
-        <el-card class="management-card">
-          <template #header>
-            <div class="card-header">
-              <span>类型管理</span>
-            </div>
-          </template>
-          
-          <!-- 投资类型管理 -->
-          <div class="type-section">
-            <h4>投资类型</h4>
-            <draggable 
-              v-model="localInvestmentTypes" 
-              tag="div"
-              class="type-list"
-              handle=".drag-handle"
-              item-key="index"
-            >
-              <template #item="{ element, index }">
-                <div class="type-item">
-                  <div class="drag-handle">
-                    <el-icon><Rank /></el-icon>
+        <div class="management-section">
+          <h2 class="section-title">类型管理</h2>
+          <div class="type-management-content">
+            <!-- 投资类型管理 -->
+            <div class="type-section">
+              <h3>投资类型</h3>
+              <draggable 
+                v-model="localInvestmentTypes" 
+                tag="div"
+                class="type-list"
+                handle=".drag-handle"
+                item-key="index"
+              >
+                <template #item="{ element, index }">
+                  <div class="type-item">
+                    <div class="drag-handle">
+                      <el-icon><Rank /></el-icon>
+                    </div>
+                    <el-input 
+                      v-model="localInvestmentTypes[index]" 
+                      size="small"
+                      @blur="validateInvestmentType(index)"
+                    />
+                    <el-button 
+                      @click="removeInvestmentType(index)" 
+                      size="small" 
+                      type="danger"
+                      circle
+                    >
+                      ×
+                    </el-button>
                   </div>
-                  <el-input 
-                    v-model="localInvestmentTypes[index]" 
-                    size="small"
-                    @blur="validateInvestmentType(index)"
-                  />
-                  <el-button 
-                    @click="removeInvestmentType(index)" 
-                    size="small" 
-                    type="danger"
-                    circle
+                </template>
+              </draggable>
+              <el-button @click="addInvestmentType" size="small" type="primary" round>
+                添加投资类型
+              </el-button>
+            </div>
+            
+            <!-- 交易类型管理 -->
+            <div class="type-section">
+              <h3>交易类型</h3>
+              
+              <div class="transaction-types">
+                <div class="transaction-type-group">
+                  <h4>收入类型</h4>
+                  <draggable 
+                    v-model="localTransactionTypes.income" 
+                    tag="div"
+                    class="type-list"
+                    handle=".drag-handle"
+                    item-key="index"
                   >
-                    ×
+                    <template #item="{ element, index }">
+                      <div class="type-item">
+                        <div class="drag-handle">
+                          <el-icon><Rank /></el-icon>
+                        </div>
+                        <el-input 
+                          v-model="localTransactionTypes.income[index]" 
+                          size="small"
+                          @blur="validateTransactionType('income', index)"
+                        />
+                        <el-button 
+                          @click="removeTransactionType('income', index)" 
+                          size="small" 
+                          type="danger"
+                          circle
+                        >
+                          ×
+                        </el-button>
+                      </div>
+                    </template>
+                  </draggable>
+                  <el-button @click="addTransactionType('income')" size="small" type="primary" round>
+                    添加收入类型
                   </el-button>
                 </div>
-              </template>
-            </draggable>
-            <el-button @click="addInvestmentType" size="small" type="primary">
-              添加投资类型
-            </el-button>
-          </div>
-          
-          <!-- 交易类型管理 -->
-          <div class="type-section">
-            <h4>交易类型</h4>
-            
-            <div class="transaction-types">
-              <div class="transaction-type-group">
-                <h5>收入类型</h5>
-                <draggable 
-                  v-model="localTransactionTypes.income" 
-                  tag="div"
-                  class="type-list"
-                  handle=".drag-handle"
-                  item-key="index"
-                >
-                  <template #item="{ element, index }">
-                    <div class="type-item">
-                      <div class="drag-handle">
-                        <el-icon><Rank /></el-icon>
+                
+                <div class="transaction-type-group">
+                  <h4>支出类型</h4>
+                  <draggable 
+                    v-model="localTransactionTypes.expense" 
+                    tag="div"
+                    class="type-list"
+                    handle=".drag-handle"
+                    item-key="index"
+                  >
+                    <template #item="{ element, index }">
+                      <div class="type-item">
+                        <div class="drag-handle">
+                          <el-icon><Rank /></el-icon>
+                        </div>
+                        <el-input 
+                          v-model="localTransactionTypes.expense[index]" 
+                          size="small"
+                          @blur="validateTransactionType('expense', index)"
+                        />
+                        <el-button 
+                          @click="removeTransactionType('expense', index)" 
+                          size="small" 
+                          type="danger"
+                          circle
+                        >
+                          ×
+                        </el-button>
                       </div>
-                      <el-input 
-                        v-model="localTransactionTypes.income[index]" 
-                        size="small"
-                        @blur="validateTransactionType('income', index)"
-                      />
-                      <el-button 
-                        @click="removeTransactionType('income', index)" 
-                        size="small" 
-                        type="danger"
-                        circle
-                      >
-                        ×
-                      </el-button>
-                    </div>
-                  </template>
-                </draggable>
-                <el-button @click="addTransactionType('income')" size="small" type="primary">
-                  添加收入类型
-                </el-button>
-              </div>
-              
-              <div class="transaction-type-group">
-                <h5>支出类型</h5>
-                <draggable 
-                  v-model="localTransactionTypes.expense" 
-                  tag="div"
-                  class="type-list"
-                  handle=".drag-handle"
-                  item-key="index"
-                >
-                  <template #item="{ element, index }">
-                    <div class="type-item">
-                      <div class="drag-handle">
-                        <el-icon><Rank /></el-icon>
-                      </div>
-                      <el-input 
-                        v-model="localTransactionTypes.expense[index]" 
-                        size="small"
-                        @blur="validateTransactionType('expense', index)"
-                      />
-                      <el-button 
-                        @click="removeTransactionType('expense', index)" 
-                        size="small" 
-                        type="danger"
-                        circle
-                      >
-                        ×
-                      </el-button>
-                    </div>
-                  </template>
-                </draggable>
-                <el-button @click="addTransactionType('expense')" size="small" type="primary">
-                  添加支出类型
-                </el-button>
+                    </template>
+                  </draggable>
+                  <el-button @click="addTransactionType('expense')" size="small" type="primary" round>
+                    添加支出类型
+                  </el-button>
+                </div>
               </div>
             </div>
+            
+            <div class="form-actions">
+              <el-button @click="saveTypes" type="primary" round>保存类型设置</el-button>
+              <el-button @click="resetTypes" round>重置为默认</el-button>
+            </div>
           </div>
-          
-          <div class="form-actions">
-            <el-button @click="saveTypes" type="primary">保存类型设置</el-button>
-            <el-button @click="resetTypes">重置为默认</el-button>
-          </div>
-        </el-card>
+        </div>
       </el-tab-pane>
     </el-tabs>
   </div>
 </template>
 
 <script>
-import { ElCard, ElButton, ElInput, ElIcon, ElTabs, ElTabPane } from 'element-plus';
+import { ElButton, ElInput, ElIcon, ElTabs, ElTabPane } from 'element-plus';
 import { Upload, Download, Delete, Rank } from '@element-plus/icons-vue';
 import draggable from 'vuedraggable';
 import TypeManager from '../utils/TypeManager.js';
@@ -178,7 +172,6 @@ import TypeManager from '../utils/TypeManager.js';
 export default {
   name: 'TypeManagement',
   components: {
-    ElCard,
     ElButton,
     ElInput,
     ElIcon,
@@ -289,26 +282,41 @@ export default {
 </script>
 
 <style scoped>
-.type-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  gap: 10px;
+.type-management {
+  padding: 20px 0;
 }
 
-.drag-handle {
-  cursor: move;
-  padding: 5px;
+.management-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 20px;
 }
 
-.type-item :deep(.el-input) {
-  flex: 1;
-}
-
-.data-management-section h4 {
-  margin-top: 0;
-  margin-bottom: 15px;
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 20px 0;
   color: #333;
+}
+
+.data-management-content,
+.type-management-content {
+  padding: 10px 0;
+}
+
+.management-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.management-card h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 1.2rem;
 }
 
 .data-management-actions {
@@ -326,39 +334,71 @@ export default {
 .transaction-types {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  gap: 30px;
+  margin-bottom: 30px;
 }
 
-.transaction-type-group h5 {
+.transaction-type-group h4 {
   margin-top: 0;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   color: #666;
+  font-size: 1.1rem;
 }
 
 .type-section {
   margin-bottom: 30px;
 }
 
-.type-section h4 {
+.type-section h3 {
   margin-top: 0;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   color: #333;
+  font-size: 1.2rem;
+}
+
+.type-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+.drag-handle {
+  cursor: move;
+  padding: 5px;
+  background: #e8f4ff;
+  border-radius: 4px;
+}
+
+.type-item :deep(.el-input) {
+  flex: 1;
 }
 
 .form-actions {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
 }
 
-/* 响应式设计 - 统一的组件间距 */
+/* 响应式设计 */
 @media (max-width: 768px) {
-  .management-card {
-    margin-bottom: 20px;
+  .type-management {
+    padding: 15px 0;
+  }
+  
+  .management-section {
+    padding: 15px;
+  }
+  
+  .section-title {
+    font-size: 1.3rem;
   }
   
   .transaction-types {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
   
   .form-actions {

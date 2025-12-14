@@ -1,35 +1,44 @@
 <template>
   <div class="finance-app">
-    <el-container>
-      <el-main>
-        <!-- 导航菜单 -->
-        <el-menu 
-          :default-active="activeTab" 
-          mode="horizontal" 
-          @select="handleMenuSelect"
-          class="main-navigation"
-        >
-          <el-menu-item index="0" disabled class="app-title">
-            <span class="app-name-text">{{ appName }}</span>
-          </el-menu-item>
-          <el-menu-item index="dashboard" class="nav-item">
-            <el-icon><DataAnalysis /></el-icon>
-            <span class="nav-text">看板</span>
-          </el-menu-item>
-          <el-menu-item index="transactions" class="nav-item">
-            <el-icon><TrendCharts /></el-icon>
-            <span class="nav-text">收支</span>
-          </el-menu-item>
-          <el-menu-item index="investments" class="nav-item">
-            <el-icon><Coin /></el-icon>
-            <span class="nav-text">投资</span>
-          </el-menu-item>
-          <el-menu-item index="type-management" class="nav-item">
-            <el-icon><Setting /></el-icon>
-            <span class="nav-text">管理</span>
-          </el-menu-item>
-        </el-menu>
+    <!-- 桌面端侧边栏导航 -->
+    <div class="desktop-sidebar" v-if="!isMobile">
+      <div class="app-logo">
+        <h2>{{ appName }}</h2>
+      </div>
+      <el-menu 
+        :default-active="activeTab" 
+        @select="handleMenuSelect"
+        class="sidebar-menu"
+        :collapse="false"
+      >
+        <el-menu-item index="dashboard" class="nav-item">
+          <el-icon><DataAnalysis /></el-icon>
+          <span class="nav-text">看板</span>
+        </el-menu-item>
+        <el-menu-item index="transactions" class="nav-item">
+          <el-icon><TrendCharts /></el-icon>
+          <span class="nav-text">收支</span>
+        </el-menu-item>
+        <el-menu-item index="investments" class="nav-item">
+          <el-icon><Coin /></el-icon>
+          <span class="nav-text">投资</span>
+        </el-menu-item>
+        <el-menu-item index="type-management" class="nav-item">
+          <el-icon><Setting /></el-icon>
+          <span class="nav-text">管理</span>
+        </el-menu-item>
+      </el-menu>
+    </div>
 
+    <!-- 主内容区域 -->
+    <div class="main-content">
+      <!-- 移动端顶部标题 -->
+      <div class="mobile-header" v-if="isMobile">
+        <h2>{{ appName }}</h2>
+      </div>
+
+      <!-- 内容区域 -->
+      <div class="content-area">
         <!-- 数据看板视图 -->
         <div v-show="activeTab === 'dashboard'">
           <Dashboard 
@@ -91,8 +100,35 @@
             @clear-data="clearAllData"
           />
         </div>
-      </el-main>
-    </el-container>
+      </div>
+    </div>
+
+    <!-- 移动端底部导航栏 -->
+    <div class="mobile-navbar" v-if="isMobile">
+      <el-menu 
+        :default-active="activeTab" 
+        mode="horizontal" 
+        @select="handleMenuSelect"
+        class="mobile-menu"
+      >
+        <el-menu-item index="dashboard" class="nav-item">
+          <el-icon><DataAnalysis /></el-icon>
+          <span class="nav-text">看板</span>
+        </el-menu-item>
+        <el-menu-item index="transactions" class="nav-item">
+          <el-icon><TrendCharts /></el-icon>
+          <span class="nav-text">收支</span>
+        </el-menu-item>
+        <el-menu-item index="investments" class="nav-item">
+          <el-icon><Coin /></el-icon>
+          <span class="nav-text">投资</span>
+        </el-menu-item>
+        <el-menu-item index="type-management" class="nav-item">
+          <el-icon><Setting /></el-icon>
+          <span class="nav-text">管理</span>
+        </el-menu-item>
+      </el-menu>
+    </div>
     
     <!-- 全局错误提示 -->
     <el-dialog v-model="errorDialogVisible" title="错误" width="30%">
@@ -105,77 +141,73 @@
 </template>
 
 <script>
-import { ElContainer, ElHeader, ElMain, ElMenu, ElMenuItem, ElDialog, ElButton, ElIcon } from 'element-plus';
+import { ElContainer, ElAside, ElMain, ElMenu, ElMenuItem, ElIcon, ElDialog, ElButton } from 'element-plus';
 import { DataAnalysis, TrendCharts, Coin, Setting } from '@element-plus/icons-vue';
-import SummarySection from './components/SummarySection.vue';
-import TypeManagement from './components/TypeManagement.vue';
+import Dashboard from './components/dashboard/Dashboard.vue';
 import TransactionsView from './components/transactions/TransactionsView.vue';
 import TransactionPage from './components/transactions/TransactionPage.vue';
 import InvestmentManagement from './components/investments/InvestmentManagement.vue';
 import InvestmentPage from './components/investments/InvestmentPage.vue';
-import Dashboard from './components/dashboard/Dashboard.vue';
-import TypeManager from './utils/TypeManager.js';
+import TypeManagement from './components/TypeManagement.vue';
 
 export default {
-  name: 'FinanceApp',
+  name: 'App',
   components: {
     ElContainer,
-    ElHeader,
+    ElAside,
     ElMain,
     ElMenu,
     ElMenuItem,
+    ElIcon,
     ElDialog,
     ElButton,
-    ElIcon,
     DataAnalysis,
     TrendCharts,
     Coin,
     Setting,
-    SummarySection,
+    Dashboard,
+    TransactionsView,
     TransactionPage,
     InvestmentManagement,
-    Dashboard,
     InvestmentPage,
-    TransactionsView,
     TypeManagement
   },
   data() {
     return {
-      appName: '个人财务管理系统',
+      appName: '财务管理',
       activeTab: 'dashboard',
-      transactions: [],
-      investments: [],
+      isEditing: false,
+      isEditingInvestment: false,
       showTransactionPage: false,
       showInvestmentPage: false,
       currentTransaction: null,
       currentInvestment: null,
-      isEditing: false,
-      isEditingInvestment: false,
+      transactions: [],
+      investments: [],
       errorDialogVisible: false,
-      errorMessage: ''
+      errorMessage: '',
+      isMobile: false
     };
   },
   computed: {
     balance() {
       const totalIncome = this.transactions
-        .filter(transaction => transaction.type === 'income')
+        .filter(t => t.type === 'income')
         .reduce((sum, transaction) => sum + transaction.amount, 0);
+      
       const totalExpense = this.transactions
-        .filter(transaction => transaction.type === 'expense')
+        .filter(t => t.type === 'expense')
         .reduce((sum, transaction) => sum + transaction.amount, 0);
+      
       return totalIncome - totalExpense;
-    },
-    totalInvestmentValue() {
-      return this.investments.reduce((sum, investment) => {
-        const currentValue = investment.currentPrice !== null ? 
-          investment.currentPrice : investment.purchasePrice;
-        return sum + (investment.quantity * currentValue);
-      }, 0);
     }
   },
   methods: {
     handleMenuSelect(index) {
       this.activeTab = index;
+      // 当切换页面时，确保返回列表视图而不是表单视图
+      this.showTransactionPage = false;
+      this.showInvestmentPage = false;
     },
     // 显示错误信息
     showError(message) {
@@ -464,67 +496,162 @@ export default {
     },
     cancelInvestmentEdit() {
       this.$emit('cancel-edit');
+    },
+    checkIsMobile() {
+      this.isMobile = window.innerWidth <= 768;
     }
   },
   mounted() {
     // 初始化类型管理器
     TypeManager.initialize();
     this.loadFromLocalStorage();
+    
+    // 检测是否为移动设备
+    this.checkIsMobile();
+    window.addEventListener('resize', this.checkIsMobile);
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.checkIsMobile);
   }
 };
 </script>
 
 <style scoped>
 .finance-app {
+  display: flex;
   height: 100vh;
+  background-color: #f5f6f7;
+}
+
+.desktop-sidebar {
+  width: 220px;
+  background: linear-gradient(135deg, #409eff, #64b5f6);
+  color: white;
+  height: 100%;
+  position: fixed;
+  z-index: 100;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.app-logo {
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.app-logo h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.sidebar-menu {
+  border: none !important;
+  background: transparent !important;
+  margin-top: 20px;
+}
+
+.sidebar-menu :deep(.el-menu-item) {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 1rem;
+  height: 50px;
+  margin: 5px 10px;
+  border-radius: 8px;
+}
+
+.sidebar-menu :deep(.el-menu-item:hover) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+.sidebar-menu :deep(.el-menu-item.is-active) {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 220px;
   display: flex;
   flex-direction: column;
-  background-color: #f5f5f5;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.main-navigation {
-  flex-shrink: 0;
+.mobile-header {
+  background: linear-gradient(135deg, #409eff, #64b5f6);
+  color: white;
+  padding: 15px 20px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 99;
 }
 
-.el-main {
-  padding: 0;
+.mobile-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.content-area {
   flex: 1;
   overflow-y: auto;
+  padding: 20px;
 }
 
-.app-title {
-  font-weight: bold;
-  cursor: default;
-  opacity: 1.0;
+.mobile-navbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
 }
 
-.nav-item .el-icon {
-  margin-right: 5px;
+.mobile-menu {
+  border: none !important;
 }
 
-/* 移动端适配 */
+.mobile-menu :deep(.el-menu-item) {
+  height: 60px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.mobile-menu :deep(.el-menu-item .el-icon) {
+  margin: 0 0 4px 0;
+  font-size: 1.2rem;
+}
+
+.mobile-menu :deep(.el-menu-item.is-active) {
+  color: #409eff !important;
+}
+
+/* 响应式设计 */
 @media (max-width: 768px) {
-  .nav-text {
+  .desktop-sidebar {
     display: none;
   }
   
-  .nav-item .el-icon {
-    margin-right: 0;
+  .main-content {
+    margin-left: 0;
+    margin-bottom: 60px;
   }
   
-  .app-title {
-    display: none;
-  }
-  
-  .app-name-text {
-    display: none;
+  .content-area {
+    padding: 15px;
   }
 }
 
 @media (min-width: 769px) {
-  .nav-item .el-icon {
-    margin-right: 5px;
+  .mobile-header,
+  .mobile-navbar {
+    display: none;
   }
 }
-
 </style>

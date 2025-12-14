@@ -1,94 +1,134 @@
 <template>
   <div class="transactions-view">
     <!-- 财务概览 -->
-    <el-card class="summary-card">
-      <template #header>
-        <div class="card-header">
-          <span>财务概览</span>
-          <div class="date-filter">
-            <el-select 
-              v-model="selectedYear" 
-              placeholder="选择年份" 
-              size="small"
-              @change="updateDateFilter"
-            >
-              <el-option
-                v-for="year in availableYears"
-                :key="year"
-                :label="year"
-                :value="year"
-              />
-            </el-select>
-            <el-select 
-              v-model="selectedMonth" 
-              placeholder="选择月份" 
-              size="small"
-              @change="updateDateFilter"
-            >
-              <el-option
-                v-for="month in months"
-                :key="month.value"
-                :label="month.label"
-                :value="month.value"
-              />
-            </el-select>
-            <el-checkbox 
-              v-model="isYearSummary" 
-              @change="toggleYearSummary"
-              size="small"
-            >
-              按年统计
-            </el-checkbox>
+    <div class="summary-section">
+      <div class="summary-header">
+        <h2 class="section-title">财务概览</h2>
+        <div class="date-filter">
+          <el-select 
+            v-model="selectedYear" 
+            placeholder="选择年份" 
+            size="small"
+            @change="updateDateFilter"
+          >
+            <el-option
+              v-for="year in availableYears"
+              :key="year"
+              :label="year"
+              :value="year"
+            />
+          </el-select>
+          <el-select 
+            v-model="selectedMonth" 
+            placeholder="选择月份" 
+            size="small"
+            @change="updateDateFilter"
+          >
+            <el-option
+              v-for="month in months"
+              :key="month.value"
+              :label="month.label"
+              :value="month.value"
+            />
+          </el-select>
+          <el-checkbox 
+            v-model="isYearSummary" 
+            @change="toggleYearSummary"
+            size="small"
+          >
+            按年统计
+          </el-checkbox>
+        </div>
+      </div>
+      
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="summary-icon income">
+            <el-icon><TrendCharts /></el-icon>
+          </div>
+          <div class="summary-content">
+            <h3>总收入</h3>
+            <p class="amount income">¥{{ filteredTotalIncome.toFixed(2) }}</p>
           </div>
         </div>
-      </template>
-      
-      <SummarySection 
-        :total-income="filteredTotalIncome" 
-        :total-expense="filteredTotalExpense" 
-        :balance="filteredBalance"
-        :investment-total="investmentTotal"
-      />
-    </el-card>
+        
+        <div class="summary-card">
+          <div class="summary-icon expense">
+            <el-icon><TrendCharts /></el-icon>
+          </div>
+          <div class="summary-content">
+            <h3>总支出</h3>
+            <p class="amount expense">¥{{ filteredTotalExpense.toFixed(2) }}</p>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="summary-icon balance">
+            <el-icon><Wallet /></el-icon>
+          </div>
+          <div class="summary-content">
+            <h3>账户余额</h3>
+            <p 
+              class="amount" 
+              :class="{ expense: filteredBalance < 0, income: filteredBalance >= 0 }"
+            >
+              ¥{{ filteredBalance.toFixed(2) }}
+            </p>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="summary-icon investment">
+            <el-icon><Coin /></el-icon>
+          </div>
+          <div class="summary-content">
+            <h3>投资总额</h3>
+            <p class="amount investment">¥{{ investmentTotal.toFixed(2) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
     
     <!-- 交易列表 -->
-    <el-card class="transaction-list-card">
-      <template #header>
-        <div class="card-header">
-          <span>交易记录</span>
-          <el-button 
-            type="primary" 
-            size="small" 
-            @click="$emit('add-transaction')"
-          >
-            添加交易
-          </el-button>
-        </div>
-      </template>
+    <div class="transactions-section">
+      <div class="section-header">
+        <h2 class="section-title">交易记录</h2>
+        <el-button 
+          type="primary" 
+          @click="$emit('add-transaction')"
+          round
+        >
+          添加交易
+        </el-button>
+      </div>
       
-      <TransactionList 
-        :transactions="filteredSortedTransactions" 
-        @delete-transaction="$emit('delete-transaction', $event)"
-        @edit-transaction="$emit('edit-transaction', $event)"
-      />
-    </el-card>
+      <div class="transactions-content">
+        <TransactionList 
+          :transactions="filteredSortedTransactions" 
+          @delete-transaction="$emit('delete-transaction', $event)"
+          @edit-transaction="$emit('edit-transaction', $event)"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import { ElCard, ElButton, ElSelect, ElOption, ElCheckbox } from 'element-plus';
-import SummarySection from '../../components/SummarySection.vue';
+import { ElButton, ElSelect, ElOption, ElCheckbox, ElIcon } from 'element-plus';
+import { TrendCharts, Coin, Wallet } from '@element-plus/icons-vue';
 import TransactionList from './TransactionList.vue';
 
 export default {
   name: 'TransactionsView',
   components: {
-    ElCard,
     ElButton,
     ElSelect,
     ElOption,
     ElCheckbox,
-    SummarySection,
+    ElIcon,
+    TrendCharts,
+    Coin,
+    Wallet,
     TransactionList
   },
   props: {
@@ -186,12 +226,24 @@ export default {
 </script>
 
 <style scoped>
-.card-header {
+.transactions-view {
+  padding: 20px 0;
+}
+
+.summary-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 15px;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
 }
 
 .date-filter {
@@ -201,13 +253,114 @@ export default {
   flex-wrap: wrap;
 }
 
+.summary-section {
+  margin-bottom: 30px;
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
 .summary-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.summary-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.summary-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+}
+
+.summary-icon.income {
+  background: rgba(245, 108, 108, 0.1);
+  color: #f56c6c;
+}
+
+.summary-icon.expense {
+  background: rgba(103, 194, 58, 0.1);
+  color: #67c23a;
+}
+
+.summary-icon.balance {
+  background: rgba(102, 184, 255, 0.1);
+  color: #409eff;
+}
+
+.summary-icon.investment {
+  background: rgba(142, 84, 228, 0.1);
+  color: #8e54e4;
+}
+
+.summary-content h3 {
+  margin: 0 0 5px 0;
+  font-size: 1rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.amount {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.amount.income {
+  color: #f56c6c;
+}
+
+.amount.expense {
+  color: #67c23a;
+}
+
+.amount.investment {
+  color: #8e54e4;
+}
+
+.transactions-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.transactions-content {
+  /* 交易列表内容 */
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .card-header {
+  .transactions-view {
+    padding: 15px 0;
+  }
+  
+  .summary-header,
+  .section-header {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -215,6 +368,45 @@ export default {
   .date-filter {
     width: 100%;
     justify-content: space-between;
+  }
+  
+  .section-title {
+    font-size: 1.3rem;
+  }
+  
+  .summary-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+  .summary-card {
+    padding: 15px;
+  }
+  
+  .summary-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    margin-right: 10px;
+  }
+  
+  .amount {
+    font-size: 1.2rem;
+  }
+  
+  .transactions-section {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .date-filter {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 </style>
