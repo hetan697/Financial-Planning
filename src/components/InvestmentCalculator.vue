@@ -16,12 +16,25 @@
         class="investment-option-card"
       >
         <div class="option-header">
+          <el-select 
+            v-model="option.type" 
+            placeholder="投资类型"
+            size="small"
+            class="option-type-select"
+          >
+            <el-option label="股票" value="股票"></el-option>
+            <el-option label="基金" value="基金"></el-option>
+            <el-option label="债券" value="债券"></el-option>
+            <el-option label="其他" value="其他"></el-option>
+          </el-select>
+          
           <el-input 
             v-model="option.name" 
             placeholder="投资方式名称"
             size="small"
             class="option-name-input"
           />
+          
           <el-button 
             @click="removeInvestmentOption(index)" 
             size="small" 
@@ -74,6 +87,7 @@
           class="summary-card"
         >
           <div class="summary-header">
+            <span class="summary-type">{{ option.type }}</span>
             <span class="summary-name">{{ option.name }}</span>
             <span class="summary-percentage">{{ option.percentage }}%</span>
           </div>
@@ -110,7 +124,7 @@
 </template>
 
 <script>
-import { ElButton, ElInput, ElInputNumber, ElSlider } from 'element-plus';
+import { ElButton, ElInput, ElInputNumber, ElSlider, ElSelect, ElOption } from 'element-plus';
 
 export default {
   name: 'InvestmentCalculator',
@@ -118,7 +132,9 @@ export default {
     ElButton,
     ElInput,
     ElInputNumber,
-    ElSlider
+    ElSlider,
+    ElSelect,
+    ElOption
   },
   props: {
     investableFund: {
@@ -134,24 +150,28 @@ export default {
     return {
       investmentOptions: [
         { 
-          name: '银行定期存款', 
+          type: '股票',
+          name: '股票投资', 
           percentage: 30, 
-          returnRate: 2.1 
-        },
-        { 
-          name: '货币基金', 
-          percentage: 20, 
-          returnRate: 2.8 
-        },
-        { 
-          name: '债券基金', 
-          percentage: 30, 
-          returnRate: 4.5 
-        },
-        { 
-          name: '股票基金', 
-          percentage: 20, 
           returnRate: 8.0 
+        },
+        { 
+          type: '基金',
+          name: '基金投资', 
+          percentage: 40, 
+          returnRate: 6.0 
+        },
+        { 
+          type: '债券',
+          name: '债券投资', 
+          percentage: 20, 
+          returnRate: 4.0 
+        },
+        { 
+          type: '其他',
+          name: '其他投资', 
+          percentage: 10, 
+          returnRate: 3.0 
         }
       ]
     };
@@ -204,6 +224,7 @@ export default {
     // 添加投资方式
     addInvestmentOption() {
       this.investmentOptions.push({
+        type: '股票',
         name: '新投资方式',
         percentage: 0,
         returnRate: 5.0
@@ -272,11 +293,15 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+  gap: 10px;
+}
+
+.option-type-select {
+  width: 100px;
 }
 
 .option-name-input {
   flex: 1;
-  margin-right: 10px;
 }
 
 .option-details .detail-row {
@@ -337,7 +362,14 @@ export default {
   margin-bottom: 10px;
 }
 
+.summary-type {
+  font-weight: bold;
+  color: #409eff;
+}
+
 .summary-name {
+  flex: 1;
+  text-align: center;
   font-weight: bold;
   font-size: 1.1em;
 }
@@ -415,6 +447,15 @@ export default {
     grid-template-columns: 1fr;
   }
   
+  .option-header {
+    flex-wrap: wrap;
+  }
+  
+  .option-type-select {
+    width: auto;
+    flex: 1;
+  }
+  
   .option-details .detail-row {
     flex-direction: column;
     align-items: flex-start;
@@ -428,6 +469,18 @@ export default {
   .option-details .detail-row :deep(.el-input-number) {
     margin: 5px 0;
     width: 100%;
+  }
+  
+  .summary-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .summary-type,
+  .summary-name,
+  .summary-percentage {
+    text-align: left;
   }
 }
 </style>
