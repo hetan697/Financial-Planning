@@ -50,7 +50,7 @@ export default {
       default: () => []
     }
   },
-  emits: ['delete-investment', 'edit-investment'],
+  emits: ['delete-investment', 'edit-investment', 'add-investment'], // 添加add-investment事件
   methods: {
     formatDate(dateString) {
       const date = new Date(dateString);
@@ -78,6 +78,10 @@ export default {
     },
     editInvestment(investment) {
       this.$emit('edit-investment', investment);
+    },
+    // 添加投资按钮点击事件
+    addInvestment() {
+      this.$emit('add-investment');
     }
   }
 };
@@ -97,6 +101,27 @@ export default {
   color: #333;
   border-bottom: 2px solid #eee;
   padding-bottom: 10px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.add-btn {
+  background-color: #409eff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.add-btn:hover {
+  background-color: #337ecc;
 }
 
 .no-investments {

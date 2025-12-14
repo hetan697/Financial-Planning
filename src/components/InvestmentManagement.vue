@@ -116,6 +116,7 @@
       :investments="investments"
       @edit-investment="editInvestment"
       @delete-investment="requestDeleteInvestment"
+      @add-investment="showAddInvestmentForm"  <!-- 添加事件监听 -->
     />
     
     <!-- 投资建议 -->
@@ -221,6 +222,12 @@ export default {
         currentPrice: null,
         purchaseDate: new Date().toISOString().substr(0, 10)
       };
+    },
+    // 显示添加投资表单
+    showAddInvestmentForm() {
+      this.newInvestment = this.getEmptyInvestment();
+      this.isEditingInvestment = false;
+      this.showInvestmentForm = true;
     },
     submitInvestment() {
       this.$refs.investmentForm.validate((valid) => {
