@@ -255,9 +255,9 @@ export default {
         }
         
         // 更新本地数据
-        this.localInvestmentTypes = validInvestmentTypes;
-        this.localTransactionTypes.income = validIncomeTypes;
-        this.localTransactionTypes.expense = validExpenseTypes;
+        this.localInvestmentTypes = [...validInvestmentTypes];
+        this.localTransactionTypes.income = [...validIncomeTypes];
+        this.localTransactionTypes.expense = [...validExpenseTypes];
         
         // 保存到TypeManager
         TypeManager.setInvestmentTypes(this.localInvestmentTypes);
@@ -269,7 +269,7 @@ export default {
         this.$message.success('类型设置保存成功');
       } catch (error) {
         console.error('保存类型设置失败:', error);
-        this.$message.error('保存类型设置失败');
+        this.$message.error('保存类型设置失败: ' + error.message);
       }
     },
     
@@ -315,6 +315,10 @@ export default {
     this.$once('hook:beforeDestroy', () => {
       window.removeEventListener('typesUpdated', handleTypesUpdated);
     });
+  },
+  beforeUnmount() {
+    // 确保在组件卸载前移除事件监听器
+    window.removeEventListener('typesUpdated', this.handleTypesUpdated);
   }
 };
 </script>
