@@ -1,109 +1,164 @@
 <template>
   <div class="investment-advice">
-    <h3>投资建议</h3>
     <div class="advice-summary">
       <p>根据您当前的财务状况，我们为您提供以下投资建议：</p>
       <div class="financial-health" v-if="balance > 0">
         <span>财务健康度: </span>
-        <div class="health-bar">
-          <div class="health-fill" :style="{ width: healthPercentage + '%' }" :class="healthLevel"></div>
-        </div>
+        <el-progress 
+          :percentage="healthPercentage" 
+          :status="healthLevelStatus"
+          :stroke-width="12"
+          :show-text="true"
+        />
         <span class="health-text" :class="healthLevel">{{ healthText }}</span>
       </div>
       <div v-else-if="balance < 0" class="negative-balance-warning">
-        <p>⚠️ 您的账户余额为负，建议优先增加收入或减少支出</p>
+        <el-alert
+          title="您的账户余额为负，建议优先增加收入或减少支出"
+          type="error"
+          show-icon
+        />
       </div>
       <div v-else class="zero-balance-info">
-        <p>ℹ️ 您还没有添加任何交易记录，建议先添加收支信息以便获取个性化投资建议</p>
+        <el-alert
+          title="您还没有添加任何交易记录，建议先添加收支信息以便获取个性化投资建议"
+          type="info"
+          show-icon
+        />
       </div>
     </div>
     
-    <div class="advice-sections">
-      <!-- 紧急备用金建议 -->
-      <div class="advice-section">
-        <h4>💰 紧急备用金</h4>
-        <p>{{ emergencyFundAdvice.message }}</p>
-        <div v-if="emergencyFundAdvice.amount" class="amount-display">
-          建议金额: <span class="amount">¥{{ emergencyFundAdvice.amount.toFixed(2) }}</span>
-        </div>
-      </div>
-      
-      <!-- 风险承受能力评估 -->
-      <div class="advice-section">
-        <h4>📊 风险承受能力评估</h4>
-        <p>根据您的资产情况，您的风险承受能力为：<strong :class="riskLevel.class">{{ riskLevel.label }}</strong></p>
-        <ul class="risk-characteristics">
-          <li v-for="(char, index) in riskLevel.characteristics" :key="index">{{ char }}</li>
-        </ul>
-      </div>
-      
-      <!-- 投资分配建议 -->
-      <div class="advice-section">
-        <h4>📈 投资组合建议</h4>
-        <p>{{ investmentAllocation.message }}</p>
-        <div class="allocation-chart" v-if="Object.keys(investmentAllocation.details).length > 0">
-          <div 
-            v-for="(detail, key) in investmentAllocation.details" 
-            :key="key"
-            class="allocation-item"
-          >
-            <div class="allocation-header">
-              <span class="allocation-name">{{ detail.name }}</span>
-              <span class="allocation-percentage">{{ detail.percentage }}%</span>
-            </div>
-            <div class="allocation-amount">¥{{ detail.amount.toFixed(2) }}</div>
-            <div class="allocation-bar">
-              <div 
-                class="allocation-fill" 
-                :style="{ width: detail.percentage + '%' }"
-                :class="getInvestmentClass(key)"
-              ></div>
-            </div>
-            <div class="allocation-description">{{ detail.description }}</div>
+    <el-tabs type="border-card">
+      <el-tab-pane label="💰 紧急备用金">
+        <div class="advice-section">
+          <p>{{ emergencyFundAdvice.message }}</p>
+          <div v-if="emergencyFundAdvice.amount" class="amount-display">
+            建议金额: <span class="amount">¥{{ emergencyFundAdvice.amount.toFixed(2) }}</span>
           </div>
         </div>
-        <div v-else class="no-allocation-advice">
-          <p>当前暂无具体的投资分配建议。建议您先建立足够的紧急备用金后再考虑投资。</p>
-        </div>
-      </div>
+      </el-tab-pane>
       
-      <!-- 投资策略建议 -->
-      <div class="advice-section">
-        <h4>🧭 投资策略</h4>
-        <div class="strategy-points">
-          <div 
-            v-for="(strategy, index) in investmentStrategies" 
+      <el-tab-pane label="📊 风险评估">
+        <div class="advice-section">
+          <p>根据您的资产情况，您的风险承受能力为：<strong :class="riskLevel.class">{{ riskLevel.label }}</strong></p>
+          <el-alert
+            :title="characteristic"
+            v-for="(characteristic, index) in riskLevel.characteristics"
             :key="index"
-            class="strategy-point"
-          >
-            <div class="strategy-number">{{ index + 1 }}</div>
-            <div class="strategy-content">
-              <h5>{{ strategy.title }}</h5>
-              <p>{{ strategy.description }}</p>
-            </div>
+            type="info"
+            style="margin-bottom: 10px;"
+          />
+        </div>
+      </el-tab-pane>
+      
+      <el-tab-pane label="📈 投资组合">
+        <div class="advice-section">
+          <p>{{ investmentAllocation.message }}</p>
+          <div class="allocation-chart" v-if="Object.keys(investmentAllocation.details).length > 0">
+            <el-row :gutter="20">
+              <el-col 
+                v-for="(detail, key) in investmentAllocation.details" 
+                :key="key"
+                :span="8"
+                :xs="24"
+              >
+                <el-card class="allocation-item">
+                  <div class="allocation-header">
+                    <span class="allocation-name">{{ detail.name }}</span>
+                    <span class="allocation-percentage">{{ detail.percentage }}%</span>
+                  </div>
+                  <div class="allocation-amount">¥{{ detail.amount.toFixed(2) }}</div>
+                  <div class="allocation-bar">
+                    <el-progress 
+                      :percentage="detail.percentage" 
+                      :show-text="false"
+                      :stroke-width="8"
+                      :color="getInvestmentColor(key)"
+                    />
+                  </div>
+                  <div class="allocation-description">{{ detail.description }}</div>
+                </el-card>
+              </el-col>
+            </el-row>
+          </div>
+          <div v-else class="no-allocation-advice">
+            <el-alert
+              title="当前暂无具体的投资分配建议。建议您先建立足够的紧急备用金后再考虑投资。"
+              type="warning"
+              show-icon
+            />
           </div>
         </div>
-      </div>
+      </el-tab-pane>
       
-      <!-- 定期复查提醒 -->
-      <div class="advice-section">
-        <h4>📅 定期复查</h4>
-        <p>{{ reviewAdvice.message }}</p>
-        <ul>
-          <li v-for="(tip, index) in reviewAdvice.tips" :key="index">{{ tip }}</li>
-        </ul>
-      </div>
-    </div>
+      <el-tab-pane label="🧭 投资策略">
+        <div class="advice-section">
+          <el-timeline>
+            <el-timeline-item
+              v-for="(strategy, index) in investmentStrategies"
+              :key="index"
+              :timestamp="'策略 ' + (index + 1)"
+              placement="top"
+            >
+              <el-card>
+                <h4>{{ strategy.title }}</h4>
+                <p>{{ strategy.description }}</p>
+              </el-card>
+            </el-timeline-item>
+          </el-timeline>
+        </div>
+      </el-tab-pane>
+      
+      <el-tab-pane label="📅 定期复查">
+        <div class="advice-section">
+          <p>{{ reviewAdvice.message }}</p>
+          <el-alert
+            :title="tip"
+            v-for="(tip, index) in reviewAdvice.tips"
+            :key="index"
+            type="success"
+            style="margin-bottom: 10px;"
+          />
+        </div>
+      </el-tab-pane>
+    </el-tabs>
     
     <div class="disclaimer">
-      <p><strong>免责声明：</strong>以上仅为一般性投资建议，不构成具体投资意见。投资有风险，请谨慎决策。</p>
+      <el-alert
+        title="以上仅为一般性投资建议，不构成具体投资意见。投资有风险，请谨慎决策。"
+        type="warning"
+        show-icon
+      />
     </div>
   </div>
 </template>
 
 <script>
+import { 
+  ElProgress, 
+  ElAlert, 
+  ElTabs, 
+  ElTabPane, 
+  ElRow, 
+  ElCol, 
+  ElCard, 
+  ElTimeline, 
+  ElTimelineItem 
+} from 'element-plus';
+
 export default {
   name: 'InvestmentAdvice',
+  components: {
+    ElProgress,
+    ElAlert,
+    ElTabs,
+    ElTabPane,
+    ElRow,
+    ElCol,
+    ElCard,
+    ElTimeline,
+    ElTimelineItem
+  },
   props: {
     balance: {
       type: Number,
@@ -114,6 +169,7 @@ export default {
       default: () => []
     }
   },
+  emits: ['allocation-change'],
   data() {
     return {
       emergencyFundMonths: 3 // 建议的应急资金月数
@@ -127,6 +183,15 @@ export default {
       if (this.balance < 5000) return 60;
       if (this.balance < 10000) return 80;
       return 100;
+    },
+    
+    // 财务健康等级状态
+    healthLevelStatus() {
+      const percentage = this.healthPercentage;
+      if (percentage < 40) return 'exception';
+      if (percentage < 70) return 'warning';
+      if (percentage < 90) return '';
+      return 'success';
     },
     
     // 财务健康等级
@@ -151,29 +216,41 @@ export default {
     
     // 紧急备用金建议
     emergencyFundAdvice() {
-      if (this.balance <= 0) {
+      // 基于过去6个月的支出记录计算月均支出
+      const expenseTransactions = this.transactions.filter(t => t.type === 'expense');
+      
+      if (expenseTransactions.length === 0) {
         return {
-          message: '您的当前余额为负，请优先考虑增加收入或减少支出。',
+          message: '您还没有任何支出记录，建议先记录至少3个月的支出数据以便更准确地计算紧急备用金。',
           amount: 0
         };
       }
       
-      // 计算紧急备用金（假设月支出为总收入的60%）
-      const monthlyExpense = this.balance * 0.6;
-      const emergencyFund = monthlyExpense * this.emergencyFundMonths;
+      // 获取过去6个月的支出记录
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
       
-      if (this.balance > emergencyFund) {
+      const recentExpenses = expenseTransactions.filter(t => new Date(t.date) >= sixMonthsAgo);
+      
+      if (recentExpenses.length === 0) {
         return {
-          message: `您已拥有足够的紧急备用金。建议保留¥${emergencyFund.toFixed(2)}作为${this.emergencyFundMonths}个月的生活费储备。`,
-          amount: emergencyFund
-        };
-      } else {
-        const needed = emergencyFund - this.balance;
-        return {
-          message: `您的紧急备用金不足。建议额外储备¥${needed.toFixed(2)}以达到${this.emergencyFundMonths}个月生活费的标准。`,
-          amount: emergencyFund
+          message: '您最近6个月没有支出记录，建议先记录至少3个月的支出数据以便更准确地计算紧急备用金。',
+          amount: 0
         };
       }
+      
+      // 计算月均支出
+      const totalExpense = recentExpenses.reduce((sum, transaction) => sum + transaction.amount, 0);
+      const monthsCount = Math.min(6, this.getMonthsCovered(recentExpenses));
+      const averageMonthlyExpense = monthsCount > 0 ? totalExpense / monthsCount : 0;
+      
+      // 紧急备用金通常为3-6个月的支出
+      const emergencyFund = averageMonthlyExpense * this.emergencyFundMonths;
+      
+      return {
+        message: `根据您最近${monthsCount}个月的支出记录，月均支出为¥${averageMonthlyExpense.toFixed(2)}。建议准备${this.emergencyFundMonths}个月的紧急备用金。`,
+        amount: emergencyFund
+      };
     },
     
     // 风险承受能力评估
@@ -234,13 +311,40 @@ export default {
         };
       }
       
-      // 计算紧急备用金（假设月支出为总收入的60%）
-      const monthlyExpense = this.balance * 0.6;
-      const emergencyFund = monthlyExpense * this.emergencyFundMonths;
+      // 计算紧急备用金（基于实际支出数据）
+      const expenseTransactions = this.transactions.filter(t => t.type === 'expense');
+      
+      if (expenseTransactions.length === 0) {
+        return {
+          message: '建议先记录至少3个月的支出数据，以便更准确地计算紧急备用金和制定投资计划。',
+          details: {}
+        };
+      }
+      
+      // 获取过去6个月的支出记录
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      const recentExpenses = expenseTransactions.filter(t => new Date(t.date) >= sixMonthsAgo);
+      
+      if (recentExpenses.length === 0) {
+        return {
+          message: '建议先记录至少3个月的支出数据，以便更准确地计算紧急备用金和制定投资计划。',
+          details: {}
+        };
+      }
+      
+      // 计算月均支出
+      const totalExpense = recentExpenses.reduce((sum, transaction) => sum + transaction.amount, 0);
+      const monthsCount = Math.min(6, this.getMonthsCovered(recentExpenses));
+      const averageMonthlyExpense = monthsCount > 0 ? totalExpense / monthsCount : 0;
+      
+      // 紧急备用金通常为3-6个月的支出
+      const emergencyFund = averageMonthlyExpense * this.emergencyFundMonths;
       
       if (this.balance <= emergencyFund) {
         return {
-          message: '您的资金尚不足以建立充足的紧急备用金，建议优先储备紧急资金。',
+          message: `您的资金尚不足以建立充足的紧急备用金（建议金额: ¥${emergencyFund.toFixed(2)}），建议优先储备紧急资金。`,
           details: {}
         };
       }
@@ -275,8 +379,11 @@ export default {
         allocation[key].amount = investableFund * (allocation[key].percentage / 100);
       });
       
+      // 发送分配建议给父组件
+      this.$emit('allocation-change', allocation);
+      
       return {
-        message: `根据您的风险承受能力(${this.riskLevel.label})，建议按以下方式分配投资资金：`,
+        message: `根据您的风险承受能力(${this.riskLevel.label})和财务状况，建议按以下方式分配投资资金：`,
         details: allocation
       };
     },
@@ -317,33 +424,36 @@ export default {
     }
   },
   methods: {
-    getInvestmentClass(type) {
-      const classes = {
-        conservative: 'conservative',
-        moderate: 'moderate',
-        aggressive: 'aggressive'
+    getInvestmentColor(type) {
+      const colors = {
+        conservative: '#17a2b8',
+        moderate: '#28a745',
+        aggressive: '#dc3545'
       };
-      return classes[type] || '';
+      return colors[type] || '#667eea';
+    },
+    
+    // 计算支出记录覆盖的月份数量
+    getMonthsCovered(transactions) {
+      if (transactions.length === 0) return 0;
+      
+      // 获取最早的和最晚的交易日期
+      const dates = transactions.map(t => new Date(t.date)).sort((a, b) => a - b);
+      const firstDate = dates[0];
+      const lastDate = dates[dates.length - 1];
+      
+      // 计算月份差
+      const yearDiff = lastDate.getFullYear() - firstDate.getFullYear();
+      const monthDiff = lastDate.getMonth() - firstDate.getMonth();
+      return yearDiff * 12 + monthDiff + 1; // +1表示包含起始和结束月份
     }
   }
 };
 </script>
 
 <style scoped>
-/* 投资建议 */
 .investment-advice {
-  background: white;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 30px;
-}
-
-.investment-advice h3 {
-  margin-bottom: 20px;
-  color: #333;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 10px;
 }
 
 .advice-summary {
@@ -360,37 +470,10 @@ export default {
   border-radius: 8px;
 }
 
-.health-bar {
-  flex: 1;
-  height: 12px;
-  background-color: #eee;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.health-fill {
-  height: 100%;
-  border-radius: 6px;
-}
-
-.health-fill.poor {
-  background-color: #dc3545;
-}
-
-.health-fill.fair {
-  background-color: #ffc107;
-}
-
-.health-fill.good {
-  background-color: #28a745;
-}
-
-.health-fill.excellent {
-  background-color: #20c997;
-}
-
 .health-text {
   font-weight: bold;
+  min-width: 60px;
+  text-align: center;
 }
 
 .health-text.poor {
@@ -412,40 +495,10 @@ export default {
 .negative-balance-warning,
 .zero-balance-info {
   margin-top: 15px;
-  padding: 15px;
-  border-radius: 8px;
-}
-
-.negative-balance-warning {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-}
-
-.zero-balance-info {
-  background-color: #cce7ff;
-  color: #004085;
-  border: 1px solid #b8daff;
-}
-
-.advice-sections {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
 }
 
 .advice-section {
-  padding: 20px;
-  border: 1px solid #eee;
-  border-radius: 8px;
-}
-
-.advice-section h4 {
-  margin: 0 0 15px 0;
-  color: #333;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  padding: 20px 0;
 }
 
 .amount-display {
@@ -456,15 +509,6 @@ export default {
 .amount {
   font-weight: bold;
   color: #28a745;
-}
-
-.risk-characteristics {
-  padding-left: 20px;
-  margin: 10px 0;
-}
-
-.risk-characteristics li {
-  margin-bottom: 5px;
 }
 
 .conservative {
@@ -480,16 +524,11 @@ export default {
 }
 
 .allocation-chart {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
   margin-top: 15px;
 }
 
 .allocation-item {
-  padding: 15px;
-  border: 1px solid #eee;
-  border-radius: 8px;
+  margin-bottom: 20px;
 }
 
 .allocation-header {
@@ -512,108 +551,17 @@ export default {
   margin-bottom: 10px;
 }
 
-.allocation-bar {
-  height: 8px;
-  background-color: #eee;
-  border-radius: 4px;
-  margin-bottom: 10px;
-  overflow: hidden;
-}
-
-.allocation-fill {
-  height: 100%;
-  border-radius: 4px;
-}
-
-.allocation-fill.conservative {
-  background-color: #17a2b8;
-}
-
-.allocation-fill.moderate {
-  background-color: #28a745;
-}
-
-.allocation-fill.aggressive {
-  background-color: #dc3545;
-}
-
 .allocation-description {
   font-size: 0.9rem;
   color: #666;
+  margin-top: 10px;
 }
 
 .no-allocation-advice {
-  background-color: #fff3cd;
-  color: #856404;
-  padding: 15px;
-  border-radius: 8px;
   margin-top: 15px;
-  border: 1px solid #ffeaa7;
-}
-
-.strategy-points {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.strategy-point {
-  display: flex;
-  gap: 15px;
-}
-
-.strategy-number {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-weight: bold;
-}
-
-.strategy-content h5 {
-  margin: 0 0 5px 0;
-  color: #333;
-}
-
-.strategy-content p {
-  margin: 0;
-  color: #666;
 }
 
 .disclaimer {
   margin-top: 30px;
-  padding: 15px;
-  background-color: #fff8e1;
-  border-radius: 8px;
-  border-left: 4px solid #ffc107;
-}
-
-.disclaimer p {
-  font-size: 0.9rem;
-  color: #666;
-  margin: 0;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .financial-health {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .allocation-chart {
-    grid-template-columns: 1fr;
-  }
-  
-  .strategy-point {
-    flex-direction: column;
-    gap: 5px;
-  }
 }
 </style>

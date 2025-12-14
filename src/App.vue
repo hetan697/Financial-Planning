@@ -438,7 +438,7 @@ export default {
 
 <style scoped>
 .finance-app {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -463,14 +463,6 @@ export default {
 @media (max-width: 768px) {
   .finance-app {
     padding: 10px;
-  }
-  
-  .tab-navigation {
-    justify-content: center;
-  }
-  
-  .button-group {
-    flex-direction: column;
   }
 }
 </style>

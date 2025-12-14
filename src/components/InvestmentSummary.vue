@@ -72,14 +72,9 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .investment-summary {
   margin-bottom: 30px;
-}
-
-.card-header {
-  font-weight: bold;
-  font-size: 1.1rem;
 }
 
 .summary-item {
@@ -90,7 +85,6 @@ export default {
 .summary-item h4 {
   margin: 0 0 10px 0;
   color: #666;
-  font-size: 1rem;
 }
 
 .amount {
@@ -108,7 +102,7 @@ export default {
 }
 
 .percentage {
-  font-size: 1rem;
-  font-weight: normal;
+  font-size: 0.8rem;
+  margin-left: 0.5rem;
 }
 </style>

@@ -127,22 +127,4 @@ export default {
   color: #667eea;
   margin-top: 15px;
 }
-
-.income {
-  color: #4caf50;
-  font-weight: bold;
-}
-
-.expense {
-  color: #f44336;
-  font-weight: bold;
-}
-
-:deep(.income-row) {
-  background-color: #f0f9ff;
-}
-
-:deep(.expense-row) {
-  background-color: #fff0f0;
-}
 </style>

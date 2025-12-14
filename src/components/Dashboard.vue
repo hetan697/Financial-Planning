@@ -113,7 +113,7 @@
 
 <script>
 import { Chart, registerables } from 'chart.js';
-import { ElRow, ElCol, ElCard, ElButton } from 'element-plus';
+import { ElRow, ElCol, ElCard, ElButton, ElMessage, ElMessageBox } from 'element-plus';
 Chart.register(...registerables);
 
 export default {
@@ -194,9 +194,6 @@ export default {
   methods: {
     exportData() {
       this.$emit('export-data');
-    },
-    importData(event) {
-      this.$emit('import-data', event);
     },
     triggerImport() {
       this.$refs.fileInput.click();
