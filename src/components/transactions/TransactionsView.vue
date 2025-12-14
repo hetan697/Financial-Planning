@@ -1,47 +1,26 @@
 <template>
   <div class="transactions-view">
     <!-- 财务概览 -->
-    <el-card class="summary-card">
-      <template #header>
-        <div class="card-header">
-          <span>财务概览</span>
-          <div class="date-filter">
-            <el-select 
-              v-model="selectedYear" 
-              placeholder="选择年份" 
-              size="small"
-              @change="updateDateFilter"
-            >
-              <el-option
-                v-for="year in availableYears"
-                :key="year"
-                :label="year"
-                :value="year"
-              />
-            </el-select>
-            <el-select 
-              v-model="selectedMonth" 
-              placeholder="选择月份" 
-              size="small"
-              @change="updateDateFilter"
-            >
-              <el-option
-                v-for="month in months"
-                :key="month.value"
-                :label="month.label"
-                :value="month.value"
-              />
-            </el-select>
-            <el-checkbox 
-              v-model="isYearSummary" 
-              @change="toggleYearSummary"
-              size="small"
-            >
-              按年统计
-            </el-checkbox>
-          </div>
+    <div class="card-section">
+      <div class="card-header">
+        <span class="card-title">财务概览</span>
+        <div class="date-filter">
+          <select v-model="selectedYear" @change="updateDateFilter">
+            <option v-for="year in availableYears" :key="year" :value="year">
+              {{ year }}
+            </option>
+          </select>
+          <select v-model="selectedMonth" @change="updateDateFilter" :disabled="isYearSummary">
+            <option v-for="month in months" :key="month.value" :value="month.value">
+              {{ month.label }}
+            </option>
+          </select>
+          <label class="checkbox-container">
+            <input type="checkbox" v-model="isYearSummary" @change="toggleYearSummary">
+            <span class="checkmark">按年统计</span>
+          </label>
         </div>
-      </template>
+      </div>
       
       <SummarySection 
         :total-income="filteredTotalIncome" 
@@ -49,45 +28,36 @@
         :balance="filteredBalance"
         :investment-total="investmentTotal"
       />
-    </el-card>
+    </div>
     
     <!-- 交易列表 -->
-    <el-card class="transaction-list-card">
-      <template #header>
-        <div class="card-header">
-          <span>交易记录</span>
-          <el-button 
-            type="primary" 
-            size="small" 
-            @click="$emit('add-transaction')"
-          >
-            添加交易
-          </el-button>
-        </div>
-      </template>
+    <div class="card-section">
+      <div class="card-header">
+        <span class="card-title">交易记录</span>
+        <button 
+          class="btn-primary"
+          @click="$emit('add-transaction')"
+        >
+          添加交易
+        </button>
+      </div>
       
       <TransactionList 
         :transactions="filteredSortedTransactions" 
         @delete-transaction="$emit('delete-transaction', $event)"
         @edit-transaction="$emit('edit-transaction', $event)"
       />
-    </el-card>
+    </div>
   </div>
 </template>
 
 <script>
-import { ElCard, ElButton, ElSelect, ElOption, ElCheckbox } from 'element-plus';
 import SummarySection from '../../components/SummarySection.vue';
 import TransactionList from './TransactionList.vue';
 
 export default {
   name: 'TransactionsView',
   components: {
-    ElCard,
-    ElButton,
-    ElSelect,
-    ElOption,
-    ElCheckbox,
     SummarySection,
     TransactionList
   },
@@ -101,38 +71,34 @@ export default {
       required: true
     }
   },
-  emits: ['delete-transaction', 'edit-transaction', 'add-transaction'],
+  emits: ['add-transaction', 'edit-transaction', 'delete-transaction'],
   data() {
+    const now = new Date();
     return {
-      selectedYear: new Date().getFullYear(),
-      selectedMonth: new Date().getMonth() + 1,
+      selectedYear: now.getFullYear(),
+      selectedMonth: now.getMonth() + 1,
       isYearSummary: false,
       months: [
-        { value: 1, label: '1月' },
-        { value: 2, label: '2月' },
-        { value: 3, label: '3月' },
-        { value: 4, label: '4月' },
-        { value: 5, label: '5月' },
-        { value: 6, label: '6月' },
-        { value: 7, label: '7月' },
-        { value: 8, label: '8月' },
-        { value: 9, label: '9月' },
-        { value: 10, label: '10月' },
-        { value: 11, label: '11月' },
-        { value: 12, label: '12月' }
+        { label: '1月', value: 1 },
+        { label: '2月', value: 2 },
+        { label: '3月', value: 3 },
+        { label: '4月', value: 4 },
+        { label: '5月', value: 5 },
+        { label: '6月', value: 6 },
+        { label: '7月', value: 7 },
+        { label: '8月', value: 8 },
+        { label: '9月', value: 9 },
+        { label: '10月', value: 10 },
+        { label: '11月', value: 11 },
+        { label: '12月', value: 12 }
       ]
     };
   },
   computed: {
     availableYears() {
-      const years = new Set();
-      this.transactions.forEach(transaction => {
-        const year = new Date(transaction.date).getFullYear();
-        years.add(year);
-      });
-      // 添加当前年份以防没有交易记录
-      years.add(new Date().getFullYear());
-      return Array.from(years).sort((a, b) => b - a);
+      const years = this.transactions.map(t => new Date(t.date).getFullYear());
+      const uniqueYears = [...new Set(years)];
+      return uniqueYears.length > 0 ? uniqueYears.sort((a, b) => b - a) : [new Date().getFullYear()];
     },
     filteredTransactions() {
       return this.transactions.filter(transaction => {
@@ -148,19 +114,18 @@ export default {
       });
     },
     filteredSortedTransactions() {
-      // 按日期降序排列交易记录
       return [...this.filteredTransactions].sort((a, b) => 
         new Date(b.date) - new Date(a.date)
       );
     },
     filteredTotalIncome() {
       return this.filteredTransactions
-        .filter(transaction => transaction.type === 'income')
+        .filter(t => t.type === 'income')
         .reduce((sum, transaction) => sum + transaction.amount, 0);
     },
     filteredTotalExpense() {
       return this.filteredTransactions
-        .filter(transaction => transaction.type === 'expense')
+        .filter(t => t.type === 'expense')
         .reduce((sum, transaction) => sum + transaction.amount, 0);
     },
     filteredBalance() {
@@ -176,45 +141,107 @@ export default {
   },
   methods: {
     updateDateFilter() {
-      // 更新日期筛选条件
+      // Filter updated automatically via computed properties
     },
     toggleYearSummary() {
-      // 切换年统计模式
+      // Year summary toggled automatically via v-model
     }
   }
 };
 </script>
 
 <style scoped>
+.transactions-view {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.card-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
 }
 
 .date-filter {
   display: flex;
-  align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  align-items: center;
 }
 
-.summary-card {
-  margin-bottom: 20px;
+.date-filter select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: white;
+  font-size: 14px;
 }
 
-/* 响应式设计 */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  user-select: none;
+}
+
+.checkbox-container input {
+  margin-right: 8px;
+}
+
+.btn-primary {
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: #0062cc;
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
 @media (max-width: 768px) {
   .card-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
   }
   
   .date-filter {
-    width: 100%;
     justify-content: space-between;
+  }
+  
+  .card-title {
+    text-align: center;
   }
 }
 </style>

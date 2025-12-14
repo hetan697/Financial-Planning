@@ -8,26 +8,23 @@
     />
     
     <!-- 投资列表 -->
-    <el-card class="investment-list-card">
-      <template #header>
-        <div class="card-header">
-          <span>投资项目</span>
-          <el-button 
-            type="primary" 
-            size="small" 
-            @click="showAddInvestmentForm"
-          >
-            添加投资
-          </el-button>
-        </div>
-      </template>
+    <div class="card-section">
+      <div class="card-header">
+        <span class="card-title">投资项目</span>
+        <button 
+          class="btn-primary"
+          @click="showAddInvestmentForm"
+        >
+          添加投资
+        </button>
+      </div>
       
       <InvestmentList 
         :investments="investments"
         @edit-investment="editInvestment"
         @delete-investment="requestDeleteInvestment"
       />
-    </el-card>
+    </div>
     
     <!-- 投资建议 -->
     <InvestmentAdvice 
@@ -39,7 +36,6 @@
 </template>
 
 <script>
-import { ElMessageBox, ElMessage } from 'element-plus';
 import InvestmentSummary from './InvestmentSummary.vue';
 import InvestmentList from './InvestmentList.vue';
 import InvestmentAdvice from './InvestmentAdvice.vue';
@@ -83,49 +79,71 @@ export default {
     }
   },
   methods: {
+    showAddInvestmentForm() {
+      this.$emit('add-investment');
+    },
     editInvestment(investment) {
       this.$emit('edit-investment', investment);
     },
     requestDeleteInvestment(id) {
-      ElMessageBox.confirm('此操作将永久删除该投资记录，是否继续？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
+      if (confirm('此操作将永久删除该投资记录，是否继续？')) {
         this.$emit('delete-investment', id);
-        ElMessage.success('删除成功');
-      }).catch(() => {
-        // 用户取消操作
-        ElMessage.info('已取消删除');
-      });
-    },
-    showAddInvestmentForm() {
-      this.$emit('add-investment');
+        alert('删除成功');
+      }
     }
   }
 };
 </script>
 
 <style scoped>
+.investment-management {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.card-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.investment-list-card {
   margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
 }
 
-.investment-management {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
 }
 
-@media (max-width: 768px) {
-  .investment-management {
-    padding: 10px;
-  }
+.btn-primary {
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: #0062cc;
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
 }
 </style>

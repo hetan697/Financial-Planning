@@ -1,131 +1,113 @@
 <template>
   <div class="investment-page">
-    <el-page-header @back="goBack" :content="isEditing ? '编辑投资' : '添加投资'" class="page-header" />
+    <div class="page-header">
+      <button class="back-button" @click="goBack">
+        ← 返回
+      </button>
+      <h2>{{ isEditing ? '编辑投资' : '添加投资' }}</h2>
+    </div>
     
-    <el-card class="investment-form-card">
-      <el-form 
-        :model="localInvestment" 
-        :rules="rules"
-        ref="investmentForm"
-        label-position="top"
-        @submit.prevent="saveInvestment"
-      >
-        <el-row :gutter="20">
-          <el-col :span="12" :xs="24">
-            <el-form-item label="投资类型:" prop="type">
-              <el-select 
-                v-model="localInvestment.type" 
-                placeholder="请选择投资类型"
-                style="width: 100%"
+    <div class="investment-form-card">
+      <form @submit.prevent="saveInvestment" class="investment-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>投资类型:</label>
+            <select 
+              :value="localInvestment.type" 
+              @change="updateInvestment('type', $event.target.value)"
+            >
+              <option 
+                v-for="type in investmentTypes" 
+                :key="type" 
+                :value="type"
               >
-                <el-option label="股票" value="股票"></el-option>
-                <el-option label="基金" value="基金"></el-option>
-                <el-option label="债券" value="债券"></el-option>
-                <el-option label="银行理财" value="银行理财"></el-option>
-                <el-option label="其他" value="其他"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
+                {{ type }}
+              </option>
+            </select>
+          </div>
           
-          <el-col :span="12" :xs="24">
-            <el-form-item label="买入日期:" prop="purchaseDate">
-              <el-date-picker
-                v-model="localInvestment.purchaseDate"
-                type="date"
-                placeholder="请选择买入日期"
-                value-format="YYYY-MM-DD"
-                format="YYYY-MM-DD"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
+          <div class="form-group">
+            <label>名称:</label>
+            <input 
+              type="text" 
+              :value="localInvestment.name" 
+              @input="updateInvestment('name', $event.target.value)"
+              placeholder="例如：阿里巴巴、沪深300等" 
+              required
+            >
+          </div>
+        </div>
         
-        <el-form-item label="名称:" prop="name">
-          <el-input 
-            v-model="localInvestment.name" 
-            placeholder="请输入投资名称"
-          />
-        </el-form-item>
+        <div class="form-row">
+          <div class="form-group">
+            <label>数量:</label>
+            <input 
+              type="number" 
+              :value="localInvestment.quantity" 
+              @input="updateInvestment('quantity', parseFloat($event.target.value) || 0)"
+              min="0" 
+              step="0.01" 
+              placeholder="0" 
+              required
+            >
+          </div>
+          
+          <div class="form-group">
+            <label>买入价格:</label>
+            <input 
+              type="number" 
+              :value="localInvestment.purchasePrice" 
+              @input="updateInvestment('purchasePrice', parseFloat($event.target.value) || 0)"
+              min="0" 
+              step="0.01" 
+              placeholder="0.00" 
+              required
+            >
+          </div>
+        </div>
         
-        <el-row :gutter="20">
-          <el-col :span="8" :xs="24">
-            <el-form-item label="数量:" prop="quantity">
-              <el-input-number 
-                v-model="localInvestment.quantity" 
-                :min="0"
-                :step="1"
-                controls-position="right"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
+        <div class="form-row">
+          <div class="form-group">
+            <label>当前价格:</label>
+            <input 
+              type="number" 
+              :value="localInvestment.currentPrice || ''" 
+              @input="updateInvestment('currentPrice', $event.target.value ? parseFloat($event.target.value) : null)"
+              min="0" 
+              step="0.01" 
+              placeholder="可选"
+            >
+          </div>
           
-          <el-col :span="8" :xs="24">
-            <el-form-item label="买入价:" prop="purchasePrice">
-              <el-input-number 
-                v-model="localInvestment.purchasePrice" 
-                :min="0"
-                :step="0.01"
-                controls-position="right"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-          
-          <el-col :span="8" :xs="24">
-            <el-form-item label="当前价 (可选):" prop="currentPrice">
-              <el-input-number 
-                v-model="localInvestment.currentPrice" 
-                :min="0"
-                :step="0.01"
-                controls-position="right"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
+          <div class="form-group">
+            <label>买入日期:</label>
+            <input 
+              type="date" 
+              :value="localInvestment.purchaseDate" 
+              @input="updateInvestment('purchaseDate', $event.target.value)"
+              required
+            >
+          </div>
+        </div>
         
         <div class="form-buttons">
-          <el-button 
-            type="primary" 
-            native-type="submit" 
-            style="flex: 1"
-          >
-            {{ isEditing ? '更新' : '添加' }}
-          </el-button>
-          <el-button 
-            @click="goBack"
-            style="flex: 1"
-          >
+          <button type="submit" class="btn-primary">
+            {{ isEditing ? '更新投资' : '添加投资' }}
+          </button>
+          <button type="button" class="btn-secondary" @click="goBack">
             取消
-          </el-button>
+          </button>
         </div>
-      </el-form>
-    </el-card>
+      </form>
+    </div>
   </div>
 </template>
 
 <script>
-import { ElCard, ElForm, ElFormItem, ElSelect, ElOption, 
-         ElDatePicker, ElInput, ElInputNumber, ElButton, ElRow, ElCol, ElPageHeader, ElMessage } from 'element-plus';
+import TypeManager from '../../utils/TypeManager.js';
 
 export default {
   name: 'InvestmentPage',
-  components: {
-    ElCard,
-    ElForm,
-    ElFormItem,
-    ElSelect,
-    ElOption,
-    ElDatePicker,
-    ElInput,
-    ElInputNumber,
-    ElButton,
-    ElRow,
-    ElCol,
-    ElPageHeader
-  },
   props: {
     investment: {
       type: Object,
@@ -147,43 +129,28 @@ export default {
   data() {
     return {
       localInvestment: { ...this.investment },
-      rules: {
-        type: [
-          { required: true, message: '请选择投资类型', trigger: 'change' }
-        ],
-        name: [
-          { required: true, message: '请输入投资名称', trigger: 'blur' }
-        ],
-        quantity: [
-          { required: true, message: '请输入数量', trigger: 'change' },
-          { type: 'number', min: 0.001, message: '数量必须大于0', trigger: 'change' }
-        ],
-        purchasePrice: [
-          { required: true, message: '请输入买入价', trigger: 'change' },
-          { type: 'number', min: 0.01, message: '买入价必须大于0', trigger: 'change' }
-        ],
-        purchaseDate: [
-          { required: true, message: '请选择买入日期', trigger: 'change' }
-        ]
-      }
+      investmentTypes: TypeManager.getInvestmentTypes()
     };
   },
   methods: {
+    updateInvestment(field, value) {
+      this.localInvestment[field] = value;
+    },
     saveInvestment() {
-      this.$refs.investmentForm.validate((valid) => {
-        if (valid) {
-          this.$emit('save', this.localInvestment);
-        } else {
-          ElMessage({
-            message: '请填写所有必填字段',
-            type: 'warning'
-          });
-          return false;
-        }
-      });
+      if (!this.localInvestment.name || 
+          this.localInvestment.quantity <= 0 || 
+          this.localInvestment.purchasePrice <= 0) {
+        alert('请输入有效的投资名称、数量和买入价');
+        return;
+      }
+      
+      this.$emit('save', this.localInvestment);
     },
     goBack() {
       this.$emit('cancel');
+    },
+    updateInvestmentTypes() {
+      this.investmentTypes = TypeManager.getInvestmentTypes();
     }
   },
   watch: {
@@ -193,48 +160,142 @@ export default {
       },
       deep: true
     }
+  },
+  mounted() {
+    // 监听自定义事件以更新投资类型
+    window.addEventListener('typesUpdated', this.updateInvestmentTypes);
+  },
+  beforeUnmount() {
+    // 清理事件监听器
+    window.removeEventListener('typesUpdated', this.updateInvestmentTypes);
   }
 };
 </script>
 
 <style scoped>
 .investment-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .page-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
   margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 5px 10px;
+  color: #007AFF;
+  border-radius: 8px;
+}
+
+.back-button:hover {
+  background-color: #f0f0f0;
+}
+
+.page-header h2 {
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  padding-right: 60px; /* 为返回按钮留出空间 */
 }
 
 .investment-form-card {
-  margin-bottom: 30px;
   background: white;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  flex: 1;
+  overflow-y: auto;
 }
 
-.card-header {
+.investment-form {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  height: 100%;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
   margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input,
+.form-group select {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 16px;
+  background: #F2F2F7;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #007AFF;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
 }
 
 .form-buttons {
   display: flex;
-  gap: 10px;
+  gap: 15px;
+  margin-top: auto;
+}
+
+.btn-primary, .btn-secondary {
+  flex: 1;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #007AFF;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0062cc;
+}
+
+.btn-secondary {
+  background: #F2F2F7;
+  color: #007AFF;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e6;
 }
 
 @media (max-width: 768px) {
-  .form-buttons {
+  .form-row {
     flex-direction: column;
-  }
-  
-  .investment-page {
-    padding: 10px;
+    gap: 0;
   }
 }
 </style>

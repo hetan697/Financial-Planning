@@ -1,126 +1,94 @@
 <template>
   <div class="transaction-page">
-    <el-page-header @back="goBack" :content="isEditing ? '编辑交易' : '添加交易'" class="page-header" />
+    <div class="page-header">
+      <button class="back-button" @click="goBack">
+        ← 返回
+      </button>
+      <h2>{{ isEditing ? '编辑交易' : '添加交易' }}</h2>
+    </div>
     
-    <el-card class="transaction-form-card">
-      <el-form 
-        :model="localTransaction" 
-        :rules="rules"
-        ref="transactionForm"
-        label-position="top"
-        @submit.prevent="saveTransaction"
-      >
-        <el-row :gutter="20">
-          <el-col :span="12" :xs="24">
-            <el-form-item label="类型:" prop="type">
-              <el-select 
-                v-model="localTransaction.type" 
-                placeholder="请选择类型"
-                style="width: 100%"
-              >
-                <el-option label="收入" value="income"></el-option>
-                <el-option label="支出" value="expense"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
+    <div class="transaction-form-card">
+      <form @submit.prevent="saveTransaction" class="transaction-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>类型:</label>
+            <select v-model="localTransaction.type">
+              <option value="income">收入</option>
+              <option value="expense">支出</option>
+            </select>
+          </div>
           
-          <el-col :span="12" :xs="24">
-            <el-form-item label="日期:" prop="date">
-              <el-date-picker
-                v-model="localTransaction.date"
-                type="date"
-                placeholder="请选择日期"
-                value-format="YYYY-MM-DD"
-                format="YYYY-MM-DD"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
+          <div class="form-group">
+            <label>日期:</label>
+            <input 
+              type="date" 
+              v-model="localTransaction.date"
+            >
+          </div>
+        </div>
         
-        <el-form-item label="明细:" prop="description">
-          <el-select 
-            v-model="localTransaction.description" 
-            placeholder="请选择明细"
-            style="width: 100%"
-          >
-            <el-option-group label="收入">
-              <el-option 
+        <div class="form-group">
+          <label>明细:</label>
+          <select v-model="localTransaction.description">
+            <optgroup label="收入" v-if="localTransaction.type === 'income'">
+              <option 
                 v-for="item in incomeOptions" 
                 :key="item" 
-                :label="item" 
                 :value="item"
-              />
-            </el-option-group>
-            <el-option-group label="支出">
-              <el-option 
+              >
+                {{ item }}
+              </option>
+            </optgroup>
+            <optgroup label="支出" v-if="localTransaction.type === 'expense'">
+              <option 
                 v-for="item in expenseOptions" 
                 :key="item" 
-                :label="item" 
                 :value="item"
-              />
-            </el-option-group>
-          </el-select>
-        </el-form-item>
+              >
+                {{ item }}
+              </option>
+            </optgroup>
+          </select>
+        </div>
         
-        <el-form-item label="备注 (可选):" prop="notes">
-          <el-input 
+        <div class="form-group">
+          <label>备注 (可选):</label>
+          <input 
+            type="text" 
             v-model="localTransaction.notes" 
             placeholder="请输入备注信息"
-          />
-        </el-form-item>
+          >
+        </div>
         
-        <el-form-item label="金额:" prop="amount">
-          <el-input-number 
-            v-model="localTransaction.amount" 
-            :min="0"
-            :step="0.01"
-            controls-position="right"
-            style="width: 100%"
-          />
-        </el-form-item>
+        <div class="form-group">
+          <label>金额:</label>
+          <input 
+            type="number" 
+            v-model.number="localTransaction.amount" 
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+          >
+        </div>
         
         <div class="form-buttons">
-          <el-button 
-            type="primary" 
-            native-type="submit" 
-            style="flex: 1"
-          >
+          <button type="submit" class="btn-primary">
             {{ isEditing ? '更新' : '添加' }}
-          </el-button>
-          <el-button 
-            @click="goBack"
-            style="flex: 1"
-          >
+          </button>
+          <button type="button" class="btn-secondary" @click="goBack">
             取消
-          </el-button>
+          </button>
         </div>
-      </el-form>
-    </el-card>
+      </form>
+    </div>
   </div>
 </template>
 
 <script>
-import { ElCard, ElForm, ElFormItem, ElSelect, ElOption, ElOptionGroup, 
-         ElDatePicker, ElInput, ElInputNumber, ElButton, ElRow, ElCol, ElPageHeader, ElMessage } from 'element-plus';
+import TypeManager from '../../utils/TypeManager.js';
 
 export default {
   name: 'TransactionPage',
-  components: {
-    ElCard,
-    ElForm,
-    ElFormItem,
-    ElSelect,
-    ElOption,
-    ElOptionGroup,
-    ElDatePicker,
-    ElInput,
-    ElInputNumber,
-    ElButton,
-    ElRow,
-    ElCol,
-    ElPageHeader
-  },
   props: {
     transaction: {
       type: Object,
@@ -139,62 +107,31 @@ export default {
   },
   emits: ['save', 'cancel'],
   data() {
+    const transactionTypes = TypeManager.getTransactionTypes();
+    
     return {
       localTransaction: { ...this.transaction },
-      incomeOptions: [
-        '工资',
-        '奖金',
-        '投资收益',
-        '兼职收入',
-        '礼金',
-        '其他收入'
-      ],
-      expenseOptions: [
-        '房租',
-        '水电费',
-        '餐饮',
-        '交通',
-        '购物',
-        '娱乐',
-        '医疗',
-        '教育',
-        '保险',
-        '投资支出',
-        '其他支出'
-      ],
-      rules: {
-        type: [
-          { required: true, message: '请选择类型', trigger: 'change' }
-        ],
-        date: [
-          { required: true, message: '请选择日期', trigger: 'change' }
-        ],
-        description: [
-          { required: true, message: '请选择明细', trigger: 'change' }
-        ],
-        amount: [
-          { required: true, message: '请输入金额', trigger: 'change' },
-          { type: 'number', min: 0.01, message: '金额必须大于0', trigger: 'change' }
-        ]
-      }
+      incomeOptions: transactionTypes.income,
+      expenseOptions: transactionTypes.expense
     };
   },
   methods: {
     saveTransaction() {
-      this.$refs.transactionForm.validate((valid) => {
-        if (valid) {
-          this.$emit('save', this.localTransaction);
-        } else {
-          ElMessage({
-            message: '请填写所有必填字段',
-            type: 'warning'
-          });
-          return false;
-        }
-      });
+      if (!this.localTransaction.type || !this.localTransaction.description || 
+          !this.localTransaction.date || this.localTransaction.amount <= 0) {
+        alert('请填写所有必填字段且金额必须大于0');
+        return;
+      }
+      
+      this.$emit('save', this.localTransaction);
     },
     goBack() {
       this.$emit('cancel');
+    },
+    updateTransactionTypes() {
+      const transactionTypes = TypeManager.getTransactionTypes();
+      this.incomeOptions = transactionTypes.income;
+      this.expenseOptions = transactionTypes.expense;
     }
   },
   watch: {
@@ -204,52 +141,142 @@ export default {
       },
       deep: true
     }
+  },
+  mounted() {
+    // 监听自定义事件以更新交易类型
+    window.addEventListener('typesUpdated', this.updateTransactionTypes);
+  },
+  beforeUnmount() {
+    // 清理事件监听器
+    window.removeEventListener('typesUpdated', this.updateTransactionTypes);
   }
 };
 </script>
 
 <style scoped>
 .transaction-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .page-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
   margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 5px 10px;
+  color: #007AFF;
+  border-radius: 8px;
+}
+
+.back-button:hover {
+  background-color: #f0f0f0;
+}
+
+.page-header h2 {
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  padding-right: 60px; /* 为返回按钮留出空间 */
 }
 
 .transaction-form-card {
-  margin-bottom: 30px;
   background: white;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  flex: 1;
+  overflow-y: auto;
 }
 
-.card-header {
+.transaction-form {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  height: 100%;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
   margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input,
+.form-group select {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 16px;
+  background: #F2F2F7;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #007AFF;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
 }
 
 .form-buttons {
   display: flex;
-  gap: 10px;
+  gap: 15px;
+  margin-top: auto;
+}
+
+.btn-primary, .btn-secondary {
+  flex: 1;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #007AFF;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0062cc;
+}
+
+.btn-secondary {
+  background: #F2F2F7;
+  color: #007AFF;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e6;
 }
 
 @media (max-width: 768px) {
-  .transaction-page {
-    padding: 10px;
-  }
-
-  .form-buttons {
+  .form-row {
     flex-direction: column;
-  }
-  
-  .transaction-page {
-    padding: 10px;
+    gap: 0;
   }
 }
 </style>

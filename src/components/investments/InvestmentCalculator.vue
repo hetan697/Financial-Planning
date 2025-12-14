@@ -3,9 +3,9 @@
     <div class="calculator-header">
       <h3>投资计算器</h3>
       <div class="controls">
-        <el-button @click="showAddOptionPage" size="small" type="primary">
+        <button @click="showAddOptionPage" class="btn-primary">
           添加投资方式
-        </el-button>
+        </button>
       </div>
     </div>
     
@@ -17,71 +17,67 @@
           class="investment-option-card"
         >
           <div class="option-header">
-            <el-select 
-              v-model="option.type" 
-              placeholder="投资类型"
-              size="small"
+            <select 
+              :value="option.type" 
+              @change="updateOption(index, 'type', $event.target.value)"
               class="option-type-select"
-              @change="updateOption(index, 'type', $event)"
             >
-              <el-option 
+              <option 
                 v-for="type in investmentTypes" 
                 :key="type" 
-                :label="type" 
                 :value="type"
-              ></el-option>
-            </el-select>
+              >
+                {{ type }}
+              </option>
+            </select>
             
-            <el-input 
-              v-model="option.name" 
+            <input 
+              type="text"
+              :value="option.name" 
               placeholder="投资方式名称"
-              size="small"
               class="option-name-input"
-              @input="updateOption(index, 'name', $event)"
+              @input="updateOption(index, 'name', $event.target.value)"
             />
             
-            <el-button 
+            <button 
               @click="editOption(index)" 
-              size="small"
+              class="btn-secondary"
             >
               编辑
-            </el-button>
+            </button>
             
-            <el-button 
+            <button 
               @click="removeInvestmentOption(index)" 
-              size="small" 
-              type="danger"
-              circle
+              class="btn-danger"
             >
               ×
-            </el-button>
+            </button>
           </div>
           
           <div class="option-details">
             <div class="detail-row">
               <label>预期年化收益率:</label>
-              <el-input-number 
-                v-model="option.returnRate" 
-                :min="0" 
-                :max="100" 
-                :step="0.1"
-                size="small"
-                controls-position="right"
-                @change="updateOption(index, 'returnRate', $event)"
+              <input
+                type="number"
+                :value="option.returnRate"
+                min="0"
+                max="100"
+                step="0.1"
+                @input="updateOption(index, 'returnRate', parseFloat($event.target.value) || 0)"
               /> %
             </div>
             
             <div class="detail-row">
               <label>分配比例:</label>
-              <el-slider
-                v-model="option.percentage"
-                :min="0"
-                :max="100"
-                :step="1"
-                show-input
-                size="small"
-                @change="handlePercentageChange(index)"
+              <input 
+                type="range"
+                :value="option.percentage"
+                min="0"
+                max="100"
+                step="1"
+                @input="updateOption(index, 'percentage', parseInt($event.target.value) || 0)"
               />
+              <span class="percentage-value">{{ option.percentage }}%</span>
             </div>
           </div>
         </div>
@@ -149,19 +145,12 @@
 </template>
 
 <script>
-import { ElButton, ElInput, ElInputNumber, ElSlider, ElSelect, ElOption } from 'element-plus';
 import TypeManager from '../../utils/TypeManager.js';
 import InvestmentOptionForm from './InvestmentOptionForm.vue';
 
 export default {
   name: 'InvestmentCalculator',
   components: {
-    ElButton,
-    ElInput,
-    ElInputNumber,
-    ElSlider,
-    ElSelect,
-    ElOption,
     InvestmentOptionForm
   },
   props: {
@@ -311,123 +300,20 @@ export default {
       if (this.investmentOptions.length > 1) {
         this.investmentOptions.splice(index, 1);
       } else {
-        this.$message.warning('至少需要保留一种投资方式');
+        alert('至少需要保留一种投资方式');
       }
-    },
-    
-    // 处理比例调整
-    handlePercentageChange(changedIndex) {
-      const changedOption = this.investmentOptions[changedIndex];
-      
-      // 如果总比例超过100%，需要调整其他选项的比例
-      if (this.totalPercentage > 100) {
-        const excess = this.totalPercentage - 100;
-        this.distributeExcessPercentage(excess, changedIndex);
-      } 
-      // 如果总比例小于100%，需要补足缺少的比例
-      else if (this.totalPercentage < 100) {
-        const deficit = 100 - this.totalPercentage;
-        this.distributeDeficitPercentage(deficit, changedIndex);
-      }
-    },
-    
-    // 分配多余的比例
-    distributeExcessPercentage(excess, excludeIndex) {
-      // 找到可以减少比例的选项（除了刚刚调整的选项和已经是0%的选项）
-      const adjustableOptions = this.investmentOptions
-        .map((option, index) => ({ option, index }))
-        .filter(({ option, index }) => index !== excludeIndex && option.percentage > 0);
-      
-      if (adjustableOptions.length > 0) {
-        // 平均减少每个可调整选项的比例
-        const reductionPerOption = excess / adjustableOptions.length;
-        adjustableOptions.forEach(({ option }) => {
-          const reduction = Math.min(reductionPerOption, option.percentage);
-          option.percentage -= reduction;
-        });
-      } else {
-        // 如果没有可调整的选项，将多余的百分比从当前选项中减去
-        this.investmentOptions[excludeIndex].percentage -= excess;
-      }
-      
-      // 确保所有比例都是非负数并且是整数
-      this.investmentOptions.forEach(option => {
-        option.percentage = Math.max(0, Math.round(option.percentage));
-      });
-      
-      // 再次检查总和，如有必要进行微调
-      this.adjustToExactHundred();
-    },
-    
-    // 补足缺少的比例
-    distributeDeficitPercentage(deficit, excludeIndex) {
-      // 找到可以增加比例的选项（除了刚刚调整的选项）
-      const adjustableOptions = this.investmentOptions
-        .map((option, index) => ({ option, index }))
-        .filter(({ index }) => index !== excludeIndex);
-      
-      if (adjustableOptions.length > 0) {
-        // 平均增加每个可调整选项的比例
-        const additionPerOption = deficit / adjustableOptions.length;
-        adjustableOptions.forEach(({ option }) => {
-          option.percentage += additionPerOption;
-        });
-      } else {
-        // 如果没有其他选项，将缺少的百分比加到当前选项
-        this.investmentOptions[excludeIndex].percentage += deficit;
-      }
-      
-      // 确保所有比例都是整数
-      this.investmentOptions.forEach(option => {
-        option.percentage = Math.round(option.percentage);
-      });
-      
-      // 再次检查总和，如有必要进行微调
-      this.adjustToExactHundred();
-    },
-    
-    // 调整总和精确到100%
-    adjustToExactHundred() {
-      let currentTotal = this.investmentOptions.reduce((sum, option) => sum + option.percentage, 0);
-      
-      while (currentTotal !== 100) {
-        if (currentTotal > 100) {
-          // 找到一个可以减少的选项
-          const reducibleOption = this.investmentOptions.find(option => option.percentage > 0);
-          if (reducibleOption) {
-            reducibleOption.percentage--;
-            currentTotal--;
-          } else {
-            break; // 无法再减少
-          }
-        } else {
-          // 找到一个可以增加的选项
-          const incrementableOption = this.investmentOptions[0]; // 增加第一个选项
-          if (incrementableOption) {
-            incrementableOption.percentage++;
-            currentTotal++;
-          } else {
-            break; // 无法再增加
-          }
-        }
-      }
-    }
-  },
-  watch: {
-    investmentOptions: {
-      handler() {
-        // 向父组件发送投资选项更新事件
-        this.$emit('update:investment-options', this.investmentOptions);
-      },
-      deep: true
     }
   },
   mounted() {
-    // 监听localStorage变化以更新投资类型
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'investmentTypes') {
-        this.investmentTypes = TypeManager.getInvestmentTypes();
-      }
+    // 监听自定义事件以更新投资类型
+    window.addEventListener('typesUpdated', () => {
+      this.investmentTypes = TypeManager.getInvestmentTypes();
+    });
+  },
+  beforeUnmount() {
+    // 清理事件监听器
+    window.removeEventListener('typesUpdated', () => {
+      this.investmentTypes = TypeManager.getInvestmentTypes();
     });
   }
 };
@@ -436,10 +322,9 @@ export default {
 <style scoped>
 .investment-calculator {
   background: white;
+  border-radius: 16px;
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 .calculator-header {
@@ -447,8 +332,8 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #eee;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
 }
 
 .calculator-header h3 {
@@ -466,8 +351,8 @@ export default {
 }
 
 .investment-option-card {
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  background: #F2F2F7;
+  border-radius: 12px;
   padding: 15px;
   margin-bottom: 15px;
 }
@@ -477,56 +362,81 @@ export default {
   gap: 10px;
   align-items: center;
   margin-bottom: 15px;
-  flex-wrap: wrap;
 }
 
 .option-type-select,
 .option-name-input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.option-type-select {
+  flex: 0 0 120px;
+}
+
+.option-name-input {
   flex: 1;
-  min-width: 120px;
 }
 
 .option-details {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
 }
 
 .detail-row {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .detail-row label {
-  min-width: 120px;
   font-weight: 500;
+  color: #333;
+}
+
+.detail-row input[type="number"] {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  width: 100px;
+}
+
+.detail-row input[type="range"] {
+  width: 100%;
+}
+
+.percentage-value {
+  font-weight: 500;
+  color: #007AFF;
 }
 
 .total-percentage {
-  padding: 10px 15px;
-  border-radius: 4px;
+  padding: 15px;
+  border-radius: 12px;
+  background: #F2F2F7;
   margin-bottom: 20px;
-  background-color: #e8f4ff;
   font-weight: 500;
 }
 
 .total-percentage.error {
-  background-color: #ffeeee;
-  color: #f56c6c;
+  background: #FFECEB;
+  color: #FF3B30;
 }
 
 .warning-text {
-  font-size: 0.9em;
-  color: #f56c6c;
+  color: #FF9500;
+  font-size: 14px;
+  margin-left: 10px;
 }
 
 .investment-summary h4 {
   margin-top: 0;
   margin-bottom: 15px;
   color: #333;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 8px;
 }
 
 .summary-grid {
@@ -537,63 +447,63 @@ export default {
 }
 
 .summary-card {
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  background: white;
+  border-radius: 12px;
   padding: 15px;
-  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .summary-header {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
-  font-size: 0.9em;
 }
 
 .summary-type {
-  font-weight: bold;
-  color: #409eff;
+  font-weight: 600;
+  color: #007AFF;
 }
 
 .summary-name {
-  color: #666;
-}
-
-.summary-percentage {
-  font-weight: bold;
-  color: #409eff;
-}
-
-.summary-amount {
-  font-size: 1.2em;
-  font-weight: bold;
-  margin-bottom: 5px;
+  font-weight: 500;
   color: #333;
 }
 
+.summary-percentage {
+  font-weight: 600;
+  color: #34C759;
+}
+
+.summary-amount {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
 .summary-return-rate {
-  font-size: 0.9em;
+  font-size: 14px;
   color: #666;
   margin-bottom: 5px;
 }
 
 .summary-return {
-  font-size: 0.9em;
-  color: #67c23a;
+  font-size: 14px;
+  color: #34C759;
   font-weight: 500;
 }
 
 .overall-summary {
-  background-color: #e8f4ff;
-  border-radius: 8px;
-  padding: 15px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
-  padding: 5px 0;
-  border-bottom: 1px solid #d0e6ff;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
 }
 
 .summary-row:last-child {
@@ -601,42 +511,66 @@ export default {
 }
 
 .positive {
-  color: #f56c6c;
-  font-weight: bold;
+  color: #34C759;
 }
 
 .alert {
   padding: 15px;
-  border-radius: 4px;
+  border-radius: 12px;
   text-align: center;
 }
 
 .alert.warning {
-  background-color: #fff6e6;
-  color: #e6a23c;
+  background: #FFF4E5;
+  color: #FF9500;
 }
 
-/* 响应式设计 */
+.btn-primary, .btn-secondary, .btn-danger {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: #007AFF;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0062cc;
+}
+
+.btn-secondary {
+  background: #F2F2F7;
+  color: #007AFF;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e6;
+}
+
+.btn-danger {
+  background: #FF3B30;
+  color: white;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.btn-danger:hover {
+  background: #d73329;
+}
+
 @media (max-width: 768px) {
-  .investment-calculator {
-    padding: 15px;
-    margin-bottom: 20px;
-  }
-  
-  .calculator-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .option-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .detail-row {
-    flex-direction: column;
-    align-items: flex-start;
+  .option-details {
+    grid-template-columns: 1fr;
   }
   
   .summary-grid {

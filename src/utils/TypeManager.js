@@ -24,6 +24,8 @@ class TypeManager {
   static setInvestmentTypes(types) {
     try {
       localStorage.setItem('investmentTypes', JSON.stringify(types));
+      // 触发自定义事件通知其他组件类型已更新
+      window.dispatchEvent(new CustomEvent('typesUpdated'));
     } catch (error) {
       console.error('Failed to save investment types to localStorage:', error);
     }
@@ -44,6 +46,8 @@ class TypeManager {
   static setTransactionTypes(types) {
     try {
       localStorage.setItem('transactionTypes', JSON.stringify(types));
+      // 触发自定义事件通知其他组件类型已更新
+      window.dispatchEvent(new CustomEvent('typesUpdated'));
     } catch (error) {
       console.error('Failed to save transaction types to localStorage:', error);
     }

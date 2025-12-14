@@ -127,13 +127,27 @@ export default {
       this.$emit('cancel-edit');
     }
   },
+  methods: {
+    updateInvestment(field, value) {
+      this.$emit('update-investment', { field, value });
+    },
+    addInvestment() {
+      this.$emit('add-investment', this.newInvestment);
+    },
+    cancelEdit() {
+      this.$emit('cancel-edit');
+    },
+    updateInvestmentTypes() {
+      this.investmentTypes = TypeManager.getInvestmentTypes();
+    }
+  },
   mounted() {
-    // 监听localStorage变化以更新投资类型
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'investmentTypes') {
-        this.investmentTypes = TypeManager.getInvestmentTypes();
-      }
-    });
+    // 监听自定义事件以更新投资类型
+    window.addEventListener('typesUpdated', this.updateInvestmentTypes);
+  },
+  beforeUnmount() {
+    // 清理事件监听器
+    window.removeEventListener('typesUpdated', this.updateInvestmentTypes);
   }
 };
 </script>

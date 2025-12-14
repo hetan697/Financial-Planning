@@ -1,110 +1,83 @@
 <template>
   <div class="dashboard">
     <!-- 财务概览 -->
-    <el-card class="summary-cards">
-      <template #header>
-        <div class="card-header">
-          <span>财务概览</span>
-        </div>
-      </template>
+    <div class="card-section">
+      <div class="card-header">
+        <span class="card-title">财务概览</span>
+      </div>
       
-      <el-row :gutter="15">
-        <el-col :span="6" :xs="12">
-          <div class="summary-item">
-            <h4>总收入</h4>
-            <p class="amount income">¥{{ totalIncome.toFixed(2) }}</p>
-          </div>
-        </el-col>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <h4>总收入</h4>
+          <p class="amount income">¥{{ totalIncome.toFixed(2) }}</p>
+        </div>
         
-        <el-col :span="6" :xs="12">
-          <div class="summary-item">
-            <h4>总支出</h4>
-            <p class="amount expense">¥{{ totalExpense.toFixed(2) }}</p>
-          </div>
-        </el-col>
+        <div class="summary-item">
+          <h4>总支出</h4>
+          <p class="amount expense">¥{{ totalExpense.toFixed(2) }}</p>
+        </div>
         
-        <el-col :span="6" :xs="12">
-          <div class="summary-item">
-            <h4>账户余额</h4>
-            <p 
-              class="amount" 
-              :class="{ expense: balance < 0, income: balance >= 0 }"
-            >
-              ¥{{ balance.toFixed(2) }}
-            </p>
-          </div>
-        </el-col>
+        <div class="summary-item">
+          <h4>账户余额</h4>
+          <p 
+            class="amount" 
+            :class="{ expense: balance < 0, income: balance >= 0 }"
+          >
+            ¥{{ balance.toFixed(2) }}
+          </p>
+        </div>
         
-        <el-col :span="6" :xs="12">
-          <div class="summary-item">
-            <h4>投资总额</h4>
-            <p class="amount investment">¥{{ totalInvestmentValue.toFixed(2) }}</p>
-          </div>
-        </el-col>
-      </el-row>
-    </el-card>
+        <div class="summary-item">
+          <h4>投资总额</h4>
+          <p class="amount investment">¥{{ totalInvestmentValue.toFixed(2) }}</p>
+        </div>
+      </div>
+    </div>
     
     <!-- 图表区域 -->
-    <el-row :gutter="15" class="charts-row">
-      <el-col :span="24" v-if="hasTransactions || hasInvestments">
-        <el-card>
-          <template #header>
-            <div class="card-header">
-              <span>数据可视化</span>
-            </div>
-          </template>
-          
-          <div class="chart-container">
-            <canvas ref="trendChart"></canvas>
-          </div>
-        </el-card>
-      </el-col>
+    <div class="charts-container">
+      <div class="card-section" v-if="hasTransactions || hasInvestments">
+        <div class="card-header">
+          <span class="card-title">数据可视化</span>
+        </div>
+        
+        <div class="chart-container">
+          <canvas ref="trendChart"></canvas>
+        </div>
+      </div>
       
-      <el-col :span="12" :xs="24" v-if="hasExpenseTransactions">
-        <el-card>
-          <template #header>
-            <div class="card-header">
-              <span>支出分类</span>
-            </div>
-          </template>
+      <div class="charts-row">
+        <div class="card-section" v-if="hasExpenseData">
+          <div class="card-header">
+            <span class="card-title">支出分类</span>
+          </div>
           
           <div class="chart-container">
             <canvas ref="expenseChart"></canvas>
           </div>
-        </el-card>
-      </el-col>
-      
-      <el-col :span="12" :xs="24" v-if="hasInvestments">
-        <el-card>
-          <template #header>
-            <div class="card-header">
-              <span>投资收益</span>
-            </div>
-          </template>
+        </div>
+        
+        <div class="card-section" v-if="hasInvestments">
+          <div class="card-header">
+            <span class="card-title">投资收益</span>
+          </div>
           
           <div class="chart-container">
             <canvas ref="investmentChart"></canvas>
           </div>
-        </el-card>
-      </el-col>
+        </div>
+      </div>
       
-      <el-col :span="24" v-if="!hasTransactions && !hasInvestments">
-        <el-card>
-          <div class="empty-state">
-            <p>暂无数据，请先添加交易记录或投资项目</p>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
+      <div class="card-section" v-if="!hasTransactions && !hasInvestments">
+        <div class="empty-state">
+          <p>暂无数据，请先添加交易记录或投资项目</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import {
-  ElCard,
-  ElRow,
-  ElCol
-} from 'element-plus';
 import {
   Chart,
   LineController,
@@ -118,11 +91,9 @@ import {
   ArcElement,
   Legend,
   Tooltip,
-  Title,
-  Colors
+  Filler
 } from 'chart.js';
 
-// 注册Chart.js组件
 Chart.register(
   LineController,
   BarController,
@@ -135,17 +106,11 @@ Chart.register(
   ArcElement,
   Legend,
   Tooltip,
-  Title,
-  Colors
+  Filler
 );
 
 export default {
   name: 'Dashboard',
-  components: {
-    ElCard,
-    ElRow,
-    ElCol
-  },
   props: {
     transactions: {
       type: Array,
@@ -156,7 +121,6 @@ export default {
       default: () => []
     }
   },
-  emits: ['export-data', 'import-data', 'clear-data'],
   data() {
     return {
       trendChart: null,
@@ -168,231 +132,223 @@ export default {
     totalIncome() {
       return this.transactions
         .filter(t => t.type === 'income')
-        .reduce((sum, transaction) => sum + transaction.amount, 0);
+        .reduce((sum, t) => sum + t.amount, 0);
     },
     totalExpense() {
       return this.transactions
         .filter(t => t.type === 'expense')
-        .reduce((sum, transaction) => sum + transaction.amount, 0);
+        .reduce((sum, t) => sum + t.amount, 0);
     },
     balance() {
       return this.totalIncome - this.totalExpense;
     },
     totalInvestmentValue() {
       return this.investments.reduce((sum, investment) => {
-        const price = investment.currentPrice || investment.purchasePrice;
-        return sum + (price * investment.quantity);
+        const currentValue = investment.currentPrice !== null ? 
+          investment.currentPrice : investment.purchasePrice;
+        return sum + (investment.quantity * currentValue);
       }, 0);
     },
     hasTransactions() {
       return this.transactions.length > 0;
     },
-    hasExpenseTransactions() {
-      return this.transactions.filter(t => t.type === 'expense').length > 0;
-    },
     hasInvestments() {
       return this.investments.length > 0;
-    }
-  },
-  mounted() {
-    this.renderCharts();
-  },
-  watch: {
-    transactions: {
-      handler() {
-        this.destroyCharts();
-        this.renderCharts();
-      },
-      deep: true
     },
-    investments: {
-      handler() {
-        this.destroyCharts();
-        this.renderCharts();
-      },
-      deep: true
+    hasExpenseData() {
+      return this.transactions.some(t => t.type === 'expense');
     }
   },
   methods: {
-    renderCharts() {
-      this.$nextTick(() => {
-        if (this.hasTransactions || this.hasInvestments) {
-          this.renderTrendChart();
-        }
-        
-        if (this.hasExpenseTransactions) {
-          this.renderExpenseChart();
-        }
-        
-        if (this.hasInvestments) {
-          this.renderInvestmentChart();
-        }
-      });
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      return `${date.getMonth() + 1}-${date.getDate()}`;
     },
-    destroyCharts() {
+    getMonthName(monthIndex) {
+      const months = ['1月', '2月', '3月', '4月', '5月', '6月', 
+                     '7月', '8月', '9月', '10月', '11月', '12月'];
+      return months[monthIndex];
+    },
+    getLastSixMonths() {
+      const months = [];
+      const now = new Date();
+      
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        months.push({
+          year: date.getFullYear(),
+          month: date.getMonth(),
+          label: this.getMonthName(date.getMonth())
+        });
+      }
+      
+      return months;
+    },
+    getMonthlyData(months) {
+      const incomeData = [];
+      const expenseData = [];
+      
+      months.forEach(({ year, month }) => {
+        const monthlyTransactions = this.transactions.filter(t => {
+          const tDate = new Date(t.date);
+          return tDate.getFullYear() === year && tDate.getMonth() === month;
+        });
+        
+        const income = monthlyTransactions
+          .filter(t => t.type === 'income')
+          .reduce((sum, t) => sum + t.amount, 0);
+          
+        const expense = monthlyTransactions
+          .filter(t => t.type === 'expense')
+          .reduce((sum, t) => sum + t.amount, 0);
+          
+        incomeData.push(income);
+        expenseData.push(expense);
+      });
+      
+      return { incomeData, expenseData };
+    },
+    initTrendChart() {
       if (this.trendChart) {
         this.trendChart.destroy();
-        this.trendChart = null;
       }
       
-      if (this.expenseChart) {
-        this.expenseChart.destroy();
-        this.expenseChart = null;
-      }
-      
-      if (this.investmentChart) {
-        this.investmentChart.destroy();
-        this.investmentChart = null;
-      }
-    },
-    renderTrendChart() {
-      const ctx = this.$refs.trendChart?.getContext('2d');
-      if (!ctx) return;
-      
-      // 按月份分组数据
-      const monthlyData = {};
-      
-      this.transactions.forEach(transaction => {
-        const date = new Date(transaction.date);
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        
-        if (!monthlyData[monthKey]) {
-          monthlyData[monthKey] = { income: 0, expense: 0 };
-        }
-        
-        if (transaction.type === 'income') {
-          monthlyData[monthKey].income += transaction.amount;
-        } else {
-          monthlyData[monthKey].expense += transaction.amount;
-        }
-      });
-      
-      // 转换为图表数据
-      const months = Object.keys(monthlyData).sort();
-      const incomeData = months.map(month => monthlyData[month].income);
-      const expenseData = months.map(month => monthlyData[month].expense);
+      const ctx = this.$refs.trendChart.getContext('2d');
+      const months = this.getLastSixMonths();
+      const labels = months.map(m => m.label);
+      const { incomeData, expenseData } = this.getMonthlyData(months);
       
       this.trendChart = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: months,
+          labels,
           datasets: [
             {
               label: '收入',
               data: incomeData,
-              borderColor: '#f56c6c',
-              backgroundColor: 'rgba(245, 108, 108, 0.1)',
-              tension: 0.1,
-              fill: true
+              borderColor: '#34C759',
+              backgroundColor: 'rgba(52, 199, 89, 0.1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4
             },
             {
               label: '支出',
               data: expenseData,
-              borderColor: '#67c23a',
-              backgroundColor: 'rgba(103, 194, 58, 0.1)',
-              tension: 0.1,
-              fill: true
+              borderColor: '#FF3B30',
+              backgroundColor: 'rgba(255, 59, 48, 0.1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4
             }
           ]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: {
               position: 'top',
             },
-            title: {
-              display: true,
-              text: '收支趋势'
+            tooltip: {
+              mode: 'index',
+              intersect: false
             }
           },
           scales: {
             y: {
-              beginAtZero: true
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
             }
           }
         }
       });
     },
-    renderExpenseChart() {
-      const ctx = this.$refs.expenseChart?.getContext('2d');
-      if (!ctx) return;
+    initExpenseChart() {
+      if (this.expenseChart) {
+        this.expenseChart.destroy();
+      }
       
-      // 按描述分组支出数据
-      const expenseData = {};
+      const ctx = this.$refs.expenseChart.getContext('2d');
       
+      // 计算支出分类数据
+      const expenseByType = {};
       this.transactions
         .filter(t => t.type === 'expense')
-        .forEach(transaction => {
-          if (!expenseData[transaction.description]) {
-            expenseData[transaction.description] = 0;
+        .forEach(t => {
+          // 使用description字段代替不存在的category字段
+          const type = t.description || '未分类';
+          if (!expenseByType[type]) {
+            expenseByType[type] = 0;
           }
-          expenseData[transaction.description] += transaction.amount;
+          expenseByType[type] += t.amount;
         });
       
-      // 转换为图表数据
-      const labels = Object.keys(expenseData);
-      const data = Object.values(expenseData);
+      const labels = Object.keys(expenseByType);
+      const data = Object.values(expenseByType);
+      
+      // 只有当有数据时才渲染图表
+      if (labels.length === 0) {
+        return;
+      }
+      
+      // iOS风格的颜色
+      const colors = [
+        '#007AFF', '#34C759', '#FF3B30', '#FF9500', 
+        '#AF52DE', '#5AC8FA', '#FFCC00', '#FF2D55'
+      ];
       
       this.expenseChart = new Chart(ctx, {
         type: 'pie',
         data: {
-          labels: labels,
-          datasets: [
-            {
-              data: data,
-              backgroundColor: [
-                '#f56c6c',
-                '#67c23a',
-                '#409eff',
-                '#e6a23c',
-                '#722ed1',
-                '#f56c6c',
-                '#67c23a',
-                '#409eff',
-                '#e6a23c',
-                '#722ed1'
-              ]
-            }
-          ]
+          labels,
+          datasets: [{
+            data,
+            backgroundColor: colors.slice(0, labels.length).concat(colors),
+            borderWidth: 0
+          }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: {
               position: 'right',
-            },
-            title: {
-              display: true,
-              text: '支出分类'
+              labels: {
+                boxWidth: 12,
+                padding: 15
+              }
             }
           }
         }
       });
     },
-    renderInvestmentChart() {
-      const ctx = this.$refs.investmentChart?.getContext('2d');
-      if (!ctx) return;
+    initInvestmentChart() {
+      if (this.investmentChart) {
+        this.investmentChart.destroy();
+      }
       
-      // 计算每个投资的收益
-      const investmentLabels = [];
-      const investmentProfits = [];
-      const backgroundColors = [];
+      const ctx = this.$refs.investmentChart.getContext('2d');
       
-      this.investments.forEach((investment, index) => {
-        const cost = investment.purchasePrice * investment.quantity;
-        const currentValue = (investment.currentPrice || investment.purchasePrice) * investment.quantity;
-        const profit = currentValue - cost;
-        
-        investmentLabels.push(investment.name);
-        investmentProfits.push(profit);
-        
-        // 根据盈亏设置颜色
-        if (profit >= 0) {
-          backgroundColors.push('#f56c6c'); // 盈利用红色
-        } else {
-          backgroundColors.push('#67c23a'); // 亏损用绿色
-        }
+      // 计算投资数据
+      const investmentLabels = this.investments.map(inv => inv.name);
+      const investmentValues = this.investments.map(inv => {
+        const currentValue = inv.currentPrice !== null ? 
+          inv.currentPrice : inv.purchasePrice;
+        return inv.quantity * currentValue;
+      });
+      
+      const profitLoss = this.investments.map(inv => {
+        const currentValue = inv.currentPrice !== null ? 
+          inv.currentPrice : inv.purchasePrice;
+        return (currentValue - inv.purchasePrice) * inv.quantity;
       });
       
       this.investmentChart = new Chart(ctx, {
@@ -401,124 +357,190 @@ export default {
           labels: investmentLabels,
           datasets: [
             {
-              label: '收益',
-              data: investmentProfits,
-              backgroundColor: backgroundColors
+              label: '投资价值',
+              data: investmentValues,
+              backgroundColor: '#34C759',
+              borderWidth: 0
+            },
+            {
+              label: '盈亏',
+              data: profitLoss,
+              backgroundColor: profitLoss.map(p => p >= 0 ? '#34C759' : '#FF3B30'),
+              borderWidth: 0
             }
           ]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: {
-              display: false
-            },
-            title: {
-              display: true,
-              text: '投资收益'
+              position: 'top',
             }
           },
           scales: {
             y: {
-              beginAtZero: true
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
             }
           }
         }
       });
+    },
+    initCharts() {
+      if (this.hasTransactions || this.hasInvestments) {
+        this.$nextTick(() => {
+          if (this.hasTransactions) {
+            this.initTrendChart();
+            if (this.hasExpenseTransactions) {
+              this.initExpenseChart();
+            }
+          }
+          if (this.hasInvestments) {
+            this.initInvestmentChart();
+          }
+        });
+      }
     }
   },
+  mounted() {
+    this.initCharts();
+  },
   beforeUnmount() {
-    this.destroyCharts();
+    if (this.trendChart) {
+      this.trendChart.destroy();
+    }
+    if (this.expenseChart) {
+      this.expenseChart.destroy();
+    }
+    if (this.investmentChart) {
+      this.investmentChart.destroy();
+    }
+  },
+  watch: {
+    transactions: {
+      handler() {
+        this.initCharts();
+      },
+      deep: true
+    },
+    investments: {
+      handler() {
+        this.initCharts();
+      },
+      deep: true
+    }
   }
 };
 </script>
 
 <style scoped>
 .dashboard {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+  overflow-y: auto;
 }
 
-.summary-cards {
-  margin-bottom: 30px;
+.card-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 .card-header {
-  font-weight: bold;
-  font-size: 1.1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 10px;
 }
 
 .summary-item {
   text-align: center;
-  padding: 20px 0;
+  padding: 15px;
+  border-radius: 12px;
+  background: #F2F2F7;
 }
 
 .summary-item h4 {
   margin: 0 0 10px 0;
-  font-size: 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
 }
 
 .amount {
-  font-size: 1.5rem;
-  font-weight: bold;
   margin: 0;
+  font-size: 20px;
+  font-weight: 600;
 }
 
-.income {
-  color: #f56c6c;
+.amount.income {
+  color: #34C759;
 }
 
-.expense {
-  color: #67c23a;
+.amount.expense {
+  color: #FF3B30;
 }
 
-.charts {
-  margin-bottom: 30px;
+.amount.investment {
+  color: #007AFF;
+}
+
+.charts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
 .chart-container {
-  margin-bottom: 20px;
-}
-
-.chart-wrapper {
+  height: 300px;
   position: relative;
-  height: 300px;
 }
 
-.chart-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 300px;
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
   color: #999;
 }
 
-.data-management {
-  margin-bottom: 30px;
-}
-
-.button-group {
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-}
-
 @media (max-width: 768px) {
-  .dashboard {
-    padding: 10px;
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
   
-  .button-group {
-    flex-direction: column;
-  }
-  
-  .summary-item {
-    padding: 10px 0;
-  }
-  
-  .amount {
-    font-size: 1.2rem;
+  .charts-row {
+    grid-template-columns: 1fr;
   }
 }
 </style>
