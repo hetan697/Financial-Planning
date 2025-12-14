@@ -149,6 +149,7 @@ import TransactionPage from './components/transactions/TransactionPage.vue';
 import InvestmentManagement from './components/investments/InvestmentManagement.vue';
 import InvestmentPage from './components/investments/InvestmentPage.vue';
 import TypeManagement from './components/TypeManagement.vue';
+import TypeManager from './utils/TypeManager.js';
 
 export default {
   name: 'App',
@@ -318,11 +319,8 @@ export default {
       }).then(() => {
         this.transactions = [];
         this.investments = [];
-        // 重置为默认类型
-        TypeManager.setInvestmentTypes(TypeManager.defaultInvestmentTypes);
-        TypeManager.setTransactionTypes(TypeManager.defaultTransactionTypes);
         this.saveToLocalStorage();
-        this.$message.success('数据已清空');
+        this.$message.success('数据已清除');
       }).catch(() => {
         // 用户取消操作
       });
@@ -428,21 +426,15 @@ export default {
       this.showInvestmentPage = true;
     },
     saveInvestment(investment) {
-      if (!investment.name || investment.quantity <= 0 || investment.purchasePrice <= 0) {
-        this.showError('请输入有效的投资名称、数量和买入价');
-        return;
-      }
-
       if (this.isEditingInvestment) {
+        // 编辑现有投资
         const index = this.investments.findIndex(i => i.id === investment.id);
         if (index !== -1) {
           this.investments.splice(index, 1, investment);
         }
       } else {
-        this.investments.push({
-          ...investment,
-          id: Date.now()
-        });
+        // 添加新投资
+        this.investments.push(investment);
       }
       
       this.saveToLocalStorage();
@@ -454,33 +446,6 @@ export default {
       this.currentInvestment = null;
       this.isEditingInvestment = false;
     },
-    addInvestment(investment) {
-      if (!investment.name || investment.quantity <= 0 || investment.purchasePrice <= 0) {
-        this.showError('请输入有效的投资名称、数量和买入价');
-        return;
-      }
-
-      this.investments.push({
-        ...investment,
-        id: Date.now()
-      });
-      
-      this.saveToLocalStorage();
-      this.$message.success('投资添加成功');
-    },
-    updateInvestment(investment) {
-      if (!investment.name || investment.quantity <= 0 || investment.purchasePrice <= 0) {
-        this.showError('请输入有效的投资名称、数量和买入价');
-        return;
-      }
-
-      const index = this.investments.findIndex(i => i.id === investment.id);
-      if (index !== -1) {
-        this.investments.splice(index, 1, investment);
-        this.saveToLocalStorage();
-        this.$message.success('投资更新成功');
-      }
-    },
     deleteInvestment(id) {
       this.$confirm('此操作将永久删除该投资记录，是否继续？', '提示', {
         confirmButtonText: '确定',
@@ -489,7 +454,7 @@ export default {
       }).then(() => {
         this.investments = this.investments.filter(investment => investment.id !== id);
         this.saveToLocalStorage();
-        this.$message.success('删除成功');
+        this.$message.success('投资记录已删除');
       }).catch(() => {
         // 用户取消操作
       });
