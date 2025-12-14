@@ -397,10 +397,13 @@ export default {
 }
 
 .el-header {
-  background-color: #409eff;
-  color: white;
   text-align: center;
   line-height: 60px;
+  padding: 0;
+}
+
+.el-main {
+  padding: 0;
 }
 
 .main-navigation {
