@@ -30,7 +30,7 @@
         </div>
 
         <!-- 财务记录视图 -->
-        <div v-show="activeTab === 'transactions'">
+        <div v-show="activeTab === 'transactions' && !showTransactionPage">
           <!-- 财务概览 -->
           <SummarySection 
             :total-income="totalIncome" 
@@ -55,7 +55,6 @@
             @save="saveTransaction"
             @cancel="cancelTransaction"
           />
-        </div>
         </div>
 
         <!-- 投资管理视图 -->
