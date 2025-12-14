@@ -435,9 +435,6 @@ export default {
         // 用户取消操作
       });
     },
-    editInvestment(investment) {
-      this.$emit('edit-investment', investment);
-    },
     cancelInvestmentEdit() {
       this.$emit('cancel-edit');
     }
