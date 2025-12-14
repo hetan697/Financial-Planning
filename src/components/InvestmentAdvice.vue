@@ -54,102 +54,12 @@
       <h4>📈 投资组合</h4>
       <p>{{ investmentAllocation.message }}</p>
       
-      <!-- 投资方式管理 -->
-      <div v-if="balance > 0 && emergencyFundAdvice.amount >= 0 && balance > emergencyFundAdvice.amount" class="investment-options">
-        <h5>管理投资方式</h5>
-        <div class="options-controls">
-          <el-button @click="addInvestmentOption" size="small" type="primary">添加投资方式</el-button>
-        </div>
-        
-        <div class="investment-options-list">
-          <div 
-            v-for="(option, index) in investmentOptions" 
-            :key="index"
-            class="investment-option-card"
-          >
-            <div class="option-header">
-              <el-input 
-                v-model="option.name" 
-                placeholder="投资方式名称"
-                size="small"
-                class="option-name-input"
-              />
-              <el-button 
-                @click="removeInvestmentOption(index)" 
-                size="small" 
-                type="danger"
-                circle
-              >
-                ×
-              </el-button>
-            </div>
-            
-            <div class="option-details">
-              <div class="detail-row">
-                <label>预期年化收益率:</label>
-                <el-input-number 
-                  v-model="option.returnRate" 
-                  :min="0" 
-                  :max="100" 
-                  :step="0.1"
-                  size="small"
-                  controls-position="right"
-                /> %
-              </div>
-              
-              <div class="detail-row">
-                <label>分配比例:</label>
-                <el-slider
-                  v-model="option.percentage"
-                  :min="0"
-                  :max="100"
-                  :step="1"
-                  show-input
-                  size="small"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="total-percentage" :class="{ 'error': totalPercentage !== 100 }">
-          投资比例总计: {{ totalPercentage }}%
-          <span v-if="totalPercentage !== 100" class="warning-text">投资比例总和应为100%</span>
-        </div>
-        
-        <div v-if="totalPercentage === 100" class="investment-summary">
-          <h5>投资收益预估</h5>
-          <div class="summary-grid">
-            <div 
-              v-for="(option, index) in investmentOptionsWithReturns" 
-              :key="index"
-              class="summary-card"
-            >
-              <div class="summary-header">
-                <span class="summary-name">{{ option.name }}</span>
-                <span class="summary-percentage">{{ option.percentage }}%</span>
-              </div>
-              <div class="summary-amount">¥{{ option.investmentAmount.toFixed(2) }}</div>
-              <div class="summary-return-rate">{{ option.returnRate }}% 年化收益率</div>
-              <div class="summary-return">预计年收益: ¥{{ option.expectedReturn.toFixed(2) }}</div>
-            </div>
-          </div>
-          
-          <div class="overall-summary">
-            <div class="summary-row">
-              <span>总投资金额:</span>
-              <span>¥{{ overallInvestmentAmount.toFixed(2) }}</span>
-            </div>
-            <div class="summary-row">
-              <span>预计年总收益:</span>
-              <span>¥{{ overallExpectedReturn.toFixed(2) }}</span>
-            </div>
-            <div class="summary-row">
-              <span>整体年化收益率:</span>
-              <span :class="{ 'positive': overallReturnRate > 0 }">{{ overallReturnRate.toFixed(2) }}%</span>
-            </div>
-          </div>
-        </div>
+      <!-- 投资计算器 -->
+      <div v-if="balance > 0 && emergencyFundAdvice.amount >= 0 && balance > emergencyFundAdvice.amount">
+        <InvestmentCalculator 
+          :investable-fund="investableFund"
+          @update:investment-options="handleInvestmentOptionsUpdate"
+        />
       </div>
       
       <div v-else class="alert warning">
@@ -185,15 +95,14 @@
 </template>
 
 <script>
-import { ElSlider, ElInput, ElInputNumber, ElButton } from 'element-plus';
+import { ElSlider } from 'element-plus';
+import InvestmentCalculator from './InvestmentCalculator.vue';
 
 export default {
   name: 'InvestmentAdvice',
   components: {
     ElSlider,
-    ElInput,
-    ElInputNumber,
-    ElButton
+    InvestmentCalculator
   },
   props: {
     balance: {
@@ -209,28 +118,7 @@ export default {
   data() {
     return {
       emergencyFundMonths: 3, // 建议的应急资金月数
-      investmentOptions: [
-        { 
-          name: '银行定期存款', 
-          percentage: 30, 
-          returnRate: 2.1 
-        },
-        { 
-          name: '货币基金', 
-          percentage: 20, 
-          returnRate: 2.8 
-        },
-        { 
-          name: '债券基金', 
-          percentage: 30, 
-          returnRate: 4.5 
-        },
-        { 
-          name: '股票基金', 
-          percentage: 20, 
-          returnRate: 8.0 
-        }
-      ]
+      investmentOptions: []
     };
   },
   computed: {
@@ -413,22 +301,6 @@ export default {
       });
     },
     
-    // 总投资金额
-    overallInvestmentAmount() {
-      return this.investmentOptionsWithReturns.reduce((sum, option) => sum + option.investmentAmount, 0);
-    },
-    
-    // 预计年总收益
-    overallExpectedReturn() {
-      return this.investmentOptionsWithReturns.reduce((sum, option) => sum + option.expectedReturn, 0);
-    },
-    
-    // 整体年化收益率
-    overallReturnRate() {
-      if (this.overallInvestmentAmount === 0) return 0;
-      return (this.overallExpectedReturn / this.overallInvestmentAmount) * 100;
-    },
-    
     // 投资分配建议
     investmentAllocation() {
       if (this.balance <= 0) {
@@ -555,22 +427,9 @@ export default {
       return yearDiff * 12 + monthDiff + 1; // +1表示包含起始和结束月份
     },
     
-    // 添加投资方式
-    addInvestmentOption() {
-      this.investmentOptions.push({
-        name: '新投资方式',
-        percentage: 0,
-        returnRate: 5.0
-      });
-    },
-    
-    // 删除投资方式
-    removeInvestmentOption(index) {
-      if (this.investmentOptions.length > 1) {
-        this.investmentOptions.splice(index, 1);
-      } else {
-        this.$message.warning('至少需要保留一种投资方式');
-      }
+    // 处理投资选项更新
+    handleInvestmentOptionsUpdate(options) {
+      this.investmentOptions = options;
     }
   }
 };
