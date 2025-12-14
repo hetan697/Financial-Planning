@@ -1,0 +1,21 @@
+{
+  "name": "个人财务管理系统",
+  "short_name": "财务管理",
+  "description": "一个基于Vue.js的个人财务管理应用程序，帮助您跟踪收支、管理投资并获得个性化的投资建议",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f6f7",
+  "theme_color": "#409eff",
+  "icons": [
+    {
+      "src": "/src/assets/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/src/assets/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>个人财务管理系统</title>
+  <meta name="description" content="一个基于Vue.js的个人财务管理应用程序，帮助您跟踪收支、管理投资并获得个性化的投资建议">
+  
+  <!-- PWA meta tags -->
+  <meta name="theme-color" content="#409eff">
+  <link rel="manifest" href="/manifest.json">
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #f5f6f7;
+    }
+    
+    #app {
+      height: 100vh;
+    }
+    
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-size: 1.2em;
+      color: #666;
+    }
+  </style>
+  
+  <!-- GitHub Pages SPA redirect script -->
+  <script>
+    sessionStorage.setItem('redirected', true);
+    var path = location.pathname.replace(/\/[^\/]*$/, '');
+    if (path === '') path = '/';
+    location.replace(path + '#' + location.pathname.slice(1));
+  </script>
+</head>
+<body>
+  <div id="app">
+    <div class="loading">正在重定向...</div>
+  </div>
+</body>
+</html>

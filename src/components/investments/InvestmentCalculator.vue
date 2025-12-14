@@ -69,6 +69,7 @@
               :step="1"
               show-input
               size="small"
+              @change="handlePercentageChange(index)"
             />
           </div>
         </div>
@@ -154,6 +155,12 @@ export default {
       investmentTypes: TypeManager.getInvestmentTypes(),
       investmentOptions: [
         { 
+          type: '紧急备用金',
+          name: '紧急备用金', 
+          percentage: 10, 
+          returnRate: 2.0 
+        },
+        { 
           type: '股票',
           name: '股票投资', 
           percentage: 30, 
@@ -170,12 +177,6 @@ export default {
           name: '债券投资', 
           percentage: 20, 
           returnRate: 4.0 
-        },
-        { 
-          type: '其他',
-          name: '其他投资', 
-          percentage: 10, 
-          returnRate: 3.0 
         }
       ]
     };
@@ -267,10 +268,11 @@ export default {
 
 <style scoped>
 .investment-calculator {
-  background-color: #f5f7fa;
+  background: white;
   padding: 20px;
   border-radius: 8px;
-  margin: 20px 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
 }
 
 .calculator-header {
@@ -278,10 +280,13 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #eee;
 }
 
 .calculator-header h3 {
   margin: 0;
+  color: #333;
 }
 
 .controls {
@@ -294,85 +299,88 @@ export default {
 }
 
 .investment-option-card {
-  background: white;
+  background-color: #f8f9fa;
   border-radius: 8px;
   padding: 15px;
   margin-bottom: 15px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
 }
 
 .option-header {
   display: flex;
-  justify-content: space-between;
+  gap: 10px;
   align-items: center;
   margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.option-type-select,
+.option-name-input {
+  flex: 1;
+  min-width: 120px;
+}
+
+.option-details {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 
-.option-type-select {
-  width: 100px;
-}
-
-.option-name-input {
-  flex: 1;
-}
-
-.option-details .detail-row {
+.detail-row {
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
+  gap: 10px;
 }
 
-.option-details .detail-row label {
-  width: 120px;
-  font-weight: bold;
-}
-
-.option-details .detail-row :deep(.el-input-number) {
-  margin: 0 10px;
-  width: 100px;
+.detail-row label {
+  min-width: 120px;
+  font-weight: 500;
 }
 
 .total-percentage {
-  font-weight: bold;
-  font-size: 1.1em;
-  text-align: right;
+  padding: 10px 15px;
+  border-radius: 4px;
   margin-bottom: 20px;
+  background-color: #e8f4ff;
+  font-weight: 500;
 }
 
 .total-percentage.error {
+  background-color: #ffeeee;
   color: #f56c6c;
 }
 
 .warning-text {
   font-size: 0.9em;
-  color: #e6a23c;
+  color: #f56c6c;
 }
 
 .investment-summary h4 {
   margin-top: 0;
   margin-bottom: 15px;
   color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
 }
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin: 20px 0;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
 }
 
 .summary-card {
-  border: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
   border-radius: 8px;
   padding: 15px;
-  background-color: #fafafa;
+  text-align: center;
 }
 
 .summary-header {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
+  font-size: 0.9em;
 }
 
 .summary-type {
@@ -381,10 +389,7 @@ export default {
 }
 
 .summary-name {
-  flex: 1;
-  text-align: center;
-  font-weight: bold;
-  font-size: 1.1em;
+  color: #666;
 }
 
 .summary-percentage {
@@ -395,52 +400,52 @@ export default {
 .summary-amount {
   font-size: 1.2em;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   color: #333;
 }
 
 .summary-return-rate {
-  margin-bottom: 5px;
+  font-size: 0.9em;
   color: #666;
+  margin-bottom: 5px;
 }
 
 .summary-return {
-  font-weight: bold;
+  font-size: 0.9em;
   color: #67c23a;
+  font-weight: 500;
 }
 
 .overall-summary {
-  background: white;
+  background-color: #e8f4ff;
   border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  padding: 15px;
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
+  padding: 5px 0;
+  border-bottom: 1px solid #d0e6ff;
 }
 
 .summary-row:last-child {
   border-bottom: none;
 }
 
-.summary-row .positive {
-  color: #67c23a;
+.positive {
+  color: #f56c6c;
   font-weight: bold;
 }
 
 .alert {
   padding: 15px;
   border-radius: 4px;
-  margin: 10px 0;
+  text-align: center;
 }
 
 .alert.warning {
-  background-color: #fdf6ec;
-  border-left: 4px solid #e6a23c;
+  background-color: #fff6e6;
   color: #e6a23c;
 }
 

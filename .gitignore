@@ -1,14 +1,12 @@
-*.pyc
-__pycache__
-.DS_Store
-financial_data.json
 node_modules/
 dist/
-.env
-截屏*.png
 *.log
-debug.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+.DS_Store
+截屏*.png
+financial_data.json
+/.vite/
+/.temp/
+
+# GitHub Pages build artifacts
+_site/
+public/

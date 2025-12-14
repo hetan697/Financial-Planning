@@ -1,140 +1,147 @@
 <template>
   <div class="type-management">
-    <h3>类型管理</h3>
-    
-    <!-- 数据管理 -->
-    <div class="data-management-section">
-      <h4>数据管理</h4>
-      <div class="data-management-actions">
-        <el-button @click="exportData" type="primary">
-          <el-icon><Upload /></el-icon>
-          导出数据
-        </el-button>
-        <el-button @click="triggerImport" type="success">
-          <el-icon><Download /></el-icon>
-          导入数据
-        </el-button>
-        <el-button @click="clearData" type="danger">
-          <el-icon><Delete /></el-icon>
-          清除数据
-        </el-button>
-        <input 
-          ref="fileInput" 
-          type="file" 
-          accept=".json" 
-          @change="importData" 
-          style="display: none;"
-        />
-      </div>
-    </div>
-    
-    <!-- 投资类型管理 -->
-    <div class="type-section">
-      <h4>投资类型</h4>
-      <div class="type-list">
-        <div 
-          v-for="(type, index) in localInvestmentTypes" 
-          :key="index"
-          class="type-item"
-        >
-          <el-input 
-            v-model="localInvestmentTypes[index]" 
-            size="small"
-            @blur="validateInvestmentType(index)"
-          />
-          <el-button 
-            @click="removeInvestmentType(index)" 
-            size="small" 
-            type="danger"
-            circle
-          >
-            ×
-          </el-button>
+    <el-card class="management-card">
+      <template #header>
+        <div class="card-header">
+          <span>类型管理</span>
         </div>
-      </div>
-      <el-button @click="addInvestmentType" size="small" type="primary">
-        添加投资类型
-      </el-button>
-    </div>
-    
-    <!-- 交易类型管理 -->
-    <div class="type-section">
-      <h4>交易类型</h4>
+      </template>
       
-      <div class="transaction-types">
-        <div class="transaction-type-group">
-          <h5>收入类型</h5>
-          <div class="type-list">
-            <div 
-              v-for="(type, index) in localTransactionTypes.income" 
-              :key="index"
-              class="type-item"
-            >
-              <el-input 
-                v-model="localTransactionTypes.income[index]" 
-                size="small"
-                @blur="validateTransactionType('income', index)"
-              />
-              <el-button 
-                @click="removeTransactionType('income', index)" 
-                size="small" 
-                type="danger"
-                circle
-              >
-                ×
-              </el-button>
-            </div>
-          </div>
-          <el-button @click="addTransactionType('income')" size="small" type="primary">
-            添加收入类型
+      <!-- 数据管理 -->
+      <div class="data-management-section">
+        <h4>数据管理</h4>
+        <div class="data-management-actions">
+          <el-button @click="exportData" type="primary">
+            <el-icon><Upload /></el-icon>
+            导出数据
           </el-button>
-        </div>
-        
-        <div class="transaction-type-group">
-          <h5>支出类型</h5>
-          <div class="type-list">
-            <div 
-              v-for="(type, index) in localTransactionTypes.expense" 
-              :key="index"
-              class="type-item"
-            >
-              <el-input 
-                v-model="localTransactionTypes.expense[index]" 
-                size="small"
-                @blur="validateTransactionType('expense', index)"
-              />
-              <el-button 
-                @click="removeTransactionType('expense', index)" 
-                size="small" 
-                type="danger"
-                circle
-              >
-                ×
-              </el-button>
-            </div>
-          </div>
-          <el-button @click="addTransactionType('expense')" size="small" type="primary">
-            添加支出类型
+          <el-button @click="triggerImport" type="success">
+            <el-icon><Download /></el-icon>
+            导入数据
           </el-button>
+          <el-button @click="clearData" type="danger">
+            <el-icon><Delete /></el-icon>
+            清除数据
+          </el-button>
+          <input 
+            ref="fileInput" 
+            type="file" 
+            accept=".json" 
+            @change="importData" 
+            style="display: none;"
+          />
         </div>
       </div>
-    </div>
-    
-    <div class="form-actions">
-      <el-button @click="saveTypes" type="primary">保存类型设置</el-button>
-      <el-button @click="resetTypes">重置为默认</el-button>
-    </div>
+      
+      <!-- 投资类型管理 -->
+      <div class="type-section">
+        <h4>投资类型</h4>
+        <div class="type-list">
+          <div 
+            v-for="(type, index) in localInvestmentTypes" 
+            :key="index"
+            class="type-item"
+          >
+            <el-input 
+              v-model="localInvestmentTypes[index]" 
+              size="small"
+              @blur="validateInvestmentType(index)"
+            />
+            <el-button 
+              @click="removeInvestmentType(index)" 
+              size="small" 
+              type="danger"
+              circle
+            >
+              ×
+            </el-button>
+          </div>
+        </div>
+        <el-button @click="addInvestmentType" size="small" type="primary">
+          添加投资类型
+        </el-button>
+      </div>
+      
+      <!-- 交易类型管理 -->
+      <div class="type-section">
+        <h4>交易类型</h4>
+        
+        <div class="transaction-types">
+          <div class="transaction-type-group">
+            <h5>收入类型</h5>
+            <div class="type-list">
+              <div 
+                v-for="(type, index) in localTransactionTypes.income" 
+                :key="index"
+                class="type-item"
+              >
+                <el-input 
+                  v-model="localTransactionTypes.income[index]" 
+                  size="small"
+                  @blur="validateTransactionType('income', index)"
+                />
+                <el-button 
+                  @click="removeTransactionType('income', index)" 
+                  size="small" 
+                  type="danger"
+                  circle
+                >
+                  ×
+                </el-button>
+              </div>
+            </div>
+            <el-button @click="addTransactionType('income')" size="small" type="primary">
+              添加收入类型
+            </el-button>
+          </div>
+          
+          <div class="transaction-type-group">
+            <h5>支出类型</h5>
+            <div class="type-list">
+              <div 
+                v-for="(type, index) in localTransactionTypes.expense" 
+                :key="index"
+                class="type-item"
+              >
+                <el-input 
+                  v-model="localTransactionTypes.expense[index]" 
+                  size="small"
+                  @blur="validateTransactionType('expense', index)"
+                />
+                <el-button 
+                  @click="removeTransactionType('expense', index)" 
+                  size="small" 
+                  type="danger"
+                  circle
+                >
+                  ×
+                </el-button>
+              </div>
+            </div>
+            <el-button @click="addTransactionType('expense')" size="small" type="primary">
+              添加支出类型
+            </el-button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <el-button @click="saveTypes" type="primary">保存类型设置</el-button>
+        <el-button @click="resetTypes">重置为默认</el-button>
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
-import { ElButton, ElInput, ElIcon } from 'element-plus';
+import { ElCard, ElButton, ElInput, ElIcon } from 'element-plus';
 import { Upload, Download, Delete } from '@element-plus/icons-vue';
 import TypeManager from '../utils/TypeManager.js';
 
 export default {
   name: 'TypeManagement',
   components: {
+    ElCard,
     ElButton,
     ElInput,
     ElIcon,
@@ -240,20 +247,13 @@ export default {
 </script>
 
 <style scoped>
-.type-management {
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+.management-card {
   margin-bottom: 30px;
 }
 
-.type-management h3 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  color: #333;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 10px;
+.card-header {
+  font-weight: bold;
+  font-size: 1.1rem;
 }
 
 .data-management-section {
@@ -323,8 +323,7 @@ export default {
 
 /* 响应式设计 - 统一的组件间距 */
 @media (max-width: 768px) {
-  .type-management {
-    padding: 15px;
+  .management-card {
     margin-bottom: 20px;
   }
   

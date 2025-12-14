@@ -41,12 +41,16 @@
 - localStorage API (数据持久化)
 - Element Plus (UI组件库)
 - Element Plus Icons (图标库)
+- Chart.js (图表可视化)
 
 ## 项目结构
 
 ```
 financial-planning/
 ├── index.html              # 应用入口文件
+├── 404.html                # GitHub Pages SPA重定向文件
+├── manifest.json           # PWA配置文件
+├── sw.js                   # Service Worker文件
 ├── package.json            # 项目配置文件
 ├── README.md               # 项目说明文档
 ├── .claude                 # Claude提示词文件
@@ -92,6 +96,15 @@ financial-planning/
    npm start
    ```
 3. 在浏览器中打开 `http://localhost:8000`
+
+### 部署到GitHub Pages
+
+1. 在GitHub上创建一个新的仓库
+2. 将项目推送到该仓库
+3. 在仓库设置中启用GitHub Pages，选择`master`分支作为源
+4. 应用将自动部署到`https://<username>.github.io/<repository>/`
+
+应用支持离线使用，首次加载后会缓存所有必要资源，即使在网络不可用的情况下也能正常使用。
 
 ### 使用说明
 
