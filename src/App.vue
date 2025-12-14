@@ -211,11 +211,13 @@ export default {
       this.showTransactionPage = false;
       this.showInvestmentPage = false;
     },
+    
     // 显示错误信息
     showError(message) {
       this.errorMessage = message;
       this.errorDialogVisible = true;
     },
+    
     // 数据导入
     importData(event) {
       const file = event.target.files[0];
@@ -253,6 +255,7 @@ export default {
       };
       reader.readAsText(file);
     },
+    
     // 验证导入数据格式
     validateImportData(data) {
       if (!data || typeof data !== 'object') return false;
@@ -284,6 +287,7 @@ export default {
       
       return true;
     },
+    
     exportData() {
       try {
         const data = {
@@ -312,6 +316,8 @@ export default {
         this.showError('导出数据失败');
       }
     },
+    
+    // 数据清除
     clearAllData() {
       this.$confirm('此操作将永久删除所有数据，是否继续？', '提示', {
         confirmButtonText: '确定',
@@ -326,6 +332,8 @@ export default {
         // 用户取消操作
       });
     },
+    
+    // 保存到本地存储
     saveToLocalStorage() {
       try {
         localStorage.setItem('financeTransactions', JSON.stringify(this.transactions));
@@ -335,6 +343,8 @@ export default {
         this.showError('保存数据失败');
       }
     },
+    
+    // 从本地存储加载
     loadFromLocalStorage() {
       try {
         const transactions = localStorage.getItem('financeTransactions');
@@ -352,6 +362,7 @@ export default {
         this.showError('加载数据失败');
       }
     },
+    
     // 交易相关方法
     showAddTransactionPage() {
       this.currentTransaction = {
@@ -365,11 +376,13 @@ export default {
       this.isEditing = false;
       this.showTransactionPage = true;
     },
+    
     editTransaction(transaction) {
       this.currentTransaction = { ...transaction };
       this.isEditing = true;
       this.showTransactionPage = true;
     },
+    
     saveTransaction(transaction) {
       if (!transaction.description || transaction.amount <= 0) {
         this.showError('请输入有效的明细和金额');
@@ -389,11 +402,13 @@ export default {
       this.cancelTransaction();
       this.$message.success(this.isEditing ? '交易更新成功' : '交易添加成功');
     },
+    
     cancelTransaction() {
       this.showTransactionPage = false;
       this.currentTransaction = null;
       this.isEditing = false;
     },
+    
     deleteTransaction(id) {
       this.$confirm('此操作将永久删除该交易记录，是否继续？', '提示', {
         confirmButtonText: '确定',
@@ -407,6 +422,7 @@ export default {
         // 用户取消操作
       });
     },
+    
     // 投资相关方法
     showAddInvestmentPage() {
       this.currentInvestment = {
@@ -421,11 +437,13 @@ export default {
       this.isEditingInvestment = false;
       this.showInvestmentPage = true;
     },
+    
     editInvestment(investment) {
       this.currentInvestment = { ...investment };
       this.isEditingInvestment = true;
       this.showInvestmentPage = true;
     },
+    
     saveInvestment(investment) {
       if (this.isEditingInvestment) {
         // 编辑现有投资
@@ -442,11 +460,13 @@ export default {
       this.cancelInvestment();
       this.$message.success(this.isEditingInvestment ? '投资更新成功' : '投资添加成功');
     },
+    
     cancelInvestment() {
       this.showInvestmentPage = false;
       this.currentInvestment = null;
       this.isEditingInvestment = false;
     },
+    
     deleteInvestment(id) {
       this.$confirm('此操作将永久删除该投资记录，是否继续？', '提示', {
         confirmButtonText: '确定',
@@ -460,6 +480,7 @@ export default {
         // 用户取消操作
       });
     },
+    
     cancelInvestmentEdit() {
       this.isEditingInvestment = false;
       this.currentInvestment = null;
@@ -474,6 +495,7 @@ export default {
       }
     },
     
+    // 检测是否为移动设备
     checkIsMobile() {
       this.isMobile = window.innerWidth <= 768;
     }
