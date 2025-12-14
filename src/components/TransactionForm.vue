@@ -90,7 +90,6 @@
           {{ isEditing ? '更新' : '添加' }}
         </el-button>
         <el-button 
-          v-if="isEditing" 
           @click="cancelEdit"
           style="flex: 1"
         >

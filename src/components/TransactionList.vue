@@ -105,14 +105,6 @@ export default {
     addTransaction() {
       this.$emit('add-transaction');
     },
-    tableRowClassName({ row }) {
-      if (row.type === 'income') {
-        return 'income-row';
-      } else if (row.type === 'expense') {
-        return 'expense-row';
-      }
-      return '';
-    }
   }
 };
 </script>
@@ -133,11 +125,13 @@ export default {
   font-style: italic;
 }
 
-:deep(.income-row) td {
-  background-color: #fef0f0 !important;
+.income {
+  color: #f56c6c;
+  font-weight: bold;
 }
 
-:deep(.expense-row) td {
-  background-color: #f0f9ff !important;
+.expense {
+  color: #67c23a;
+  font-weight: bold;
 }
 </style>

@@ -38,23 +38,24 @@
             :balance="balance"
           />
           
-          <!-- 添加/编辑交易表单（仅在需要时显示）-->
-          <TransactionForm 
-            v-if="showTransactionForm"
-            :new-transaction="newTransaction" 
-            :is-editing="isEditing"
-            @add-transaction="addTransaction"
-            @update-transaction="updateTransaction"
-            @cancel-edit="cancelEdit"
-          />
-          
           <!-- 交易列表 -->
           <TransactionList 
             :transactions="sortedTransactions" 
             @delete-transaction="deleteTransaction"
             @edit-transaction="editTransaction"
-            @add-transaction="showAddTransactionForm"
+            @add-transaction="showAddTransactionPage"
           />
+        </div>
+        
+        <!-- 添加/编辑交易页面 -->
+        <div v-show="activeTab === 'transactions' && showTransactionPage">
+          <TransactionPage
+            :transaction="currentTransaction"
+            :is-editing="isEditing"
+            @save="saveTransaction"
+            @cancel="cancelTransaction"
+          />
+        </div>
         </div>
 
         <!-- 投资管理视图 -->
@@ -78,8 +79,8 @@
 <script>
 import { ElContainer, ElHeader, ElMain, ElMenu, ElMenuItem } from 'element-plus';
 import SummarySection from './components/SummarySection.vue';
-import TransactionForm from './components/TransactionForm.vue';
 import TransactionList from './components/TransactionList.vue';
+import TransactionPage from './components/TransactionPage.vue';
 import InvestmentManagement from './components/InvestmentManagement.vue';
 import Dashboard from './components/Dashboard.vue';
 
@@ -92,8 +93,8 @@ export default {
     ElMenu,
     ElMenuItem,
     SummarySection,
-    TransactionForm,
     TransactionList,
+    TransactionPage,
     InvestmentManagement,
     Dashboard
   },
@@ -102,11 +103,11 @@ export default {
       appName: '个人财务管理系统',
       activeTab: 'dashboard',
       isEditing: false,
-      showTransactionForm: false, // 控制是否显示交易表单
+      showTransactionPage: false, // 控制是否显示交易页面
       editingTransactionId: null,
       isEditingInvestment: false,
       editingInvestmentId: null,
-      newTransaction: {
+      currentTransaction: {
         type: 'income',
         description: '',
         notes: '',
@@ -168,33 +169,26 @@ export default {
   methods: {
     handleMenuSelect(index) {
       this.activeTab = index;
-      // 切换标签页时取消编辑状态和隐藏表单
+      // 切换标签页时取消编辑状态
       this.isEditing = false;
       this.isEditingInvestment = false;
-      this.showTransactionForm = false;
+      this.showTransactionPage = false;
     },
-    
-    /**
-     * 显示添加交易的表单
-     */
-    showAddTransactionForm() {
+    showAddTransactionPage() {
       // 重置表单状态
       this.isEditing = false;
       this.editingTransactionId = null;
-      this.newTransaction = {
+      this.currentTransaction = {
         type: 'income',
         description: '',
         notes: '',
         amount: 0,
         date: new Date().toISOString().substr(0, 10)
       };
-      this.showTransactionForm = true;
+      this.showTransactionPage = true;
     },
-    updateTransaction(field, value) {
-      this.newTransaction[field] = value;
-    },
-    addTransaction() {
-      if (!this.newTransaction.description || this.newTransaction.amount <= 0) {
+    saveTransaction(transaction) {
+      if (!transaction.description || transaction.amount <= 0) {
         this.$message({
           message: '请选择有效的明细和金额',
           type: 'warning'
@@ -208,31 +202,28 @@ export default {
         if (index !== -1) {
           this.transactions[index] = {
             ...this.transactions[index],
-            ...this.newTransaction
+            ...transaction,
+            id: this.editingTransactionId // 确保ID不变
           };
         }
-        this.cancelEdit();
+        this.cancelTransaction();
       } else {
         // 添加新交易
-        const transaction = {
+        const newTransaction = {
           id: Date.now(), // 简单ID生成方式
-          type: this.newTransaction.type,
-          description: this.newTransaction.description,
-          notes: this.newTransaction.notes,
-          amount: parseFloat(this.newTransaction.amount),
-          date: this.newTransaction.date
+          ...transaction
         };
 
-        this.transactions.push(transaction);
+        this.transactions.push(newTransaction);
         
         this.$message({
           message: '交易添加成功',
           type: 'success'
         });
+        
+        // 返回列表页面
+        this.showTransactionPage = false;
       }
-      
-      // 隐藏表单
-      this.showTransactionForm = false;
     },
     
     deleteTransaction(id) {
@@ -254,24 +245,14 @@ export default {
     editTransaction(transaction) {
       this.isEditing = true;
       this.editingTransactionId = transaction.id;
-      this.newTransaction = { ...transaction };
-      // 切换到财务记录视图以显示编辑表单
-      this.activeTab = 'transactions';
-      this.showTransactionForm = true;
+      this.currentTransaction = { ...transaction };
+      this.showTransactionPage = true;
     },
     
-    cancelEdit() {
+    cancelTransaction() {
       this.isEditing = false;
       this.editingTransactionId = null;
-      // 重置表单
-      this.newTransaction = {
-        type: 'income',
-        description: '',
-        notes: '',
-        amount: 0,
-        date: new Date().toISOString().substr(0, 10)
-      };
-      this.showTransactionForm = false;
+      this.showTransactionPage = false;
     },
     
     updateInvestment(field, value) {
