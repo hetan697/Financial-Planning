@@ -1,10 +1,6 @@
 <template>
   <div class="finance-app">
     <el-container>
-      <el-header>
-        <h1>{{ appName }}</h1>
-      </el-header>
-      
       <el-main>
         <!-- 导航菜单 -->
         <el-menu 
@@ -13,6 +9,7 @@
           @select="handleMenuSelect"
           class="main-navigation"
         >
+          <el-menu-item index="0" disabled class="app-title">{{ appName }}</el-menu-item>
           <el-menu-item index="dashboard">数据看板</el-menu-item>
           <el-menu-item index="transactions">财务记录</el-menu-item>
           <el-menu-item index="investments">投资管理</el-menu-item>
@@ -396,18 +393,18 @@ export default {
   background-color: #f5f5f5;
 }
 
-.el-header {
-  text-align: center;
-  line-height: 60px;
-  padding: 0;
-}
-
 .el-main {
   padding: 0;
 }
 
 .main-navigation {
   margin-bottom: 20px;
+}
+
+.app-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: default;
 }
 
 .card-header {
