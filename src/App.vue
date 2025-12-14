@@ -92,13 +92,12 @@
 <script>
 import { ElContainer, ElHeader, ElMain, ElMenu, ElMenuItem, ElDialog, ElButton } from 'element-plus';
 import SummarySection from './components/SummarySection.vue';
-import TransactionList from './components/TransactionList.vue';
-import TransactionPage from './components/TransactionPage.vue';
-import InvestmentManagement from './components/InvestmentManagement.vue';
-import Dashboard from './components/Dashboard.vue';
-import InvestmentPage from './components/InvestmentPage.vue';
-import TransactionsView from './components/TransactionsView.vue';
 import TypeManagement from './components/TypeManagement.vue';
+import TransactionsView from './components/transactions/TransactionsView.vue';
+import TransactionPage from './components/transactions/TransactionPage.vue';
+import InvestmentManagement from './components/investments/InvestmentManagement.vue';
+import InvestmentPage from './components/investments/InvestmentPage.vue';
+import Dashboard from './components/dashboard/Dashboard.vue';
 import TypeManager from './utils/TypeManager.js';
 
 export default {
@@ -112,7 +111,6 @@ export default {
     ElDialog,
     ElButton,
     SummarySection,
-    TransactionList,
     TransactionPage,
     InvestmentManagement,
     Dashboard,

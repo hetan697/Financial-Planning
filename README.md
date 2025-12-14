@@ -59,20 +59,24 @@ financial-planning/
 │   ├── utils/              # 工具函数目录
 │   │   └── TypeManager.js  # 类型管理工具
 │   ├── assets/             # 静态资源
-│   └── components/         # Vue组件
-│       ├── Dashboard.vue           # 数据看板组件
-│       ├── SummarySection.vue      # 摘要展示组件
-│       ├── TransactionForm.vue     # 交易表单组件
-│       ├── TransactionList.vue     # 交易列表组件
-│       ├── TransactionPage.vue     # 交易页面组件
-│       ├── InvestmentManagement.vue # 投资管理组件
-│       ├── InvestmentSummary.vue   # 投资摘要组件
-│       ├── InvestmentForm.vue      # 投资表单组件
-│       ├── InvestmentList.vue      # 投资列表组件
-│       ├── InvestmentAdvice.vue    # 投资建议组件
-│       ├── InvestmentCalculator.vue # 投资计算器组件
-│       ├── TypeManagement.vue      # 类型管理组件
-│       └── TransactionsView.vue    # 财务记录视图组件
+│   ├── components/         # Vue组件
+│   │   ├── SummarySection.vue      # 摘要展示组件
+│   │   ├── TypeManagement.vue      # 类型管理组件
+│   │   ├── dashboard/              # 仪表盘组件目录
+│   │   │   └── Dashboard.vue       # 数据看板组件
+│   │   ├── transactions/           # 交易相关组件目录
+│   │   │   ├── TransactionForm.vue # 交易表单组件
+│   │   │   ├── TransactionList.vue # 交易列表组件
+│   │   │   ├── TransactionPage.vue # 交易页面组件
+│   │   │   └── TransactionsView.vue# 财务记录视图组件
+│   │   └── investments/            # 投资相关组件目录
+│   │       ├── InvestmentManagement.vue # 投资管理组件
+│   │       ├── InvestmentSummary.vue   # 投资摘要组件
+│   │       ├── InvestmentForm.vue      # 投资表单组件
+│   │       ├── InvestmentList.vue      # 投资列表组件
+│   │       ├── InvestmentAdvice.vue    # 投资建议组件
+│   │       ├── InvestmentCalculator.vue # 投资计算器组件
+│   │       └── InvestmentPage.vue      # 投资页面组件
 └── docs/                   # 文档目录
 ```
 
@@ -159,6 +163,13 @@ financial-planning/
 - 良好的开发体验
 - 组件间的和谐协作
 - 用户界面的顺畅交互
+
+### 项目重构
+
+为了提高代码的可维护性和组织性，项目进行了以下重构：
+1. 按功能模块将组件分组到子目录中（dashboard、transactions、investments）
+2. 统一了组件的样式和间距规范
+3. 优化了组件间的引用关系
 
 ## 关于vibe coding
 

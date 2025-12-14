@@ -251,7 +251,13 @@ export default {
   justify-content: flex-end;
 }
 
+/* 响应式设计 - 统一的组件间距 */
 @media (max-width: 768px) {
+  .type-management {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
   .transaction-types {
     grid-template-columns: 1fr;
   }
