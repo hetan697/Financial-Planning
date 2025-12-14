@@ -128,7 +128,6 @@ import InvestmentSummary from './components/InvestmentSummary.vue';
 import InvestmentForm from './components/InvestmentForm.vue';
 import InvestmentList from './components/InvestmentList.vue';
 import InvestmentAdvice from './components/InvestmentAdvice.vue';
-import { defaultTransactions, defaultInvestments } from './assets/defaultData.js';
 
 export default {
   name: 'FinanceApp',
@@ -351,21 +350,11 @@ export default {
     saveToLocalStorage() {
       localStorage.setItem('financeTransactions', JSON.stringify(this.transactions));
       localStorage.setItem('financeInvestments', JSON.stringify(this.investments));
-      localStorage.setItem('financeDataInitialized', 'true');
     },
     
     loadFromLocalStorage() {
       const savedTransactions = localStorage.getItem('financeTransactions');
       const savedInvestments = localStorage.getItem('financeInvestments');
-      const isInitialized = localStorage.getItem('financeDataInitialized');
-      
-      // 如果没有初始化过数据，则加载默认数据
-      if (!isInitialized) {
-        this.transactions = [...defaultTransactions];
-        this.investments = [...defaultInvestments];
-        this.saveToLocalStorage(); // 保存默认数据并标记为已初始化
-        return;
-      }
       
       if (savedTransactions) {
         this.transactions = JSON.parse(savedTransactions);
@@ -405,8 +394,6 @@ export default {
           if (data.transactions && data.investments) {
             this.transactions = data.transactions;
             this.investments = data.investments;
-            // 标记为已初始化
-            localStorage.setItem('financeDataInitialized', 'true');
             alert('数据导入成功！');
           } else {
             alert('数据格式不正确！');
@@ -427,7 +414,6 @@ export default {
         this.investments = [];
         localStorage.removeItem('financeTransactions');
         localStorage.removeItem('financeInvestments');
-        localStorage.removeItem('financeDataInitialized');
       }
     }
   }
