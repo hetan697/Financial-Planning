@@ -15,6 +15,7 @@ import Investments from './components/Investments';
 import Calculator from './components/Calculator';
 import TypeManager from './components/TypeManager';
 import DataManager from './components/DataManager';
+import ReloadPrompt from './components/ReloadPrompt';
 
 const { Header, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -141,6 +142,7 @@ const App = () => {
           style={{ border: 'none' }}
         />
       </Drawer>
+      <ReloadPrompt />
     </Layout>
   );
 };
