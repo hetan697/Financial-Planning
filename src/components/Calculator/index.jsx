@@ -9,7 +9,7 @@ const { Title, Text } = Typography;
 
 const Calculator = () => {
     const [methods, setMethods] = useState([]);
-    const [totalAmount, setTotalAmount] = useState(100000);
+    const [totalAmount, setTotalAmount] = useState(() => storage.getCalculatorTotal());
     const [investmentTypes, setInvestmentTypes] = useState([]);
     const [form] = Form.useForm();
 
@@ -33,6 +33,10 @@ const Calculator = () => {
     useEffect(() => {
         storage.saveCalculatorConfig(methods);
     }, [methods]);
+
+    useEffect(() => {
+        storage.saveCalculatorTotal(totalAmount);
+    }, [totalAmount]);
 
     const handleAdd = () => {
         const newMethod = {

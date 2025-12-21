@@ -7,6 +7,7 @@ const STORAGE_KEYS = {
   INVESTMENT_TYPES: 'finance_investment_types',
   TRANSACTION_TYPES: 'finance_transaction_types',
   CALCULATOR_CONFIG: 'finance_calculator_config',
+  CALCULATOR_TOTAL: 'finance_calculator_total',
 };
 
 const DEFAULT_TYPES = {
@@ -22,7 +23,7 @@ export const initStorage = () => {
       expense: DEFAULT_TYPES.expense
     }));
   }
-  
+
   if (!localStorage.getItem(STORAGE_KEYS.INVESTMENT_TYPES)) {
     localStorage.setItem(STORAGE_KEYS.INVESTMENT_TYPES, JSON.stringify(DEFAULT_TYPES.investment));
   }
@@ -32,21 +33,28 @@ export const storage = {
   // Transactions
   getTransactions: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) || '[]'),
   saveTransactions: (data) => localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(data)),
-  
+
   // Investments
   getInvestments: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.INVESTMENTS) || '[]'),
   saveInvestments: (data) => localStorage.setItem(STORAGE_KEYS.INVESTMENTS, JSON.stringify(data)),
-  
+
   // Types
   getTransactionTypes: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTION_TYPES) || JSON.stringify({ income: [], expense: [] })),
   saveTransactionTypes: (data) => localStorage.setItem(STORAGE_KEYS.TRANSACTION_TYPES, JSON.stringify(data)),
-  
+
+  // Investment Types
   getInvestmentTypes: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.INVESTMENT_TYPES) || '[]'),
   saveInvestmentTypes: (data) => localStorage.setItem(STORAGE_KEYS.INVESTMENT_TYPES, JSON.stringify(data)),
 
   // Calculator
   getCalculatorConfig: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.CALCULATOR_CONFIG) || '[]'),
   saveCalculatorConfig: (data) => localStorage.setItem(STORAGE_KEYS.CALCULATOR_CONFIG, JSON.stringify(data)),
+
+  getCalculatorTotal: () => {
+    const total = localStorage.getItem(STORAGE_KEYS.CALCULATOR_TOTAL);
+    return total ? Number(total) : 100000;
+  },
+  saveCalculatorTotal: (data) => localStorage.setItem(STORAGE_KEYS.CALCULATOR_TOTAL, String(data)),
 
   // Data Management
   exportData: () => {
@@ -56,7 +64,7 @@ export const storage = {
     });
     return JSON.stringify(data);
   },
-  
+
   importData: (jsonString) => {
     try {
       const data = JSON.parse(jsonString);
@@ -71,11 +79,12 @@ export const storage = {
       return false;
     }
   },
-  
+
   clearData: () => {
     // Keep types, clear data
     localStorage.removeItem(STORAGE_KEYS.TRANSACTIONS);
     localStorage.removeItem(STORAGE_KEYS.INVESTMENTS);
     localStorage.removeItem(STORAGE_KEYS.CALCULATOR_CONFIG);
+    localStorage.removeItem(STORAGE_KEYS.CALCULATOR_TOTAL);
   }
 };
